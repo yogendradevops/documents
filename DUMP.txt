@@ -1,0 +1,60 @@
+﻿DUMP
+
+
+What is Stored Procedure?
+A stored procedure, by definition, is a segment of declarative SQL code that is stored in the database catalog and can be invoked later by a program, a trigger, or even a stored procedure.
+What is Triggers?
+Triggers are event-driven specialized procedures, they are stored in and managed by the database. A trigger is a SQL procedure that initiates an action on an event (Like INSERT, DELETE or UPDATE) occurs.
+When we simply execute mysqldump, It automatically takes backup of triggers but it will not backup stored procedures by default.
+------------------------------------------------------------------------------------------------
+Backup Stored Procedures and Routines
+We need to specify --routines to take backup of stored procedures with data and tables.
+The following command will create a backup of the entire database including stored procedures. For example, your database name is “mydb”.
+mysqldump -u root -p --routines mydb > mydb.sql 
+To take backup of only stored procedures and triggers (excluding table structure and data ) use the following command.
+mysqldump --routines --no-create-info --no-data --no-create-db --skip-opt mydb > mydb.sql 
+Restore Procedures
+To restore stored procedures in the database simply use the following command, But make sure you have taken backup properly before restoring it to avoid any data loss.
+mysql -u root -p mydb < mydb.sql 
+------------------------------------------------------------------------------------------------
+mysqldump will backup by default all the triggers but NOT the stored procedures/functions. There are 2 mysqldump parameters that control this behavior:
+* --routines – FALSE by default
+* --triggers – TRUE by default
+so in mysqldump command , add --routines like :
+mysqldump <other mysqldump options> --routines > outputfile.sql
+
+
+------------------------------------------------------------------------------------------------
+DUMP:
+
+
+mysqldump -u... -p... --no-data --routines --triggers dbname > DBSchema.sql
+
+
+Check for presence of routines and triggers like this:
+SELECT COUNT(1) FROM mysql.proc;
+
+
+SELECT COUNT(1) FROM information_schema.triggers;
+
+
+SELECT * FROM information_schema.triggers\G
+
+
+If you want to get this done to all DBs in the MySQL Instance, do this:
+mysql -u... -p... -A -N -e"SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('information_schema','mysql')" > /tmp/dblist.txt
+for DB in `cat /tmp/dblist.txt`
+do
+    mysqldump -u... -p... --no-data --no-create-info --routines dbname > ${DB}-routines.sql
+    mysqldump -u... -p... --no-data --triggers dbname > ${DB}-schema-triggers.sql
+done
+------------------------------------------------------------------------------------------------
+
+
+
+
+LINK For DUMP:
+https://docs.google.com/document/d/1Jnl25VEzrtK7mRqAXVDxL3OjsXzfcLI-oF1TnsyKyas/edit#
+
+
+https://medium.com/ideas2it-technologies/mysql-5-1-to-mysql-8-0-25-upgrade-a-step-by-step-guide-to-keep-your-projects-updated-8a6ca71acbad

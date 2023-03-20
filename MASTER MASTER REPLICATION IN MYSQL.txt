@@ -1,0 +1,317 @@
+﻿MASTER MASTER REPLICATION IN MYSQL
+
+
+1. Create  directories
+
+
+mkdir ~/replication && cd ~/replication && mkdir master1 && mkdir master2
+
+
+2. Create a container name of master for getting my.cnf file.
+
+
+podman run -d --name master  -e MYSQL_ROOT_PASSWORD=redhat mysql/mysql-server:latest  (this is the test container for getting my.cnf file)
+
+
+3. Use the below command to copy the file.
+podman cp master1:/etc/my.cnf 
+
+
+4. Now copy the file into  master1 and  master2.
+
+
+        cp my.cnf master1 && cp my.cnf master2
+
+
+5. remove above container after you got my.cnf file and copy in master1 and master2.
+
+
+podman rm -f master
+
+
+6. Create a network using the below command.
+
+
+podman network create --subnet 192.168.1.0/24  mysqlnetwork
+
+
+
+
+7. Create the first container name of master1 using the below command.
+
+
+supreme@supreme:~$ podman run -d --name master1 -p 3307:3306 --network mysqlnetwork --ip 192.168.1.11 -v ~/replication/master1/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat mysql
+
+
+✔ docker.io/mysql/mysql-server:latest
+Trying to pull docker.io/mysql/mysql-server:latest...
+Getting image source signatures
+Copying blob 6a4a3ef82cdc done  
+Copying blob abe8d2406c31 done  
+Copying blob 5518b09b1089 done  
+Copying blob 349b52643cc3 done  
+Copying blob c7668948e14a done  
+Copying blob b6b576315b62 done  
+Copying blob c7e93886e496 done  
+Copying config 1d9c2219ff done  
+Writing manifest to image destination
+Storing signatures
+eb76de65eb2ced390640f0268a9a4557328e490228aef3ce80ba6251d9f6726d
+
+
+
+
+8. Create the Second container name of master2 using the below command.
+
+
+supreme@supreme:~$ podman run -d --name master2 -p 3308:3306 --network mysqlnetwork --ip 192.168.1.12 -v ~/replication/master2/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat mysql
+
+
+9. supreme@supreme:~$ podman ps
+
+
+d9a5d056fb28  docker.io/library/mysql:latest                  mysqld                    7 minutes ago  Up 2 minutes ago  0.0.0.0:3307->3306/tcp  master1
+a298f3777b1c  docker.io/library/mysql:latest                  mysqld                    4 seconds ago  Up 3 seconds ago  0.0.0.0:3308->3306/tcp  master2
+
+
+10. Open the file and put some lines inside the file and mention the ip of master1 server.
+vim ~/replication/master1/my.cnf
+[mysqld]
+bind-address = 192.168.1.11  
+server-id = 1
+log-bin=/var/lib/mysql/master1-bin
+
+
+11. Open the file and put some lines inside the file and mention the ip of master2 server.
+vim ~/replication/master2/my.cnf
+
+
+[mysqld]
+bind-address = 192.168.1.12         
+server-id = 2
+log-bin=/var/lib/mysql/master2-bin
+
+
+12. Now login into master1 using the below command.
+
+
+supreme@supreme:~$ mysql -u root -p -h 127.0.0.1 -P 3307
+
+
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.32 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+
+
+
+
+13. After that run below command , create user and password and mention the ip of master2 .
+
+
+mysql> CREATE USER 'negi'@'192.168.1.12' IDENTIFIED BY 'Redhat@1234';
+
+
+Query OK, 0 rows affected (0.15 sec)
+
+
+14. Run below command to give replication permission.
+
+
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'negi'@'192.168.1.12';
+
+
+Query OK, 0 rows affected (0.13 sec)
+
+
+15. Run below command to check status.
+
+
+mysql> SHOW MASTER STATUS\G
+
+
+*************************** 1. row ***************************
+                 File: master1-bin.000002
+             Position: 703
+         Binlog_Do_DB:
+ Binlog_Ignore_DB:
+Executed_Gtid_Set:
+1 row in set (0.00 sec)
+
+
+
+
+16. Now login in master2 using the below command.
+
+
+supreme@supreme:~$ mysql -u root -p -h 127.0.0.1 -P 3308
+
+
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 8
+Server version: 8.0.32 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+17. Now stop the slave using the below command.
+
+
+mysql> STOP SLAVE;
+Query OK, 0 rows affected, 2 warnings (0.00 sec)
+18. Now reset the slave.
+
+
+mysql> RESET SLAVE;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+
+
+19. Now change master to master Host using the below command.
+
+
+mysql> CHANGE MASTER TO MASTER_HOST ='192.168.1.11', MASTER_USER ='negi', MASTER_PASSWORD ='Redhat@1234', MASTER_LOG_FILE = 'master1-bin.000002', MASTER_LOG_POS = 703;  
+
+
+Query OK, 0 rows affected, 7 warnings (0.75 sec)
+
+
+
+
+20. Now Start the slave.
+
+
+mysql> start slave;
+
+
+Query OK, 0 rows affected, 1 warning (0.36 sec)
+
+
+
+
+21. Check the Slave status using the below command.
+
+
+mysql> show slave status\G
+
+
+*************************** 1. row ***************************
+                   Slave_IO_State: Waiting for source to send event
+                      Master_Host: 192.168.1.11
+                      Master_User: negi
+                      Master_Port: 3306
+                    Connect_Retry: 60
+                  Master_Log_File: master1-bin.000004
+              Read_Master_Log_Pos: 157
+                   Relay_Log_File: a298f3777b1c-relay-bin.000004
+                    Relay_Log_Pos: 377
+            Relay_Master_Log_File: master1-bin.000004
+                 Slave_IO_Running: Yes
+                Slave_SQL_Running: Yes
+                  Replicate_Do_DB:
+              Replicate_Ignore_DB:
+               Replicate_Do_Table:
+           Replicate_Ignore_Table:
+          Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                       Last_Errno: 0
+                       Last_Error:
+                     Skip_Counter: 0
+              Exec_Master_Log_Pos: 157
+                  Relay_Log_Space: 814
+                  Until_Condition: None
+                   Until_Log_File:
+                    Until_Log_Pos: 0
+               Master_SSL_Allowed: No
+               Master_SSL_CA_File:
+               Master_SSL_CA_Path:
+                  Master_SSL_Cert:
+                Master_SSL_Cipher:
+                   Master_SSL_Key:
+            Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                    Last_IO_Errno: 0
+                    Last_IO_Error:
+                   Last_SQL_Errno: 0
+                   Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+                 Master_Server_Id: 1
+                      Master_UUID: efed81d7-c569-11ed-a83e-660b8c5f55d9
+                 Master_Info_File: mysql.slave_master_info
+                        SQL_Delay: 0
+              SQL_Remaining_Delay: NULL
+          Slave_SQL_Running_State: Replica has read all relay log; waiting for more updates
+               Master_Retry_Count: 86400
+                      Master_Bind:
+          Last_IO_Error_Timestamp:
+         Last_SQL_Error_Timestamp:
+                   Master_SSL_Crl:
+               Master_SSL_Crlpath:
+               Retrieved_Gtid_Set:
+                Executed_Gtid_Set:
+                    Auto_Position: 0
+             Replicate_Rewrite_DB:
+                     Channel_Name:
+               Master_TLS_Version:
+           Master_public_key_path:
+            Get_master_public_key: 1
+                Network_Namespace:
+1 row in set, 1 warning (0.00 sec)
+                 Master_Info_File: mysql.slave_master_info
+                        SQL_Delay: 0
+              SQL_Remaining_Delay: NULL
+          Slave_SQL_Running_State: Replica has read all relay log; waiting for more updates
+               Master_Retry_Count: 86400
+                      Master_Bind:
+          Last_IO_Error_Timestamp: 230318 09:17:37
+         Last_SQL_Error_Timestamp:
+                   Master_SSL_Crl:
+               Master_SSL_Crlpath:
+               Retrieved_Gtid_Set:
+                Executed_Gtid_Set:
+                    Auto_Position: 0
+             Replicate_Rewrite_DB:
+                     Channel_Name:
+               Master_TLS_Version:
+           Master_public_key_path:
+            Get_master_public_key: 0
+                Network_Namespace:
+1 row in set, 1 warning (0.01 sec)
+
+
+
+
+22. Restart the both containers master1 and master2 Using Below the command
+
+
+supreme@supreme:~$ podman restart master1
+
+
+supreme@supreme:~$ podman restart master2
+
+
+=====================================================================

@@ -1,0 +1,175 @@
+﻿HAProxy
+HAProxy Roundrobin:
+1.Create containers with httpd web servers and different ports.
+2.Add content to the /usr/local/apache2/htdocs/index.html file.
+3.Configure haproxy.cfg file <Path= /etc/haproxy/haproxy.cfg>.
+Edit below content in haproxy.cfg file:
+
+
+frontend main
+        mode http
+        bind *:80
+use_backend app
+default_backend                 app                       ## should be same at frontend and backend
+
+
+
+
+backend app
+        balance         roundrobin                             ##leastcon another algorithm
+        server  serverb 127.0.0.1:8081 check         ## servera name of client 
+        server  servera 127.0.0.1:8082 check         ## Port of client 8082
+
+
+4.Systemctl restart haproxy
+5.Open browser and write localhost:port no. 
+6.Refresh for Roundrobin.
+
+
+*********************************************************************************************************
+HAProxy ACLs:
+
+
+1.Add text file in client machine container at location /usr/local/apache2/htdocs/file
+2.Open haproxy.cfg file and add below lines in Frontend:
+
+
+frontend main
+        mode http
+        bind *:80
+
+
+        use_backend app
+        acl starts_file1  path -i -m beg /file1/      ## name of file 
+        acl starts_file2  path -i -m beg /file2/     ## -i for a case-insensitive match
+                                                                             ## beg to match on the beginning of a string  
+                                                                             ## -m Specify the match type
+        
+ default_backend                 app
+
+
+3.Systemctl restart haproxy
+4.open browser and write localhost/file             ## name of file written in haproxy.cfg file
+5.Refresh for Roundrobin.
+
+
+*********************************************************************************************************
+HAProxy Logs:
+
+
+1. Open haproxy.cfg and and below line in global section:
+ log             127.0.0.1 local2
+
+
+2. Open /etc/rsyslog.conf and add belo lines:
+
+
+#### MODULES ####
+module(load="imuxsock"        # provides support for local system logging (e.g. via logger command)
+           SysSock.Use="off") # Turn off message reception via local log socket;
+                              # local messages are retrieved through imjournal now.
+module(load="imjournal"                 # provides access to the systemd journal
+           StateFile="imjournal.state") # File to store the position in the journal
+module(load="imklog") # reads kernel messages (the same are read from journald)
+module(load="immark") # provides --MARK-- message capability
+
+
+# Provides UDP syslog reception
+# for parameters see http://www.rsyslog.com/doc/imudp.html
+module(load="imudp") # needs to be done just once
+input(type="imudp" port="514")
+
+
+
+
+#### RULES ####
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none,local2.none                    /var/log/messages
+local2.*                                                                /var/log/haproxy.log
+
+
+3. We can see logs at /var/log/haproxy.log
+
+
+*********************************************************************************************************
+
+
+HAProxy Metrics_Stats:
+
+
+1. Open haproxy.cfg file and  add below lines at the end of the file.
+listen stats # Define a listen section called "stats"
+  bind :9000 # Listen on port 9000
+  mode http
+  stats enable  # Enable stats page
+  stats hide-version  # Hide HAProxy version
+  stats realm Haproxy\ Statistics  # Title text for popup window
+  stats uri /haproxy_stats  # Stats URI
+  stats auth yogi:xxxx # Authentication credentials
+
+
+3.Systemctl restart haproxy
+4.open browser and write localhost:9000/haproxy_stats.
+  
+
+HAProxy_Stats
+
+
+*********************************************************************************************************
+
+
+HAproxy Exporter/matrics:
+ 
+1.Run below given command to see the HAProxy metrics:
+
+
+docker run -itd --name exporter -p 9101:9101 quay.io/prometheus/haproxy-exporter:latest --haproxy.scrape-uri="http://yogi:redhat@192.1.122.97:9001/haproxy?stats;csv"
+
+
+2. To see the output run below given command:
+
+
+curl localhost:9101/metrics
+
+
+*********************************************************************************************************
+
+
+HAProxy Prometheus:
+
+
+1.Create Docker container 
+
+
+ docker run -dit -p 9090:9090  --name prometheus -v /home/keen/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus:latest
+
+
+2. Open prometheus.yml file and add the metrics IP and port no.
+
+
+3. Open browser and write localhost:9090 to open the Prometheus dashboard
+
+
+
+
+
+
+*********************************************************************************************************
+
+
+
+
+HAproxy Grafana:
+
+
+1. Create docker container
+
+
+docker run -d --name grafana -p 3000:3000 grafana/grafana
+
+
+2. Open browser and write localhost:3000 to open the Grafana dashboard
+
+
+3. Uid 367 for graph

@@ -1,0 +1,488 @@
+﻿Setup prometheus, Grafana ,Node Exporter, Black Box Exporter And  Alertmanager
+
+
+
+
+Install POdman
+
+
+supreme@supreme:~$ sudo apt install podman
+
+
+supreme@supreme:~$ systemctl start podman
+
+
+supreme@supreme:~$ systemctl enable podman
+
+
+supreme@supreme:~$ systemctl restart podman
+
+
+supreme@supreme:~$ systemctl status podman
+
+
+
+
+● podman.service - Podman API Service
+         Loaded: loaded (/lib/systemd/system/podman.service; enabled; vendor preset: enabled)
+         Active: active (running) since Fri 2023-02-17 14:44:04 IST; 2s ago
+TriggeredBy: ● podman.socket
+           Docs: man:podman-system-service(1)
+   Main PID: 8720 (podman)
+          Tasks: 9 (limit: 38298)
+         Memory: 10.3M
+            CPU: 58ms
+         CGroup: /system.slice/podman.service
+                 └─8720 /usr/bin/podman --log-level=info system service
+
+
+Feb 17 14:44:04 supreme systemd[1]: Starting Podman API Service...
+Feb 17 14:44:04 supreme systemd[1]: Started Podman API Service.
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="/usr/bin/podman filtering at log level info"
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="[graphdriver] using prior storage driver: overlay"
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="Found CNI network podman (type=bridge) at /etc/cni/net>
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="Setting parallel job count to 13"
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="using systemd socket activation to determine API endpo>
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="using API endpoint: ''"
+Feb 17 14:44:04 supreme podman[8720]: time="2023-02-17T14:44:04+05:30" level=info msg="API service listening on \"/run/podman/podman.sock\""
+
+
+
+
+
+
+
+
+
+
+supreme@supreme:~$ mkdir prom
+
+
+supreme@supreme:~$ ls
+Desktop  Documents  Downloads  Music  Pictures  Public  prom  snap  Templates  Videos
+
+
+supreme@supreme:~$ cd prom
+
+
+supreme@supreme:~/prom$ sudo vim Prometheus.yml
+
+
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+        - static_configs:
+            - targets:
+              # - alertmanager:9093
+
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+
+        # metrics_path defaults to '/metrics'
+        # scheme defaults to 'http'.
+
+
+        static_configs:
+          - targets: ["localhost:9090"]
+          - targets: ["192.168.29.134:9100"]
+          - targets: ["192.168.29.134:3000"]
+
+
+
+
+Create a file where you create your prometheus.yml file using below command
+
+
+supreme@supreme:~/prom$ touch rules.yml
+
+
+  
+
+
+
+supreme@supreme:~/prom$ sudo vim rules.yml
+
+
+Then mention below lines in your rules.yml file
+
+
+groups:
+- name: alert.rules
+  rules:
+  - alert: EndpointDown
+        expr: probe_success == 0
+        for: 10s
+        labels:
+          severity: "critical"
+        annotations:
+          summary: "URLs of  {{ $labels.instance }} down"
+
+
+  - alert: EndpointUP
+        expr: probe_success == 1
+        for: 10s
+        labels:
+          severity: "ok"
+        annotations:
+          summary: "URLs of  {{ $labels.instance }} up"
+
+
+Prometheus 
+supreme@supreme:~/prom$ podman run -itd -p 9090:9090 --name prometheus -v /home/supreme/prom/rules.yml:/etc/prometheus/rules.yml -v /home/supreme/prom/prometheus.yml:/etc/prometheus/prometheus.yml docker.io/prom/prometheus:latest
+
+
+
+
+✔ docker.io/prom/prometheus:latest
+Trying to pull docker.io/prom/prometheus:latest...
+Getting image source signatures
+Copying blob 5aaacfdc4145 done  
+Copying blob 5420b5446248 done  
+Copying blob 225de5a6f1e7 done  
+Copying blob 4399114b4c59 done  
+Copying blob ebd656a24cc0 done  
+Copying blob e6170f30a38d done  
+Copying blob 8a2ab86e3ff1 done  
+Copying blob 5bce46b63ac9 done  
+Copying blob 3dab14bd0e8c done  
+Copying blob 00cd3198f364 done  
+Copying blob cbd4b912d9ee done  
+Copying blob 7e5bc43c7502 done  
+Copying config 8cfcb66f43 done  
+Writing manifest to image destination
+Storing signatures
+1d47c6c11bd1b1fb85ea3b8f98b64160d003d7da1c01667c3651601c68044fa6
+
+
+
+
+  
+
+
+
+
+
+
+
+Node Exporter
+supreme@supreme:~$ podman run -itd --name=node -p 9100:9100 -v"/:/host:ro,rslave" quay.io/prometheus/node-exporter:latest --path.rootfs=/host
+
+
+
+
+Trying to pull quay.io/prometheus/node-exporter:latest...
+Getting image source signatures
+Copying blob 22b70bddd3ac done  
+Copying blob c0e87333d380 done  
+Copying blob 5c12815fee55 done  
+Copying config 0da6a335fe done  
+Writing manifest to image destination
+Storing signatures
+8268de6265324afedea627917b5c368030982f8c960067e5272b2a1f855e6b55
+
+
+
+
+
+
+supreme@supreme:~/sc$ podman ps
+
+
+CONTAINER ID  IMAGE                                        COMMAND                   CREATED             STATUS                 PORTS                       NAMES
+8268de626532  quay.io/prometheus/node-exporter:latest  --path.rootfs=/ho...  33 minutes ago  Up 30 minutes ago  0.0.0.0:9100->9100/tcp  node
+3d28c41313f4  docker.io/prom/prometheus:latest             --config.file=/et...  27 minutes ago  Up 48 seconds ago  0.0.0.0:9090->9090/tcp  prometheus
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Grafana
+
+
+supreme@supreme:~/sc$ podman run -itd --name=grafana -p 3000:3000 docker.io/grafana/grafana
+
+
+Trying to pull docker.io/grafana/grafana:latest...
+Getting image source signatures
+Copying blob 8ede47195cf3 done  
+Copying blob eb8cc6723da4 done  
+Copying blob 340693cdee79 done  
+Copying blob 8a2e9bbf3137 done  
+Copying blob 035cb4c70b01 done  
+Copying blob 9621f1afde84 done  
+Copying blob 27714ac967f4 done  
+Copying blob cda8e9fe471a done  
+Copying blob 27db713358f1 done  
+Copying config f925787d0f done  
+Writing manifest to image destination
+Storing signatures
+a1e6860240c77034bf7ebc7074600b117ff47245f5046a0ca3f173a3a40eca54
+
+
+
+
+upreme@supreme:~/sc$ podman ps
+
+
+CONTAINER ID  IMAGE                                        COMMAND                   CREATED             STATUS                 PORTS                       NAMES
+8268de626532  quay.io/prometheus/node-exporter:latest  --path.rootfs=/ho...  50 minutes ago  Up 5 seconds ago   0.0.0.0:9100->9100/tcp  node
+3d28c41313f4  docker.io/prom/prometheus:latest             --config.file=/et...  44 minutes ago  Up 42 seconds ago  0.0.0.0:9090->9090/tcp  prometheus
+a1e6860240c7  docker.io/grafana/grafana:latest                                   16 minutes ago  Up 3 minutes ago   0.0.0.0:3000->3000/tcp  grafana
+
+
+
+
+
+
+supreme@supreme:~/sc$ podman restart grafana
+a1e6860240c77034bf7ebc7074600b117ff47245f5046a0ca3f173a3a40eca54
+
+
+supreme@supreme:~/sc$ podman restart prometheus
+3d28c41313f400fe305fd155f61166399ac80981372cf054335fcfb137bc0f68
+
+
+supreme@supreme:~/sc$ podman restart node
+8268de6265324afedea627917b5c368030982f8c960067e5272b2a1f855e6b55
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+BLACKBOX EXPORTER
+
+
+Run the below command to create a container for blackbox exporter
+
+
+supreme@supreme:~$ podman run -d --name black -p 9115:9115 
+bitnami/blackbox-exporter:latest
+
+
+Change your prometheus.yml file with below mention lines
+
+
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+        - static_configs:
+            - targets:
+               - alertmanager:9093
+
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+   - "rules.yml"
+
+
+scrape_configs:
+
+
+  - job_name: blackbox
+        metrics_path: /metrics
+        static_configs:
+          - targets:
+              - 192.168.29.134:9115
+              - 192.168.29.134:9100
+              - 192.168.29.134:9090
+              - 192.168.29.134:3000 
+  - job_name: blackbox-http # To get metrics about the exporter’s targets
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+        static_configs:
+          - targets:
+              - https//nalsa.gov.in
+              - https://nalsa.gov.in/lacms
+              - https://nalsa.gov.in/lsams 
+              
+        relabel_configs:
+         - source_labels: [__address__]
+           target_label: __param_target
+         - source_labels: [__param_target]
+           target_label: instance
+         - target_label: __address__
+           replacement: 192.168.29.134:9115
+
+
+Save the changes and restart the prometheus and blackbox container
+Blackbox Exporter
+Probe prometheus.io for http_2xx
+Debug probe prometheus.io for http_2xx
+Metrics
+Configuration
+Recent Probes
+Module
+	Target
+	Result
+	Debug
+	http_2xx
+	https://legalaid.gov.in
+	Failure
+	Logs
+	http_2xx
+	https://eoffice.sci.gov.in
+	Failure
+	Logs
+	http_2xx
+	https://scourtapp.nic.in/sbmaster.php
+	Success
+	Logs
+	http_2xx
+	https://nalsa.gov.in/lacms
+	Success
+	Logs
+	http_2xx
+	https//nalsa.gov.in
+	Failure
+	Logs
+	http_2xx
+	https://nalsamediation.nic.in
+	Success
+	Logs
+	http_2xx
+	https://mcpc.nic.in
+	Failure
+	Logs
+	http_2xx
+	https://main.sci.gov.in
+	Success
+	Logs
+	http_2xx
+	https://jcn.nic.in
+	Failure
+	Logs
+	http_2xx
+	https://origin.www.sci.gov.in
+	Failure
+	Logs
+	http_2xx
+	https://monitoringcommittee.nic.in
+	Failure
+	Logs
+	http_2xx
+	https://sclsc.nic.in
+	Failure
+	Logs
+	
+
+  
+
+
+
+
+
+
+
+
+
+Alert Manager
+
+
+Create a directory 
+
+
+supreme@supreme:~$ mkdir alertmanager
+supreme@supreme:~$ cd alertmanager
+supreme@supreme:~/alertmanager$ touch alertmanager.yml
+
+
+Create a container for alert manager using below command
+
+
+podman run --name alertmanager --restart always -d -p 9093:9093 -v /home/supreme/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+docker.io/prom/alertmanager
+
+
+supreme@supreme:~$ cd alertmanager/
+
+
+supreme@supreme:~/alertmanager$ sudo vim alertmanager.yml
+
+
+Mention below lines in alertmanager.yml file
+
+
+global:
+
+
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 1h
+  repeat_interval: 10s
+
+
+  receiver: 'email'
+receivers:
+- name: 'email'
+  email_configs:
+  - to: 'email id whom you want to send alerts'
+        from: 'your email id'
+        smarthost: smtp.gmail.com:587
+        auth_username: 'your email id'
+        auth_identity: 'your email id'
+        auth_password: 'your email id password'
+
+
+Save the changes and restart the alertmanager container
+
+
+
+
+You can set the time according to your alert interval time
+Above is mentioned 1h you can replace the time by 30m or 10m whatever you want.
+.

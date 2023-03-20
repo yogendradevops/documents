@@ -1,0 +1,496 @@
+﻿Date:17 March 2023
+OCP Training Assignment
+
+
+1. Difference between docker and podman?
+
+
+Docker and Podman are both containerization platforms that allow developers to package and deploy applications with their dependencies in a portable and efficient way. Here is a table outlining some of the key differences between the two:
+
+
+
+
+Feature
+	Docker
+	Podman
+	Daemon
+	Requires a Docker daemon
+	Does not require a daemon
+	Architecture
+	Client-server model
+	Client-only model
+	Image storage
+	Uses Docker Hub by default
+	Supports multiple registries and local storage
+	Security
+	Requires root access
+	Rootless mode available for enhanced security
+	Networking
+	Uses Docker networking
+	Uses CNI networking
+	Compatibility
+	Widely used and supported
+	Emerging technology with limited support
+	
+
+
+
+
+
+Some additional points on the above table:
+
+
+* Docker relies on a daemon running in the background to manage containers, whereas Podman is a standalone tool that does not require a daemon.
+* Docker is designed to work with Docker Hub as the default image registry, while Podman supports multiple registries and local storage options.
+* Podman has a rootless mode that allows users to run containers without root privileges, which can enhance security.
+* Podman uses the Container Network Interface (CNI) for networking, while Docker has its own networking implementation.
+* While Docker is more widely used and supported, Podman is an emerging technology that may offer some advantages for certain use cases.
+
+
+________________
+
+
+
+
+
+
+2. Create a base image of ubuntu.
+
+
+
+
+To create a base image of Ubuntu in Linux, we can follow these steps:
+
+
+1. Install any tools for creating the base image, such as qemu or debootstrap:
+sudo apt-get install qemu debootstrap
+
+
+2. Create a directory for the new image and move into it:
+mkdir ubuntu-image
+cd ubuntu-image
+
+
+3. Use debootstrap to install a minimal Ubuntu system in the directory:
+yogendra@kvm:~/my-ubuntu-image$ sudo debootstrap --variant=minbase focal .
+
+
+yogendra@kvm:~/my-ubuntu-image$ ls -lrth
+total 60K
+drwxr-xr-x  2 root root 4.0K Apr 15  2020 sys
+drwxr-xr-x  2 root root 4.0K Apr 15  2020 proc
+drwxr-xr-x  2 root root 4.0K Apr 15  2020 home
+drwxr-xr-x  2 root root 4.0K Apr 15  2020 boot
+lrwxrwxrwx  1 root root    7 Mar 17 14:59 bin -> usr/bin
+lrwxrwxrwx  1 root root    8 Mar 17 14:59 sbin -> usr/sbin
+lrwxrwxrwx  1 root root    7 Mar 17 14:59 lib -> usr/lib
+lrwxrwxrwx  1 root root    9 Mar 17 14:59 lib64 -> usr/lib64
+lrwxrwxrwx  1 root root    9 Mar 17 14:59 lib32 -> usr/lib32
+lrwxrwxrwx  1 root root   10 Mar 17 14:59 libx32 -> usr/libx32
+drwxr-xr-x  4 root root 4.0K Mar 17 14:59 dev
+drwx------  2 root root 4.0K Mar 17 14:59 root
+drwxr-xr-x  2 root root 4.0K Mar 17 14:59 mnt
+drwxr-xr-x  2 root root 4.0K Mar 17 14:59 srv
+drwxr-xr-x  2 root root 4.0K Mar 17 14:59 opt
+drwxr-xr-x  2 root root 4.0K Mar 17 14:59 media
+drwxr-xr-x 11 root root 4.0K Mar 17 14:59 var
+drwxr-xr-x 13 root root 4.0K Mar 17 14:59 usr
+drwxr-xr-x  4 root root 4.0K Mar 17 14:59 run
+drwxrwxrwt  2 root root 4.0K Mar 17 14:59 tmp
+drwxr-xr-x 30 root root 4.0K Mar 17 14:59 etc
+
+
+
+
+4. Compress the image into a tarball for distribution:
+sudo tar czvf ubuntu-image.tar.gz .
+
+
+
+
+________________
+
+
+
+
+3. Create a MYSQL container and access the mysql container from Base Machine
+
+
+1.  Create Newtork: 
+
+
+yogendra@kvm:~/ocp/mysql$ podman network create --subnet 172.168.1.0/24  ocp_network
+/home/yogendra/.config/cni/net.d/ocp_network.conflist
+
+
+yogendra@kvm:~/ocp/mysql$ podman network ls
+NETWORK ID    NAME           VERSION     PLUGINS
+2f259bab93aa  podman         0.4.0       bridge,portmap,firewall,tuning
+ca2de4c1bfbf  ocp_network    0.4.0       bridge,portmap,firewall,tuning,dnsname
+4a2bffc5c09b  thomusnetwork  0.4.0       bridge,portmap,firewall,tuning,dnsname
+
+
+2. Create MySQL Container to copy configuration file:
+
+
+yogendra@kvm:~/ocp/mysql$ podman run --name ocp_mysql -d --network ocp_network --ip 172.168.1.10 --privileged -p 3350:3306  -e MYSQL_ROOT_PASSWORD=redhat mysql:latest
+d9d9445f75d2478bb38c385242d3ecb66831c5d37c43a67510e42f669e5422be
+3. Copy Configuration file of MySQL:
+
+
+yogendra@kvm:~/ocp/mysql$ podman cp ocp_mysql:/etc/my.cnf .
+
+
+yogendra@kvm:~/ocp/mysql$ ls
+my.cnf
+
+
+4. Remove the MySQL container created
+
+
+yogendra@kvm:~/ocp/mysql$ podman rm -f ocp_mysql 
+d9d9445f75d2478bb38c385242d3ecb66831c5d37c43a67510e42f669e5422be
+
+
+5. Now Create MySQL Container with persistent volume:
+
+
+yogendra@kvm:~/ocp/mysql$ podman run --name ocp_mysql -d --network ocp_network --ip 172.168.1.10 --privileged -p 3350:3306 -v /home/yogendra/ocp/mysql/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat mysql:latest
+eecea3cb7b85d746ad59e4be35eb189037b1d978f2ebed3e605f7a027c80a927
+
+
+6. Install MySQL-Client :
+yogendra@kvm:~/my-ubuntu-image$ sudo apt install mysql-client
+
+
+7. Access the mysql container from Base Machine:
+
+
+yogendra@kvm:~/my-ubuntu-image$ mysql -u root -p -h127.0.0.1 -P 3350
+  
+
+
+
+
+
+
+
+________________
+
+
+
+
+4. Create a postgres container and access the DB from Base machine
+
+
+1. Create directory 
+
+
+yogendra@kvm:~/ocp$ mkdir postgres
+
+
+2. Create postgres container:
+
+
+yogendra@kvm:~/ocp/postgres$ podman run -d --name ocp_postgres --network ocp_network --ip 172.168.1.20 -p 5432:5432 -v ~/ocp/postgres:/var/lib/postgresql/data -e POSTGRES_PASSWORD=redhat  docker.io/postgres
+
+
+yogendra@kvm:~/ocp/postgres$ podman ps
+CONTAINER ID  IMAGE                               COMMAND               CREATED         STATUS             PORTS                             NAMES
+6230f12fc1b6  docker.io/library/mysql:latest      mysqld                2 days ago      Up 21 hours ago    0.0.0.0:3310->3306/tcp            master
+b45d6ae9aae8  docker.io/library/mysql:latest      mysqld                2 days ago      Up 21 hours ago    0.0.0.0:3320->3306/tcp            slave
+43329a876956  docker.io/proxysql/proxysql:latest  proxysql -f --idl...  29 hours ago    Up 21 hours ago    0.0.0.0:6032-6033->6032-6033/tcp  proxysql
+eecea3cb7b85  docker.io/library/mysql:latest      mysqld                46 minutes ago  Up 46 minutes ago  0.0.0.0:3350->3306/tcp            ocp_mysql
+be4705a5f73a  docker.io/library/postgres:latest   postgres              3 seconds ago   Up 3 seconds ago   0.0.0.0:5432->5432/tcp            ocp_postgres
+yogendra@kvm:~/ocp/postgres$ 
+3. Install postgresql-client:
+
+
+yogendra@kvm:~/ocp$ yogendra@kvm:~/ocp$ sudo apt-get install postgresql-client
+
+
+4. Access the DB from Base machine
+
+
+yogendra@kvm:~/ocp$ psql -h localhost -U postgres -p 5432
+
+
+  
+
+
+
+________________
+
+
+
+
+5. Create a wordpress container and connect the wordpress with mysql container created in ques no-3
+
+
+1. Login Mysql Database created in ques no. 3 and create user:
+yogendra@kvm:~/ocp$ mysql -u root -p -h 127.0.0.1 -P3350
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.32 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+mysql> grant all on *.* to 'admin'@'%';
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.02 sec)
+
+
+
+
+
+
+
+
+2. Create container of wordpress:
+
+
+yogendra@kvm:~/ocp$ podman run -d       --name wordpressdb --network ocp_network --ip 172.168.1.20 -p 8091:80   -e WORDPRESS_DB_HOST=172.168.1.10:3306  -e WORDPRESS_DB_NAME=wordpress       -e WORDPRESS_DB_USER=admin       -e WORDPRESS_DB_PASSWORD=redhat      docker.io/wordpress
+805e28551b27c5926d15c09679a33303d272a9bc93155679b76b1f4c7d08036d
+
+
+3. Now Go to the Browser and write in search bar:
+https://localhost:8081
+
+
+4. Configure  wordpress:
+
+
+  
+
+  
+  
+  
+
+5. Go to terminal and login mysql to check the database:
+
+
+  
+
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+6. Create a dockerfile having base image of ubuntu and install httpd and build the image
+
+
+1. Create Docker file for httpd-ubuntu image:
+
+
+yogendra@kvm:~/ocp$ mkdir ~/ocp/httpd-ubuntu-local_image && cd httpd-ubuntu-local_image && vim Dockerfile
+
+
+2. Paste the given below below lines:
+
+
+FROM ubuntu:latest
+
+
+RUN apt-get update && apt-get install -y apache2
+
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+
+
+3. Save the Dockerfile and run below given command to build the image:
+
+
+sudo docker build -t httpd-ubuntu-local_image .
+
+
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+7. Difference between TCP and UDP
+
+
+Basis
+	Transmission control protocol (TCP)
+	User datagram protocol (UDP)
+	Type of Service
+	TCP is a connection-oriented protocol. Connection-orientation means that the communicating devices should establish a connection before transmitting data and should close the connection after transmitting the data.
+	UDP is the Datagram-oriented protocol. This is because there is no overhead for opening a connection, maintaining a connection, and terminating a connection. UDP is efficient for broadcast and multicast types of network transmission.
+	Reliability
+	TCP is reliable as it guarantees the delivery of data to the destination router.
+	The delivery of data to the destination cannot be guaranteed in UDP.
+	Error checking mechanism
+	TCP provides extensive error-checking mechanisms. It is because it provides flow control and acknowledgment of data.
+	UDP has only the basic error checking mechanism using checksums.
+	Acknowledgment
+	An acknowledgment segment is present.
+	No acknowledgment segment.
+	Sequence
+	Sequencing of data is a feature of the Transmission Control Protocol (TCP). This means that packets arrive in order at the receiver.
+	There is no sequencing of data in UDP. If the order is required, it has to be managed by the application layer.
+	Speed
+	TCP is comparatively slower than UDP.
+	UDP is faster, simpler, and more efficient than TCP.
+	Retransmission
+	Retransmission of lost packets is possible in TCP, but not in UDP.
+	There is no retransmission of lost packets in the User Datagram Protocol (UDP).
+	Header Length
+	TCP has a (20-60) bytes variable length header.
+	UDP has an 8 byte fixed-length header.
+	Weight
+	TCP is heavy-weight.
+	UDP is lightweight.
+	Handshaking Techniques
+	Uses handshakes such as SYN, ACK, SYN-ACK
+	It’s a connectionless protocol i.e. No handshake
+	Broadcasting
+	TCP doesn’t support Broadcasting.
+	UDP supports Broadcasting.
+	Protocols
+	TCP is used by HTTP, HTTPs, FTP, SMTP and Telnet.
+	UDP is used by DNS, DHCP, TFTP, SNMP, RIP, and VoIP.
+	Stream Type
+	The TCP connection is a byte stream.
+	UDP connection is a message stream.
+	Overhead
+	Low but higher than UDP.
+	Very low.
+	
+
+
+
+________________
+
+
+
+
+8. Create two rootless containers of tomcat with persistent volume of logs.
+
+
+1. First, create a directory on your host system to store the logs:
+
+
+mkdir ~/tomcat-logs
+2. Next, create the first container with the following command:
+
+
+podman run -d --name tomcat1 --security-opt label=disable -p 8080:8080 -v ~/ocp/tomcat_logs/tomcat2:/usr/local/tomcat/logs:Z docker.io/library/tomcat:latest
+
+
+
+
+3. Now, create the second container with the following command:
+
+
+podman run -d --name tomcat2 --security-opt label=disable -p 8081:8080 -v ~/ocp/tomcat_logs/tomcat2:/usr/local/tomcat/logs:Z docker.io/library/tomcat:latest
+
+
+yogendra@kvm:~/ocp/tomcat_logs$ podman ps
+CONTAINER ID  IMAGE                            COMMAND          CREATED         STATUS             PORTS                   NAMES
+e255617695ae  docker.io/library/tomcat:latest  catalina.sh run  45 seconds ago  Up 45 seconds ago  0.0.0.0:8080->8080/tcp  tomcat1
+e8e28e2cb53c  docker.io/library/tomcat:latest  catalina.sh run  34 seconds ago  Up 34 seconds ago  0.0.0.0:8081->8080/tcp  tomcat2
+
+
+  
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9. Create a container of haproxy and do round robin load balancing on both tomcat container created on point no-9
+
+
+1. Create container of haproxy:
+
+
+yogendra@kvm:~/ocp/haproxy$ podman run -d --name haproxy -p 8000:80 -v ~/ocp/haproxy/:/usr/local/etc/haproxy docker.io/library/haproxy:1.7
+D26b1492b4f5ce5e72134a52be5f7d8e9b9e8bf52475063240be7e7fc0e1f5e9
+
+
+2. Configure configuration file:
+yogendra@kvm:~/ocp/haproxy$ cat haproxy.cfg 
+defaults
+        log     global
+        option  httplog
+        mode    http
+        timeout connect 5000
+        timeout client 5000
+        timeout server 5000
+
+
+
+
+frontend main
+        bind *:80
+        option http-server-close
+        option forwardfor
+        stats uri /haproxy?stats
+        default_backend tomcat-server
+
+
+
+
+backend tomcat-server
+        balance roundrobin
+        mode http
+        server tomcat1 10.89.1.3::8080 check
+        server tomcat2 10.89.1.4:8081 check
+
+
+
+
+
+
+
+
+
+
+
+
+================================================================

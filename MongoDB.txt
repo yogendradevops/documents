@@ -1,0 +1,191 @@
+﻿MongoDB
+
+
+Download the tar file of MongoDB-2.6 using below given command:
+sudo wget https://fastdl.mongodb.org/linux/mongodb-linux-i686-2.6.12.tgz
+
+
+Extract the tar file:
+tar -zxvf mongodb-linux-x86_64-2.6.12.tgz
+
+
+
+
+Now go  to the directory extracted from tar:
+cd mongodb-linux-x86_64-2.6.12/
+
+
+Create the directory:
+mkdir mongodb
+
+
+Move the extracted directory to the new created directory:
+mv mongodb-linux-x86_64-2.6.12 mongodb
+
+
+Now go to the directory we created
+cd mongodb/
+
+
+Add MongoDB bin directory to PATH variable:
+echo $PATH
+export PATH=$PATH:/sbin:/bin:/usr/sbin:/usr/bin
+
+
+Create directory for MongoDB files and start it:
+mkdir data
+cd mongodb-linux-x86_64-2.6.12/bin/
+
+
+./mongod --dbpath /home/yogendra/Downloads/mongodb/data/ &
+ps -eaf | grep mongo
+
+
+./mongo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+================================================================
+
+
+To create the Service of MongoDB 2.6 follow the following:
+1. Download the MongoDB 2.6 package for your Linux distribution from the official MongoDB website and extract it to a directory of your choice. For example:
+tar -zxvf mongodb-linux-x86_64-2.6.12.tgz -C /opt
+This will extract the package to the /opt directory.
+
+
+2. Create a data directory for MongoDB to store its database files:
+
+
+mkdir /var/lib/mongodb
+
+
+3. Create a configuration file for MongoDB. You can use the following as a starting point:
+
+
+# /etc/mongodb.conf
+dbpath=/var/lib/mongodb
+logpath=/var/log/mongodb.log
+logappend=true
+journal=true
+Adjust the paths as needed.
+4. Create a systemd service unit file for MongoDB:
+
+
+# /etc/systemd/system/mongodb.service
+[Unit]
+Description=MongoDB Database Server
+After=network.target
+
+
+[Service]
+ExecStart=/opt/mongodb-linux-x86_64-2.6.12/bin/mongod --config /etc/mongodb.conf
+User=mongodb
+Group=mongodb
+PIDFile=/var/run/mongodb.pid
+Restart=always
+RestartSec=10
+
+
+[Install]
+WantedBy=multi-user.target
+
+
+This file tells systemd how to start and stop the MongoDB service. Adjust the ExecStart path and other options as needed.
+
+
+5. Create a mongodb user and group:
+
+
+useradd mongodb
+groupadd mongodb
+usermod -a -G mongodb mongodb
+
+
+6. Set the ownership of the MongoDB data directory:
+
+
+chown mongodb:mongodb /var/lib/mongodb
+
+
+7. Reload the systemd daemon:
+
+
+systemctl daemon-reload
+
+
+8. Enable the MongoDB service to start at boot time:
+
+
+systemctl enable mongodb
+
+
+This will create the necessary symlinks to start the service automatically at boot time.
+9. Start the MongoDB service:
+
+
+systemctl start mongodb
+
+
+10. We can check the status of the service with:
+
+
+systemctl status mongodb
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+● mongodb.service - MongoDB Database Server
+   Loaded: loaded (/etc/systemd/system/mongodb.service; enabled; vendor preset: disabled)
+   Active: active (running) since Thu 2023-03-09 17:53:24 IST; 5s ago
+ Main PID: 18194 (mongod)
+    Tasks: 4
+   CGroup: /system.slice/mongodb.service
+           └─18194 /opt/mongodb-linux-i686-2.6.0/bin/mongod --config /etc/mongodb.conf
+
+
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.300+0530 [initandlisten] ** WARNING: Readahead for /var/lib/mongodb is set to 4096KB
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.300+0530 [initandlisten] **          We suggest setting it to 256KB (512 sectors) or less
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.300+0530 [initandlisten] **          http://dochub.mongodb.org/core/readahead
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.317+0530 [initandlisten] journal dir=/var/lib/mongodb/journal
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.317+0530 [initandlisten] recover : no journal files present, no recovery needed
+Mar 09 17:53:24 slave.testing.com mongod[18194]: 2023-03-09T17:53:24.639+0530 [initandlisten] preallocateIsFaster=true 2.54
+Mar 09 17:53:25 slave.testing.com mongod[18194]: 2023-03-09T17:53:25.014+0530 [initandlisten] preallocateIsFaster=true 3.28
+Mar 09 17:53:26 slave.testing.com mongod[18194]: 2023-03-09T17:53:26.381+0530 [initandlisten] preallocateIsFaster=true 3.18
+Mar 09 17:53:26 slave.testing.com mongod[18194]: 2023-03-09T17:53:26.382+0530 [initandlisten] preallocating a journal file /var/lib/mongodb/journal/prealloc.0
+Mar 09 17:53:29 slave.testing.com mongod[18194]: 2023-03-09T17:53:29.090+0530 [initandlisten] preallocating a journal file /var/lib/mongodb/journal/prealloc.1
+[root@slave bin]# ps -ef |grep mongo
+mongodb  18194     1  6 17:53 ?        00:00:01 /opt/mongodb-linux-i686-2.6.0/bin/mongod --config /etc/mongodb.conf
+root     18238 15771  0 17:53 pts/0    00:00:00 grep --color=auto mongo
+
+
+======================================================================

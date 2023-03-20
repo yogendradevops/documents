@@ -1,0 +1,50 @@
+﻿CronJob
+
+
+A cron job is a task that is executed at specified intervals. The tasks can be scheduled to run by a minute, hour, day of the month, month, day of the week, or any combination of these.
+Cron jobs are generally used to automate system maintenance or administration, such as backing up databases or data, updating the system with the latest security patches, checking the disk space usage , sending emails, and so on.
+Running cron job every 5, 10, or 15 minutes are some of the most commonly used cron schedules.
+Crontab Syntax and Operators
+Crontab (cron table) is a text file that defines the schedule of cron jobs. Crontab files can be created, viewed , modified, and removed with the crontab command.
+Each line in the user crontab file contains six fields separated by a space followed by the command to be run:
+* * * * * command(s)
+^ ^ ^ ^ ^
+| | | | |     allowed values
+| | | | |     -------
+| | | | ----- Day of week (0 - 7) (Sunday=0 or 7)
+| | | ------- Month (1 - 12)
+| | --------- Day of month (1 - 31)
+| ----------- Hour (0 - 23)
+------------- Minute (0 - 59)
+
+
+The first five fields (time and date) also accepts the following operators:
+* * - The asterisk operator means all allowed values. If you have the asterisk symbol in the Minute field, it means the task will be performed each minute.
+* - - The hyphen operator allows you to specify a range of values. If you set 1-5 in the Day of the week field, the task will run every weekday (From Monday to Friday). The range is inclusive, which means that the first and last values are included in the range.
+* , - The comma operator allows you to define a list of values for repetition. For example, if you have 1,3,5 in the Hour field, the task will run at 1 am, 3 am and 5 am. The list can contain single values and ranges, 1-5,7,8,10-15
+* / - The slash operator allows you to specify step values that can be used in conjunction with ranges. For example, if you have 1-10/2 in the Minutes field, it means the action will be performed every two minutes in range 1-10, same as specifying 1,3,5,7,9. Instead of a range of values, you can also use the asterisk operator. To specify a job to be run every 20 minutes, you can use “*/20”.
+The syntax of system-wide crontab files is slightly different than user crontabs. It contains an additional mandatory user field that specifies which user will run the cron job.
+* * * * * <username> command(s)
+
+
+To edit the crontab file, or create one if it doesn’t exist, use the crontab -e command.
+Run a Cron Job Every 5 Minutes
+There are two ways to run a cron job every five minutes.
+The first option is to use the comma operator a create a list of minutes:
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * command
+
+
+The line above is syntactically correct and it will work just fine. However, typing the whole list can be tedious and prone to errors.
+The second option to specify a job to be run every 5 minutes hours is to use the step operator:
+*/5  * * * * command
+
+
+*/5 means create a list of all minutes and run the job for every fifth value from the list.
+Run a Cron Job Every 10 Minutes
+To run a cron job every 10 minutes, add the following line in your crontab file:
+*/10  * * * * command
+
+
+Run a Cron Job Every 15 Minutes
+To run a cron job every 15 minutes, add the following line in your crontab file:
+*/15  * * * * command

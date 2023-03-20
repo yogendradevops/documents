@@ -1,0 +1,148 @@
+﻿MariaDB Task (IP)
+
+
+Kindly find the attached "banned_ips" table and restore the table into a database running on mariadb:
+
+
+Task details.
+1. Restore table into MariaDB
+2. List/Select Table data for reference
+3. Get list of All IPs
+4. Use any tool to and filter IPs of India
+5. Remove the IPs from Table (using Playbook/Script) 
+6. Get the list of removed IPs in a file or in separate table
+7. Verify Banned_IPs table again
+
+
+
+
+
+
+For the above given task I have followed the below given steps and commands:
+
+
+->Install MariaDB using below command:
+root@yogendra:/home/mariadb/tables_same# apt install mariadb-server
+
+
+->Restore given table into MariaDB:
+root@yogendra:/home/yogendar/Downloads# mysql -u root -p mariadb < banned-ips.sql
+
+
+->Login into MariaDB:
+root@yogendra:/home/yogendar/Downloads# mysql -u root -p
+
+
+->List/Select Table banned_ips data:
+MariaDB [mariadb]> select * from banned_ips;
+
+
+->Get list of All IPs in file outside MariaDB:
+MariaDB [mariadb]> select * from banned_ips into outfile '/tmp/banned_ips_imported.csv';
+
+
+->Install geoiplookup:
+root@yogendra:/home/yogendar# apt-get install geoip-bin
+
+
+->To print 2nd column i.e ip from banned_ips_imported.csv to ip.csv:
+root@yogendra:/home/mariadb/tables# cat banned_ips_imported.csv |awk '{ print $2 }' > ip.csv
+
+
+
+
+->To do geoiplookup and save output to file geo_ip.csv:
+root@yogendra:/home/mariadb/tables# for i in `cat ip.csv` ; do geoiplookup $i >> geo_ip.csv ; echo "$i" "ABC "  >> geo_ip.csv; done
+
+
+->Filter IPs of India and save output to file geo_ip_india.csv:
+root@yogendra:/home/mariadb/tables# cat geo_ip.csv | sed ':a;N;$!ba;s/\n//g' | sed 's/ABC/\n /g' |grep India | awk -F 'India'  '{ print $2 }' > geo_ip_india.csv
+
+
+->Login to MariaDB and create table:
+MariaDB [mariadb]> create table india_ip (ip varchar(30) );
+
+
+->LOAD DATA (india_ip) in Table:
+MariaDB [mariadb]> LOAD DATA LOCAL INFILE'/home/mariadb/tables/geo_ip_india.csv' INTO TABLE india_ip ;
+
+
+->Delete from banned_ips:
+MariaDB [mariadb]> delete from banned_ips where ip IN(select * from india_ip);
+
+
+
+
+
+
+—------------------------------------------------------------------------------------------------------------------------
+Playbook to automate this task is :
+
+
+---
+- hosts: localhost
+  gather_facts: true
+  become: yes
+  tasks:
+
+
+   - name: create a new database
+         mysql_db:
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          name: mariadb
+          state: present
+          login_user: root
+
+
+   - name: restore table
+         mysql_db:
+             name: mariadb
+             state: import
+             target: "/home/yogendar/Downloads/banned-ips.sql"
+             login_host: 127.0.0.1
+             login_user: root
+             login_password: 'redhat'
+
+
+   - name: Select query in db and outfile
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock    
+          query: select * from banned_ips into outfile '/tmp/banned_ips_imported.csv'
+
+
+- name: Playbook to install geoiplookup
+  hosts: localhost
+  become: true
+  tasks:
+   - name: geoiplookup apt install geoip-bin
+         apt:
+          name: geoip-bin
+          state: present
+
+
+   - name: Run a script
+         ansible.builtin.script:
+          cmd: /tmp/cat_awk.sh
+
+
+
+
+   - name: create a table in mariadb
+         command: mysql -u root -predhat -h 127.0.0.1 mariadb --execute " create table india_ip (ip VARCHAR (30) ) "   
+
+
+   - name: Load Data in india_ip table
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          query: LOAD DATA INFILE '/tmp/geo_ip_india.csv' INTO TABLE india_ip
+
+
+
+
+   - name: delete from banned_ips
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          query: delete from banned_ips where ip IN(select * from india_ip);

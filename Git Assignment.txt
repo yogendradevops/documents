@@ -1,0 +1,77 @@
+﻿Git Assignment
+Git:
+Git is a distributed version control system that helps developers collaborate on projects of any scale.
+Linus Torvalds, the developer of the Linux kernel, created Git in 2005 to help control the Linux kernel's development.
+________________
+
+
+What is a Distributed Version Control System?
+A distributed version control system is a system that helps you keep track of changes you've made to files in your project.
+This change history lives on your local machine and lets you revert to a previous version of your project with ease in case something goes wrong.
+Git makes collaboration easy. Everyone on the team can keep a full backup of the repositories they're working on on their local machine. Then, thanks to an external server like BitBucket, GitHub or GitLab, they can safely store the repository in a single place.
+This way, different members of the team can copy it locally and everyone has a clear overview of all changes made by the whole team.
+________________
+
+
+What does git commit do?
+* commit a file = create a snapshot of the current state (files, folders & their contents)
+* contains an explanatory message
+* automatically stores metadata (creator, date etc)
+* has a unique (hex) id number
+e.g.: git commit -m "Added README file
+________________
+
+
+What is a branch?
+It is a version of our code. Branches have a name and are pointing to a commit (there's a different history+past commits depending on our branch, but some commits may be common).
+One branch per feature (the smaller the better) so changes happen to the branch, not the master workflow until the final merge. Afterwards, we merge and delete the branch.
+________________
+
+
+What is Staging Area?
+is the virtual space where the changes "go" when we git add. It allows the preparation for any commit  git 
+Special git files
+   * .gitignore = file in the main folder which contains a list of files that are ignored by git (so they're not affected by git adds and git statuses). It can contain patterns (*.pyc) and paths to files.
+________________
+
+
+What does git commit do?
+   * commit a file = create a snapshot of the current world state (files, folders & their contents)
+   * contains an explanatory message
+   * automatically stores metadata (creator, date etc)
+   * has a unique (hex) id number
+e.g.: git commit -m "Added README file
+________________
+
+
+Assignment Questions
+      1. Why was the name GIT chosen?
+The name "Git" was coined by its creator Linus Torvalds. He wanted to create a distributed version control system that was efficient and fast, and named it after himself, using the British slang term "git" which means "unpleasant person".
+________________
+
+
+      2. Why do we need GIT?
+Git is a version control system that allows developers to track changes in code and collaborate on projects. It enables multiple developers to work on the same codebase and keep track of changes, manage versions, resolve conflicts, and merge changes with ease. Git also provides backup and disaster recovery capabilities, allowing developers to restore code from a previous version if needed.
+________________
+
+
+      3. Who created GIT?
+Git was created by Linus Torvalds, the creator of Linux, in 2005.
+________________
+
+
+      4. What problems are solved by using GIT?
+Git solves a number of problems that developers face when collaborating on code, including version control, conflict resolution, code sharing, and backups. Git allows developers to work on the same codebase simultaneously without fear of overwriting each other's changes. It also provides a way to track and revert changes, collaborate on code with other developers, and keep backups of the codebase in case of disaster or data loss.
+________________
+
+
+      5. What are the areas in GIT staging?
+Git has three main areas: the working directory, the staging area, and the repository. The working directory is where you make changes to your code. The staging area, also known as the index, is where you can select which changes you want to commit. The repository is where Git stores all of the committed changes, and allows you to view and revert changes if needed.
+________________
+
+
+      6. Why commit is important?
+In Git, a commit represents a snapshot of the code at a specific point in time. Commits are important because they allow developers to track changes, review code, and collaborate with other developers. Each commit includes a message describing the changes made, making it easier to understand the history of the codebase. Additionally, commits provide a way to roll back changes if needed, making it easier to troubleshoot and fix problems in the code.
+
+
+================================================================

@@ -1,0 +1,664 @@
+﻿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
+
+
+# sudo yum install --enablerepo=powertools elinks -y
+********************************************************************************************************
+
+
+Bootable Pendrive
+dd bs=4M if=path/to/ubuntu.iso of=/dev/sdx status=progress oflag=sync
+********************************************************************************************************
+
+
+Cat main.txt |grep -i “customer ID >> main-date.txt       ####create the file of the content customer id  from the main.txt into file main-data.txt
+********************************************************************************************************
+
+
+The containers are in dead state because these filesystems (in /var/lib/docker/overlay2) could not be removed when they were killed (docker rm).. Commands like lsof or fuser could have been of help..
+
+
+Please see why the folders are busy =>
+
+
+fuser -m <folder_path>
+********************************************************************************************************
+Command used:-
+podman run --name docker_exporter --detach --restart always --volume /var/run/docker.sock":"/var/run/docker.sock" --publish 9417:9417 prometheusnet/docker_exporter:latest
+
+
+********************************************************************************************************
+LOAD DATA INFILE '/tmp/prospects.txt' INTO TABLE prospect_contact FIELDS TERMINATED BY '|';
+
+
+********************************************************************************************************
+How to create multiple sub-directories and files in a directory from a single command
+vbg@vbg-desk:2022-11-18 07:03:33:~$mkdir -p /tmp/abc/{ab/{l,m,n,o},bc/{x,
+y/{1,2,3},z}} && touch /tmp/abc/{ab/m/{1,2,3,4}.txt,bc/y/2/{cp,lp,sp}.txt}
+
+
+
+
+********************************************************************************************************
+root@yogendra:/home/yogendar# ethtool enp0s31f6
+Settings for enp0s31f6:
+    Supported ports: [ TP ]
+    Supported link modes:   10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+    Supported pause frame use: No
+    Supports auto-negotiation: Yes
+
+
+********************************************************************************************************
+
+
+echo "1234" | passwd --stdin pawan
+Changing password for user.
+
+
+********************************************************************************************************
+Nohup
+
+
+Pidof
+
+
+********************************************************************************************************
+
+
+How to Find Process Name from its PID
+ps -p PID -o comm=
+
+
+
+
+********************************************************************************************************
+
+
+Vim command
+root@yogendra:/etc/pam.d# cat  /etc/pam.d/login |grep -v '#' | grep  -v '^$'
+
+
+root@yogendra:/etc/pam.d# cat  /etc/pam.d/login |grep -v '#' 
+
+
+
+
+********************************************************************************************************
+
+
+Show Password
+thinkpad@yogendra:~$ nmcli device wifi show-password
+
+
+********************************************************************************************************
+
+
+
+
+yogendra@yogendra:/home/logs_server$ awk   '{print NR,"=", $4, $14,  $(NF - 5) }' logs  |sed 's/,/ /g'
+
+
+yogendra@yogendra:/home/logs_server$ awk  '{if($NF == "") print $(NF - 1); else print $NF}' logs
+
+
+
+
+yogendra@yogendra:/home/logs_server$ sudo awk   '{print $14,  $(NF - 5) }' logs |column -t |sed 's/,/ /g' |sort |uniq -c
+
+
+
+
+********************************************************************************************************
+
+
+
+
+for i in `sudo virsh list | grep running | awk '{print $2}'` do
+    sudo virsh shutdown $i
+
+
+
+
+==================================================================
+Podman
+subscription-manager repos --enable=rhel-7-server-extras-rpms
+podman network create --subnet=172.18.0.0/24 podmannetwork
+
+
+Podman network ls
+
+
+podman run -itd --network podmannetwork --ip 172.18.0.101 -p 3306:3306 --name master -h master -e "MYSQL_USER=mysql" -e "MYSQL_ROOT_PASSWORD=redhat" -v /data/mysql/master:/var/lib/mysql/data mysql
+
+
+
+
+
+
+
+
+
+
+======================================================================
+SSL
+
+
+update-ca-certificates  update-catalog          
+yogendra@yogendra:/etc/pki$ update-ca
+update-ca-certificates  update-catalog          
+yogendra@yogendra:/etc/pki$ update-ca-certificates 
+
+
+
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-certificate-authority-ca-on-debian-10
+======================================================================
+
+
+$ wget https://github.com/prometheus/blackbox_exporter/releases/download/v0.14.0/blackbox_exporter-0.14.0.linux-amd64.tar.gz
+
+
+$ ./blackbox_exporter -h
+
+
+======================================================================
+
+
+The PID of my Prometheus process is 4431. Send a SIGHUP signal to this process for the configuration to restart.
+$ sudo kill -HUP 4431
+
+
+======================================================================
+
+
+https://devconnected.com/how-to-install-and-configure-blackbox-exporter-for-prometheus/
+
+
+======================================================================
+
+
+https://www.slideshare.net/quipo/scalable-architectures-taming-the-twitter-firehose/28-LoadBalancing_with_Varnishbackend_node01_backend
+
+
+
+
+varnishd -C -f /etc/varnish/default.vcl
+
+
+
+
+https://medium.com/@rossinigiovanni/load-balance-with-varnish-5b92adc20358
+
+
+gpasswd -a my_user varnish
+https://stackoverflow.com/questions/47313056/varnish-could-not-get-hold-of-varnishd-is-it-running
+
+
+https://npm.github.io/npme-docs/tutorials/load-balancing-with-varnish.html
+
+
+
+
+https://xieles.com/blog/case-study-varnish-load-balancer-for-1-million-visitors
+
+
+https://raw.githubusercontent.com/xieles/varnish/master/live.vcl
+
+
+
+
+https://www.digitalocean.com/community/tutorials/how-to-speed-up-static-web-pages-with-varnish-cache-server-on-ubuntu-20-04
+wrk -t2 -c1000 -d30s --latency http://localhost:8081
+
+
+======================================================================
+SSL Certificate:
+
+
+https://devopscube.com/create-self-signed-certificates-openssl/
+
+
+
+
+./ssl.sh keenable.com
+******************************
+
+
+curl --cacert keenable.com.pem https://keenable.com
+
+
+Import rootCA.crt in the browser
+
+
+
+
+--cacert <file>          CA certificate to verify peer against
+         --capath <dir>           CA directory to verify peer against
+
+
+ --cert-status
+
+
+
+
+======================================================================
+
+
+# largest 10 folders
+du -hsx * | sort -rh | head -10
+======================================================================
+                    For color OUTPUT
+echo -e '\033[1m\033[4m\E[37;41mLogs not forwarded to syslog server\033[0m\033[0m\E[0m'
+
+
+======================================================================
+MARKDOWN:
+
+
+https://talk.commonmark.org/t/tables-in-pure-markdown/81/158?page=8
+
+
+======================================================================
+Ansible
+
+
+https://www.golinuxcloud.com/ansible-conditional-statements/
+
+
+======================================================================
+ansible-playbook playbook.yml -i inventory.ini --user=username \
+                              --extra-vars "ansible_sudo_pass=yourPassword"
+
+
+======================================================================
+[auditor@mygov-web-sp-82-25 public]$ php -i | grep 'Configuration File'
+
+
+Pgrep
+Pidof
+cat /proc/3660/status
+======================================================================
+
+
+ cat url |while read line; do curl -IL $line ; done
+
+
+======================================================================
+Mysql password
+# cat /var/log/mysqld.log | grep -i pass
+
+
+======================================================================
+tail -f remotelogs_SAAS.log | grep "www.mygov.in" | awk '{print $14}' | grep www
+
+
+Stat; mtime; ctime; atime;  ssh +X
+
+
+
+
+
+
+
+
+======================================================================
+
+
+Restart service if not running using bash script
+systemctl status varnish | grep 'active (running)' > /dev/null 2>&1
+if [ $? != 0 ]
+then
+sudo systemctl start  varnish  varnish > /dev/null
+Fi
+
+
+*******************************************************
+
+
+#!/bin/bash
+
+
+SERVICENAME="varnish"
+
+
+systemctl is-active --quiet $SERVICENAME
+STATUS=$? # return value is 0 if running
+
+
+if [[ "$STATUS" -ne "0" ]]; then
+        echo "Service '$SERVICENAME' is not curently running... Starting now..."
+        service $SERVICENAME start
+fi
+
+
+Restart and generate logs:
+#!/bin/bash
+SERVICENAME='mysql'
+systemctl status $SERVICENAME | grep 'active (running)' > /dev/null 2>&1
+
+
+if [ $? != 0 ]
+then
+         echo "Service '$SERVICENAME' is not curently running... Starting now at `date`" >> /home/yogendra/Documents/service.log
+
+
+         systemctl start  mysql > /dev/null
+ else
+         echo "$SERVICENAME is running well at `date`" >> /home/yogendra/Documents/service.log
+
+
+fi
+
+
+======================================================================
+Hosts.allow ssh
+Hosts.deny
+
+
+======================================================================
+https://hackmd.io/@sk12k/ansible-awx
+https://adamtheautomator.com/ansible-awx/
+
+
+Ansible awx
+======================================================================
+
+
+
+
+
+
+
+
+======================================================================
+Container tomcat version
+sudo podman exec -it tomcat bash
+Cd /usr/local/tomcat/lib 
+java -cp catalina.jar org.apache.catalina.util.ServerInf
+======================================================================
+Podman namespace
+Error : user namespaces are not enabled in /proc/sys/user/max_user_namespaces Error: could not get runtime: cannot re-exec process
+
+
+here my steps on RHEL.
+[joedoe@myserver ]$ cat /proc/sys/user/max_user_namespaces
+0
+[joedoe@myserver ]$ sudo sysctl user.max_user_namespaces=15000
+user.max_user_namespaces = 15000
+[joedoe@myserver ]$ cat /proc/sys/user/max_user_namespaces
+15000
+[joedoe@myserver ]$ sudo usermod --add-subuids 200000-201000 --add-subgids 200000-201000 joedoe
+[joedoe@myserver ]$ grep joedoe /etc/subuid /etc/subgid
+/etc/subuid:joedoe:200000:1001
+/etc/subgid:joedoe:200000:1001
+
+
+
+
+======================================================================
+vim Dockerfile
+FROM docker.io/jenkins/jenkins
+USER root
+======================================================================
+For the you need to do port forwarding
+
+
+ssh -L 8082:10.x.x.x:8082 root@10.x.x.x
+======================================================================
+MongoDB shell version v5.0.15
+https://wiki.crowncloud.net/?How_to_Install_Latest_MongoDB_on_Ubuntu_22_04
+
+
+======================================================================
+
+
+
+
+
+
+Pacemaker pcs cluster::
+https://access.redhat.com/discussions/2249191
+
+
+sudo subscription-manager repos --enable=rhel-ha-for-rhel-7-server-rpms
+ yum install pcs pacemaker fence-agents-all
+
+
+======================================================================
+Mysql replication
+CHANGE MASTER TO GET_MASTER_PUBLIC_KEY=1;
+Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection.
+
+
+======================================================================
+ProxySQL
+sudo tail -f proxysql.log
+
+
+To check the ID of a specific rule in ProxySQL, you can use the following command:
+ProxySQl> SELECT rule_id FROM mysql_query_rules;
+
+
+======================================================================
+SELECT pg_reload_conf();
+
+
+ to update pg_hba without restarting postgres.
+
+
+
+
+======================================================================
+
+
+Exporting from MySQL
+
+
+mysqldump -u my_username -p database_name > output_
+
+
+
+
+cat ip.sh |awk '{ print $2 }' > ip.txt
+   vim ip.txt
+for i in `cat ip.txt` ; do geoiplookup $i >> abc.txt ; echo "$i" "ABC "  >> abc.txt; done
+   vim abc.txt
+   vim ip.txt
+cat abc.txt | sed ':a;N;$!ba;s/\n//g' | sed 's/ABC/\n /g' |grep India | awk -F 'India'  '{ print $2 }' > in_ip.txt
+    ls
+   vim in_ip.txt
+
+
+
+
+
+
+
+
+LOAD DATA LOCAL INFILE '/home/mariadb/yogendra/conin_ip.csv' INTO TABLE csv1 FIELDS OPTIONALLY ENCLOSED BY '"';
+
+
+SELECT INET_NTOA (`IP`) FROM csv1;
+
+
+LOAD DATA LOCAL INFILE'/home/mariadb/yogendra/conin_ip.csv' INTO TABLE test_IP ;
+####532 Indian IP Found#### 
+####607 Total IPs in the file ####
+
+
+
+
+select ip from banned_ips EXCEPT select IP from test_IP;
+
+
+
+
+
+
+AWK command
+Awk is abbreviated from the names of the developers – Aho, Weinberger, and Kernighan. 
+Syntax:
+awk options 'selection _criteria {action }' input-file > output-file
+-f program-file : Reads the AWK program source from the file 
+                  program-file, instead of from the 
+                  first command line argument.
+-F fs            : Use fs for the input field separator
+
+
+1. Default behaviour of Awk: By default Awk prints every line of data from the specified file.  
+$ awk '{print}' employee.txt
+2. Print the lines which match the given pattern. 
+$ awk '/manager/ {print}' employee.txt
+3. Splitting a Line Into Fields : For each record i.e line, the awk command splits the record delimited by whitespace character by default and stores it in the $n variables. If the line has 4 words, it will be stored in $1, $2, $3 and $4 respectively. Also, $0 represents the whole line.  
+
+
+$ awk '{print $1,$4}' employee.txt
+
+
+Examples: 
+Use of NR built-in variables (Display Line Number)  
+$ awk '{print NR,$0}' employee.txt
+
+
+
+
+
+
+Sed command
+SED command in UNIX stands for stream editor and it can perform lots of functions on file like searching, find and replace, insertion or deletion. Though most common use of SED command in UNIX is for substitution or for find and replace. By using SED you can edit files even without opening them, which is much quicker way to find and replace something in file, than first opening that file in VI Editor and then changing it.
+
+
+$sed 's/unix/linux/' file.txt
+
+
+Here the “s” specifies the substitution operation. The “/” are delimiters. The “unix” is the search pattern and the “linux” is the replacement string.
+
+
+$sed 's/unix/linux/2' file.txt
+use the /1, /2 etc flags to replace the first, second occurrence of a pattern in a line.
+
+
+$sed 's/unix/linux/g' file.txt
+The substitute flag /g (global replacement) specifies the sed command to replace all the occurrences of the string in the line.
+
+
+To Delete a particular line say n in this example
+Syntax:
+$ sed 'nd' filename.txt
+
+
+To Delete a last line
+Syntax:
+$ sed '$d' filename.txt
+
+
+
+
+To Delete from nth to last line
+Syntax:
+$ sed 'nth,$d' filename.txt
+Example:
+$ sed '12,$d' filename.txt
+
+
+To Delete pattern matching line
+Syntax:
+$ sed '/pattern/d' filename.txt
+Example:
+$ sed '/abc/d' filename.txt
+
+
+
+
+
+
+
+
+
+
+
+
+The sed command will search and replace the old table name with the new table name from within the mysql dump file.
+sed -i 's/`old-table-name`/`new-table-name`/g' old-table-name.dump
+
+
+For loop command
+
+
+
+
+
+
+
+
+—----------------
+MySQL Compare Two tables to Find Matched Records
+
+
+mysql> select id, order_date, amount
+     from orders
+     union all
+     select id, order_date, amount
+     from orders2;
+
+
+MySQL Compare Two Tables to Find unmatched records
+
+
+mysql> select id, order_date, amount
+       from (
+         select id, order_date, amount
+         from orders
+         union all
+         select id, order_date, amount
+         from orders2)
+       temp
+       group by id, order_date, amount
+      having count(*)=1;
+
+
+Let’s now write a SQL query to find the unmatched data by comparing them.
+SELECT id,title
+FROM (
+SELECT id, title FROM table1
+UNION ALL
+SELECT id,title FROM table2
+)newTable
+GROUP BY id, title
+HAVING count(*) = 1
+ORDER BY id;
+
+
+
+
+select ip from banned_ips EXCEPT select IP from test_IP;
+
+
+
+
+
+
+
+
+root@yogendra:/home/mariadb/tables/playbook# pwd
+/home/mariadb/tables/playbook
+root@yogendra:/home/mariadb/tables/playbook# ansible-playbook test1.yml
+
+
+
+
+root@yogendra:/tmp# ls
+
+
+root@yogendra:/home/yogendar/shell# pwd
+/home/yogendar/shell
+root@yogendra:/home/yogendar/shell# ls
+banned_ips_imported.csv  cat_awk.sh  geo_ip.csv  geo_ip_india.csv  ipsh.csv
+root@yogendra:/home/yogendar/shell#
+
+
+
+
+Link for running bash command using ansible
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/script_module.html

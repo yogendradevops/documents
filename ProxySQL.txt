@@ -1,0 +1,459 @@
+﻿ProxySQL
+MASTER NODE IP: 192.168.122.227                       [mysql  Ver 8.0.30]
+SLAVE NODE IP: 192.168.122.157                          [mysql  Ver 8.0.30]
+PRoxySQL IP: 192.168.1.79                                     [ProxySQL version 2.4.4]
+
+
+
+
+Frist we need to configure Master Slave Replication:
+
+
+Master Node:
+
+
+Open the configuration file
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+
+
+Now enter the below given lines:
+
+
+bind-address  = 192.168.122.227
+server-id         = 1
+log_bin                 = mysql-bin
+
+
+gtid_mode=on
+enforce_gtid_consistency
+default_authentication_plugin=mysql_native_password    
+
+
+Save the file and restart the mysql service
+
+
+sudo systemctl restart mysql
+
+
+Now login to mysql master node:
+sudo mysql -u root -p
+
+
+After login run below given query:
+
+
+CREATE USER 'keenable'@'192.168.122.227' IDENTIFIED BY 'Redhat@1234';
+
+
+ALTER USER 'keenable'@'192.168.122.69' IDENTIFIED WITH mysql_native_password BY 'Redhat@1234';
+
+
+SHOW MASTER STATUS\G
+
+
+
+
+
+
+
+
+
+
+Slave Node
+
+
+Open the configuration file of mysql
+
+
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+
+
+Write below given line in the file:
+
+
+bind-address = 192.168.122.157
+server-id        = 2
+log-bin        = mysql-bin
+
+
+Save the file restart the mysql service
+
+
+sudo systemctl restart mysql
+
+
+After restarting login into the mysql 
+
+
+sudo mysql -u root -p
+
+
+After login run below given query
+
+
+STOP SLAVE;
+RESET SLAVE;
+
+
+CHANGE MASTER TO MASTER_HOST ='192.168.122.227’, MASTER_USER ='keenable', MASTER_PASSWORD ='Redhat@1234', MASTER_LOG_FILE = 'mysql-bin.000001', MASTER_LOG_POS = 1026;
+
+
+START SLAVE;
+
+
+SHOW SLAVE STATUS\G
+
+
+
+
+
+
+
+
+
+
+WE HAVE CONFIGURED THE MASTER SLAVE REPLICATION
+************************************************************************************************
+
+
+
+
+ProxySQL:
+
+
+GO TO PROXYSQL NODE AND LOG INTO THE PROXYSQL 
+
+
+mysql -u admin -padmin -h 127.0.0.1 -P6032 --prompt='Admin>'
+
+
+Add backends:
+
+
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'192.168.122.227',3306);
+ 
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (2,'192.168.122.157',3306);
+ 
+LOAD MYSQL SERVERS TO RUNTIME;
+
+
+SAVE MYSQL SERVERS TO DISK;
+
+
+To Check the backend run below given query:
+
+
+SELECT * FROM mysql_servers;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+
+
+Configure Monitoring:
+Configure Monitor User
+
+
+UPDATE global_variables SET variable_value='monitor' WHERE variable_name='monitor';
+
+
+UPDATE global_variables SET variable_value='Redhat@1234' WHERE variable_name='mysql-monitor_password';
+
+
+Then configure the various monitoring intervals:
+
+
+UPDATE global_variables SET variable_value='2000' WHERE variable_name IN ('mysql-monitor_connect_interval','mysql-monitor_ping_interval','mysql-monitor_read_only_interval');
+
+
+To check the global_variable:
+SELECT * FROM global_variables WHERE variable_name LIKE 'mysql-monitor_%';
+
+
+LOAD MYSQL VARIABLES TO RUNTIME;
+
+
+SAVE MYSQL VARIABLES TO DISK;
+
+
+
+
+
+
+We need to configure this monitor user in the master node too.
+
+
+On Mysql Master Host:
+
+
+CREATE USER  'monitor'@'%' IDENTIFIED BY 'Redhat@1234';
+
+
+GRANT USAGE,REPLICATION CLIENT on *.* TO 'monitor'@'%';
+
+
+FLUSH PRIVILEGES;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+Backend’s health check:
+Once the configuration is active verify the status of the MySQL backends in the monitor database tables in ProxySQL Admin:
+
+
+SHOW TABLES FROM monitor;
+
+
+SELECT * FROM monitor.mysql_server_connect_log ORDER BY time_start_us DESC LIMIT 3;
+
+
+SELECT * FROM monitor.mysql_server_ping_log ORDER BY time_start_us DESC LIMIT 3;
+
+
+LOAD MYSQL SERVERS TO RUNTIME;
+
+
+SELECT * FROM mysql_servers;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+MySQL replication hostgroups
+
+
+INSERT INTO mysql_replication_hostgroups (writer_hostgroup,reader_hostgroup,comment) VALUES (1,2,'cluster1');
+Now, all the MySQL backend servers that are either configured in hostgroup 1 or 2 will be placed into their respective hostgroup based on their read_only value:
+* If they have read_only=0 , they will be moved to hostgroup 1
+* If they have read_only=1 , they will be moved to hostgroup 2
+LOAD MYSQL SERVERS TO RUNTIME;
+
+
+The read_only check results are logged to the mysql_servers_read_only_log table in the monitor database:
+
+
+SELECT * FROM monitor.mysql_server_read_only_log ORDER BY time_start_us DESC LIMIT 3;
+
+
+
+
+And it also created hostgroup2 to where it has moved servers with read_only=1 (readers) from hostgroup1.
+
+
+As a final step, persist the configuration to disk.
+SAVE MYSQL SERVERS TO DISK;
+SAVE MYSQL VARIABLES TO DISK;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+MySQL Users
+After configuring the MySQL server backends in mysql_servers the next step is to configure mysql users.
+This is performed by adding entries to the mysql_users table:
+SHOW CREATE TABLE mysql_users\G
+The table is initially empty, to add users specify the username, password and default_hostgroup for basic configuration:
+INSERT INTO mysql_users(username,password,default_hostgroup) VALUES ('proxy','Redhat@1234',1);
+
+
+INSERT INTO mysql_users(username,password,default_hostgroup) VALUES ('keenable','Redhat@1234',1);
+
+
+SELECT * FROM mysql_users;                                                                                                                     
+
+
+LOAD MYSQL USERS TO RUNTIME;
+SAVE MYSQL USERS TO DISK;
+ProxySQL is now ready to serve traffic on port 6603 (by default):
+
+
+mysql -u keenable -pRedhat@1234 -h 127.0.0.1 -P6033 -e"SELECT @@port"
+
+
+mysql -u proxy -pRedhat@1234 -h 127.0.0.1 -P6033 -e"SELECT @@port"
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+ProxySQL Statistics, the foundation for Query Rules
+ProxySQL collects a lot of real time statistics in the stats schema, each table provides specific information about the behaviour of ProxySQL and the workload being processed:
+SHOW TABLES FROM stats;
+
+
+stats_mysql_connection_pool:
+
+
+SELECT * FROM stats.stats_mysql_connection_pool;
+
+
+stats_mysql_commands_counters:
+The stats_mysql_commands_counters table returns detailed information about the type of statements executed, and the distribution of execution time:
+SELECT * FROM stats_mysql_commands_counters WHERE Total_cnt;
+
+
+
+
+
+
+
+
+stats_mysql_query_digest:
+Query information is tracked in the stats_mysql_query_digest which provides query counts per backend, response times per query as well as the actual query text as well as the query digest which is a unique identifier for every query type:
+SELECT * FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+
+
+Key query information can be filtered out to analyse the core traffic workload with a simple query:
+SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+
+
+MySQL Query Rules
+Query rules are a very powerful vehicle to control traffic passing through ProxySQL and are configured in the mysql_query_rules table
+
+
+SHOW CREATE TABLE mysql_query_rules\G
+
+
+To configure ProxySQL to send the top 2 queries to the replica hostgroup2, and everything else to the primary the following rules would be required required:
+INSERT INTO mysql_query_rules (rule_id,active,username,match_digest,destination_hostgroup,apply) VALUES (1,1,'keenable','^SELECT c FROM Persons WHERE id=?',2,1);
+
+
+
+
+INSERT INTO mysql_query_rules (rule_id,active,username,match_digest,destination_hostgroup,apply) VALUES (20,1,'keenable','DISTINCT c FROM Persons',2,1);
+
+
+The current rule configuration can be checked in the mysql_query_rules, note: this configuration is not yet active:
+SELECT match_digest,destination_hostgroup FROM mysql_query_rules WHERE active=1 AND username='keenable' ORDER BY rule_id;
+
+
+
+
+Load the query rules to runtime to activate changes :
+LOAD MYSQL QUERY RULES TO RUNTIME;
+
+
+After traffic passes through the new configuration the stats_mysql_query_digest will reflect the changes in routing per query:
+SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+The top 2 queries identified are sent to the hostgroup2 replicas.
+Aggregated results can also be viewed in the  stats_mysql_query_digest table, for example:
+SELECT hostgroup hg, SUM(sum_time), SUM(count_star) FROM stats_mysql_query_digest GROUP BY hostgroup;
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Query Caching
+To cache all the queries sent to replicas for 5 seconds update the cache_ttl on the query rules defined in the previous example:
+
+
+UPDATE mysql_query_rules set cache_ttl=5000 WHERE active=1 AND destination_hostgroup=2;
+LOAD MYSQL QUERY RULES TO RUNTIME;
+SELECT 1 FROM stats_mysql_query_digest_reset LIMIT 1; -- we reset the counters
+After traffic passes through the new configuration the stats_mysql_query_digest will show the cached queries with a hostgroup value of “-1”:
+SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+
+
+
+
+
+
+Query Rewrite
+To match the text of a query ProxySQL provides 2 mechanisms:
+* match_digest : match the regular expression against the digest of the query which strips SQL query data (e.g. `SELECT c FROM Persons  WHERE id=?` as represented in stats_mysql_query_digest.query_digest)
+* match_pattern : match the regular expression against the actual text of the query (e.g. `SELECT c FROM Persons WHERE id=2`)
+INSERT INTO mysql_query_rules (rule_id,active,username,match_pattern,replace_pattern,apply) VALUES (30,1,'keenable','DISTINCT(.*)ORDER BY c','DISTINC1',1);
+SELECT rule_id, match_digest, match_pattern, replace_pattern, cache_ttl, apply FROM mysql_query_rules ORDER BY rule_id;
+This configuration would result in the following behaviour:
+SELECT hits, mysql_query_rules.rule_id, match_digest, match_pattern, replace_pattern, cache_ttl, apply FROM mysql_query_rules NATURAL JOIN stats.stats_mysql_query_rules ORDER BY mysql_query_rules.rule_id;
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+ProxySQL Read/Write Split
+Read/Write split using different ports
+Configure ProxySQL to listen on two ports and restart it : mysql-interfaces is one of the few variables that cannot be changed at runtime and requires a restart
+SET mysql-interfaces='0.0.0.0:6401;0.0.0.0:6402';
+## save it on disk and restart proxysql
+SAVE MYSQL VARIABLES TO DISK;
+PROXYSQL RESTART;
+* 
+Add routing based on incoming port:
+
+
+INSERT INTO mysql_query_rules (rule_id,active,proxy_port,destination_hostgroup,apply)
+VALUES (1,1,6401,1,1), (2,1,6402,2,1);
+
+
+LOAD MYSQL QUERY RULES TO RUNTIME;
+SAVE MYSQL QUERY RULES TO DISK; # if you want this change to be permanent
+   * 
+Now all the queries coming to port 6401 will be sent to the MySQL server in hostgroup 1, while all the queries coming to port 6402 will be sent to one of the MySQL servers in hostgroup 2.
+Generic Read/Write split using regex
+Start by clearing the query rules created previously:
+DELETE FROM mysql_query_rules;
+Then create generic rules to route ALL SELECTs to a replica for the read/write split as follows:
+UPDATE mysql_users SET default_hostgroup=1; # by default, all goes to HG1
+LOAD MYSQL USERS TO RUNTIME;
+SAVE MYSQL USERS TO DISK; # if you want this change to be permanent
+INSERT INTO mysql_query_rules (rule_id,active,match_digest,destination_hostgroup,apply)
+VALUES (1,1,'^SELECT.*FOR UPDATE$',1,1), (2,1,'^SELECT',2,1);
+LOAD MYSQL QUERY RULES TO RUNTIME;
+SAVE MYSQL QUERY RULES TO DISK; # if you want this change to be permanent
+Now routing will work as follows:
+      * all SELECT FOR UPDATE statements will be sent to HG1
+      * all other SELECT statements will be sent to HG2
+      * everything else will be sent to HG1 (the default)
+DO NOT USE THESE RULES IN PRODUCTION, GENERIC READ/WRITE RULES LEAD TO PROBLEMS
+A better approach is to properly analyse the database workload and implement efficient rules, clear the previous rules once again:
+DELETE FROM mysql_query_rules;
+LOAD MYSQL QUERY RULES TO RUNTIME;
+SAVE MYSQL QUERY RULES TO DISK; # if you want this change to be permanent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************
+
+
+Logs:
+tail -f /var/lib/proxysql/proxysql.log
+
+
+************************************************************************************************

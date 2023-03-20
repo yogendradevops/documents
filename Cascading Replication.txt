@@ -1,0 +1,378 @@
+﻿Simple and Cascading Replication
+
+
+If you have two locations that hold the same information, you will have a simple replication with one master and one slave. If you have three or more locations that hold the same information, you can have a simple replication with one master and two or more slaves, or a cascading replication.
+
+
+Filter nagios logs using awk.
+I have setup the cascade replication.
+
+
+In a cascading replication, there are several levels of information replication: a replica copy on a slave server is in turn replicated to another slave. For information that is replicated in many locations, a cascading replication has the advantage of reducing the network traffic originating from the master server by sharing the load with the first level of slave servers.
+
+
+
+
+Network:
+podman network create --subnet=172.18.0.0/24 podmannetwork
+
+
+Master:
+yogendra@yogendra:~/mysql/keenable$ podman run --name m11 -p 3311:3306  --network podmannetwork --ip 172.18.0.10 -v /home/yogendra/mysql/keenable/m11/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat -d mysql
+
+
+Slave:
+yogendra@yogendra:~/mysql/keenable$ podman run --name m22 -p 3320:3306  --network podmannetwork --ip 172.18.0.15 -v /home/yogendra/mysql/keenable/m22/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat -d mysql
+
+
+
+
+======================================================================
+yogendra@yogendra:~/mysql/keenable/m22$ podman exec -it m11 bash
+bash-4.4# cat /etc/my
+cat: /etc/my: No such file or directory
+bash-4.4# cat /etc/my.cnf
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/8.0/en/server-configuration-defaults.html
+
+
+[mysqld]
+bind-address = 172.18.0.10
+server-id = 1
+
+
+log-bin=/var/lib/mysql/node1-bin
+
+
+gtid_mode=on
+enforce_gtid_consistency
+default_authentication_plugin=mysql_native_password
+
+
+
+
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+#
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+
+
+# Remove leading # to revert to previous value for default_authentication_plugin,
+# this will increase compatibility with older clients. For background, see:
+# https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin
+# default-authentication-plugin=mysql_native_password
+skip-host-cache
+skip-name-resolve
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+secure-file-priv=/var/lib/mysql-files
+user=mysql
+
+
+pid-file=/var/run/mysqld/mysqld.pid
+[client]
+socket=/var/run/mysqld/mysqld.sock
+
+
+!includedir /etc/mysql/conf.d/
+bash-4.4# exit
+yogendra@yogendra:~/mysql/keenable/m22$ podman exec -it m22 bash
+bash-4.4# cat /etc/my.cnf
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/8.0/en/server-configuration-defaults.html
+
+
+[mysqld]
+bind-address = 172.18.0.15
+server-id = 2
+
+
+log-bin=/var/lib/mysql/node1-bin
+
+
+gtid_mode=on
+enforce_gtid_consistency
+default_authentication_plugin=mysql_native_password
+
+
+
+
+
+
+
+
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+#
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+
+
+# Remove leading # to revert to previous value for default_authentication_plugin,
+# this will increase compatibility with older clients. For background, see:
+# https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin
+# default-authentication-plugin=mysql_native_password
+skip-host-cache
+skip-name-resolve
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+secure-file-priv=/var/lib/mysql-files
+user=mysql
+
+
+pid-file=/var/run/mysqld/mysqld.pid
+[client]
+socket=/var/run/mysqld/mysqld.sock
+
+
+!includedir /etc/mysql/conf.d/
+bash-4.4# exit
+yogendra@yogendra:~/mysql/keenable/m22$ mysql -u root -p -P 3311 -h 127.0.0.1
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 8
+Server version: 8.0.31 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+mysql>  CREATE USER 'keenable'@'172.18.0.10' IDENTIFIED BY 'Redhat@1234';
+Query OK, 0 rows affected (0.03 sec)
+
+
+mysql> ALTER USER 'keenable'@'172.18.0.10' IDENTIFIED WITH mysql_native_password BY 'Redhat@1234';
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'keenable'@'172.18.0.10';
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql> show slave status\G
+Empty set, 1 warning (0.00 sec)
+
+
+mysql> show master status\G
+*************************** 1. row ***************************
+                 File: node1-bin.000001
+             Position: 976
+         Binlog_Do_DB:
+ Binlog_Ignore_DB:
+Executed_Gtid_Set: 91834c8c-8392-11ed-82ec-0e530d123996:1-3
+1 row in set (0.00 sec)
+
+
+mysql> drop user keenable@172.18.0.10;
+Query OK, 0 rows affected (0.04 sec)
+
+
+mysql> CREATE USER 'keenable'@'172.18.0.15' IDENTIFIED BY 'Redhat@1234';
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql> ALTER USER 'keenable'@'172.18.0.15' IDENTIFIED WITH mysql_native_password BY 'Redhat@1234';
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'keenable'@'172.18.0.15';
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql> show slave status\G
+Empty set, 1 warning (0.00 sec)
+
+
+mysql> show master  status\G
+*************************** 1. row ***************************
+                 File: node1-bin.000001
+             Position: 1985
+         Binlog_Do_DB:
+ Binlog_Ignore_DB:
+Executed_Gtid_Set: 91834c8c-8392-11ed-82ec-0e530d123996:1-7
+1 row in set (0.00 sec)
+
+
+mysql> create database marry;
+Query OK, 1 row affected (0.02 sec)
+
+
+mysql> drop database marry;
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql>
+[1]+  Stopped                     mysql -u root -p -P 3311 -h 127.0.0.1
+yogendra@yogendra:~/mysql/keenable/m22$
+
+
+
+
+—-------------------------------------
+
+
+Slave
+
+
+yogendra@yogendra:~/mysql/keenable/m22$ mysql -u root -p -P 3320 -h 127.0.0.1
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.31 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+mysql> stop slave ;
+Query OK, 0 rows affected, 2 warnings (0.00 sec)
+
+
+mysql> reset slave;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+mysql> stop slave ;
+Query OK, 0 rows affected, 2 warnings (0.06 sec)
+
+
+mysql> reset slave;
+Query OK, 0 rows affected, 1 warning (0.03 sec)
+
+
+mysql> CHANGE MASTER TO MASTER_HOST ='172.18.0.10', MASTER_USER ='keenable', MASTER_PASSWORD ='Redhat@1234', MASTER_LOG_FILE = 'node1-bin.000001', MASTER_LOG_POS = 1985;
+Query OK, 0 rows affected, 7 warnings (0.09 sec)
+
+
+mysql> start slave;
+Query OK, 0 rows affected, 1 warning (0.04 sec)
+
+
+mysql> show slave status\G
+*************************** 1. row ***************************
+                   Slave_IO_State: Waiting for source to send event
+                      Master_Host: 172.18.0.10
+                      Master_User: keenable
+                      Master_Port: 3306
+                    Connect_Retry: 60
+                  Master_Log_File: node1-bin.000001
+              Read_Master_Log_Pos: 1985
+                   Relay_Log_File: 169dbe69882b-relay-bin.000002
+                    Relay_Log_Pos: 326
+            Relay_Master_Log_File: node1-bin.000001
+                 Slave_IO_Running: Yes
+                Slave_SQL_Running: Yes
+                  Replicate_Do_DB:
+              Replicate_Ignore_DB:
+               Replicate_Do_Table:
+           Replicate_Ignore_Table:
+          Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                       Last_Errno: 0
+                       Last_Error:
+                     Skip_Counter: 0
+              Exec_Master_Log_Pos: 1985
+                  Relay_Log_Space: 543
+                  Until_Condition: None
+                   Until_Log_File:
+                    Until_Log_Pos: 0
+               Master_SSL_Allowed: No
+               Master_SSL_CA_File:
+               Master_SSL_CA_Path:
+                  Master_SSL_Cert:
+                Master_SSL_Cipher:
+                   Master_SSL_Key:
+            Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                    Last_IO_Errno: 0
+                    Last_IO_Error:
+                   Last_SQL_Errno: 0
+                   Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+                 Master_Server_Id: 1
+                      Master_UUID: 91834c8c-8392-11ed-82ec-0e530d123996
+                 Master_Info_File: mysql.slave_master_info
+                        SQL_Delay: 0
+              SQL_Remaining_Delay: NULL
+          Slave_SQL_Running_State: Replica has read all relay log; waiting for more updates
+               Master_Retry_Count: 86400
+                      Master_Bind:
+          Last_IO_Error_Timestamp:
+         Last_SQL_Error_Timestamp:
+                   Master_SSL_Crl:
+               Master_SSL_Crlpath:
+               Retrieved_Gtid_Set:
+                Executed_Gtid_Set:
+                    Auto_Position: 0
+             Replicate_Rewrite_DB:
+                     Channel_Name:
+               Master_TLS_Version:
+           Master_public_key_path:
+            Get_master_public_key: 0
+                Network_Namespace:
+1 row in set, 1 warning (0.01 sec)
+
+
+mysql> show databases;
++--------------------+
+| Database               |
++--------------------+
+| information_schema |
+| marry                  |
+| mysql                  |
+| performance_schema |
+| sys                    |
++--------------------+
+5 rows in set (0.03 sec)
+
+
+mysql> show databases;
++--------------------+
+| Database               |
++--------------------+
+| information_schema |
+| mysql                  |
+| performance_schema |
+| sys                    |
++--------------------+
+4 rows in set (0.01 sec)
+
+
+mysql>

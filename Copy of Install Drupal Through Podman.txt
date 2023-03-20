@@ -1,0 +1,248 @@
+﻿Install Drupal Using Podman
+
+
+sudo yum update
+
+
+Last metadata expiration check: 0:02:26 ago on Friday 10 February 2023 12:42:01 PM IST.
+Dependencies resolved.
+Nothing to do.
+Complete!
+
+
+
+
+Install Podman 
+sudo yum install podman
+
+
+Last metadata expiration check: 0:03:23 ago on Friday 10 February 2023 12:42:01 PM IST.
+Package podman-2:4.2.0-1.module_el8.7.0+1216+b022c01d.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+
+
+
+
+Create pod:
+
+
+ podman pod create --name supreme_court --publish 8080:80 --publish 3306:3306
+
+
+d249b1aa902ec621e414f98e79dca203b2c6efa7651e053a2671ecbf59801a49
+
+
+
+
+List pod:
+podman pod ps
+POD ID        NAME           STATUS      CREATED        INFRA ID      # OF CONTAINERS
+d249b1aa902e  supreme_court  Created     8 seconds ago  2c9b8f87721e  1
+
+
+
+
+Create Container for Drupal
+podman run -itd --pod supreme_court --name drupal docker.io/drupal
+
+
+Trying to pull docker.io/library/drupal:latest...
+Getting image source signatures
+Copying blob 1fdaec518652 done  
+Copying blob bb263680fed1 done  
+Copying blob 0825793cba86 done  
+Copying blob de3c011d207b done  
+Copying blob 7e3c5bd9650e done  
+Copying blob 40c3827232f7 done  
+Copying blob 5bfea1d79d41 done  
+Copying blob 26c58de8bd2f done  
+Copying blob 808611e95449 done  
+Copying blob 6b1dadcf166b done  
+Copying blob 9a206e1be6bb done  
+Copying blob 7cb1a37deb57 done  
+Copying blob 74e999ea1413 done  
+Copying blob e11bafc3f78b done  
+Copying blob d0f0ec626a39 done  
+Copying blob ccb270afc9df done  
+Copying blob 86dd1d6f67e0 done  
+Copying blob 958b188dd0ff done  
+Copying config c3ebd5ffd1 done  
+Writing manifest to image destination
+Storing signatures
+b8f36a59d31767b6badca9ad25ae56db393a772c934a4b1ee065c914751f2520
+
+
+
+
+Create Container for mysql
+podman run -itd --pod supreme_court  --name mysql -e MYSQL_ROOT_PASSWORD=redhat docker.io/library/mysql
+
+
+Trying to pull docker.io/library/mysql:latest...
+Getting image source signatures
+Copying blob 92fcd248d982 done  
+Copying blob 197c1adcd755 done  
+Copying blob 45f2e353f7d2 done  
+Copying blob cfa4d9a7b88e done  
+Copying blob 68ec6ece42ef done  
+Copying blob 64cab5858b1d done  
+Copying blob 88635e83312d done  
+Copying blob 43f0427259d9 done  
+Copying blob 79828698a290 done  
+Copying blob a8854781893e done  
+Copying blob 6c8bdf3091d9 done  
+Copying config 57da161f45 done  
+Writing manifest to image destination
+Storing signatures
+af268a5ff035577a7bc9669497d0a3ab4214e5f48aee4303be0932ff9ee1a68e
+
+
+
+
+List containers:
+podman ps
+
+
+CONTAINER ID  IMAGE                                    COMMAND               CREATED         STATUS             PORTS                                         NAMES
+2c9b8f87721e  localhost/podman-pause:4.2.0-1663766104                        17 minutes ago  Up 16 minutes ago  0.0.0.0:3306->3306/tcp, 0.0.0.0:8080->80/tcp  d249b1aa902e-infra
+b8f36a59d317  docker.io/library/drupal:latest          apache2-foregroun...  16 minutes ago  Up 16 minutes ago  0.0.0.0:3306->3306/tcp, 0.0.0.0:8080->80/tcp  drupal
+af268a5ff035  docker.io/library/mysql:latest           mysqld                2 minutes ago   Up 2 minutes ago   0.0.0.0:3306->3306/tcp, 0.0.0.0:8080->80/tcp  mysql
+
+
+Install mysql client version
+ sudo yum install mysql.x86_64
+
+
+Last metadata expiration check: 0:12:17 ago on Friday 10 February 2023 02:14:55 PM IST.
+Dependencies resolved.
+==============================================================================================================================================
+ Package                                 Architecture        Version                                             Repository              Size
+==============================================================================================================================================
+Installing:
+ mysql                                   x86_64              8.0.26-1.module_el8.4.0+915+de215114                appstream               12 M
+Installing dependencies:
+ mariadb-connector-c-config              noarch              3.1.11-2.el8_3                                      appstream               15 k
+ mysql-common                            x86_64              8.0.26-1.module_el8.4.0+915+de215114                appstream              134 k
+Enabling module streams:
+ mysql                                                       8.0                                                                             
+
+
+Transaction Summary
+==============================================================================================================================================
+Install  3 Packages
+
+
+Total download size: 12 M
+Installed size: 63 M
+Is this ok [y/N]: y
+Downloading Packages:
+(1/3): mariadb-connector-c-config-3.1.11-2.el8_3.noarch.rpm                                                   4.4 kB/s |  15 kB     00:03    
+(2/3): mysql-common-8.0.26-1.module_el8.4.0+915+de215114.x86_64.rpm                                            40 kB/s | 134 kB     00:03    
+(3/3): mysql-8.0.26-1.module_el8.4.0+915+de215114.x86_64.rpm  
+Total                                                                                                         204 kB/s |  12 MB     01:00     
+CentOS Stream 8 - AppStream                                                                                   1.4 MB/s | 1.6 kB     00:00    
+Importing GPG key 0x8483C65D:
+ Userid     : "CentOS (CentOS Official Signing Key) <security@centos.org>"
+ Fingerprint: 99DB 70FA E1D7 CE22 7FB6 4882 05B5 55B3 8483 C65D
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+Is this ok [y/N]: y
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                      1/1 
+  Installing       : mariadb-connector-c-config-3.1.11-2.el8_3.noarch                                                                     1/3 
+  Installing       : mysql-common-8.0.26-1.module_el8.4.0+915+de215114.x86_64                                                             2/3 
+  Installing       : mysql-8.0.26-1.module_el8.4.0+915+de215114.x86_64                                                                    3/3 
+  Running scriptlet: mysql-8.0.26-1.module_el8.4.0+915+de215114.x86_64                                                                    3/3 
+/sbin/ldconfig: /usr/lib64/llvm14/lib/libclang.so.13 is not a symbolic link
+
+
+
+
+  Verifying        : mariadb-connector-c-config-3.1.11-2.el8_3.noarch                                                                     1/3 
+  Verifying        : mysql-8.0.26-1.module_el8.4.0+915+de215114.x86_64                                                                    2/3 
+  Verifying        : mysql-common-8.0.26-1.module_el8.4.0+915+de215114.x86_64                                                             3/3 
+
+
+Installed:
+  mariadb-connector-c-config-3.1.11-2.el8_3.noarch                          mysql-8.0.26-1.module_el8.4.0+915+de215114.x86_64                 
+  mysql-common-8.0.26-1.module_el8.4.0+915+de215114.x86_64 
+Complete!
+
+
+Login into database
+mysql -u root -h 127.0.0.1 -P 3306 -p
+
+
+
+
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 11
+Server version: 8.0.32 MySQL Community Server - GPL
+
+
+Copyright (c) 2000, 2021, Oracle and/or its affiliates.
+
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+
+
+
+
+
+
+
+
+To create a database run below command
+Create database drupal;
+
+
+Query OK, 1 row affected (0.05 sec)
+
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| drupal             |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.01 sec)
+
+
+Now Open browser and write in search bar localhost:8080/drupal
+  
+
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+======================================================================

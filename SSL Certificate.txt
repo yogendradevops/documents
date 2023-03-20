@@ -1,0 +1,197 @@
+﻿SSL Certificate
+#sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./my.key -out ./my.crt
+
+
+#cat my.crt my.key > my.pem
+
+
+[root@keenable ke]# pwd
+/certs/ke
+[root@keenable ke]# ll
+total 12
+-rw-r--r-- 1 root root 1403 Sep  2 14:34 my.crt
+-rw------- 1 root root 1704 Sep  2 14:33 my.key
+-rw-r--r-- 1 root root 3107 Sep  2 14:35 my.pem
+
+
+*********************************************************************************************************
+
+
+Steps followed:
+1. Use below given command to create certificate and key:
+
+
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./my.key -out ./my.crt
+
+
+2.Use below given command to create Privacy Enhanced Mail (PEM) File:
+
+
+cat my.crt my.key > my.pem
+
+
+3. Now open haproxy.cfg file and enter the following in the frontend section.
+
+
+frontend main
+    bind 192.168.122.97:80
+    bind 192.168.122.97:443 ssl crt /certs/ke/my.pem                    ## path of the ,pem file
+    http-request redirect scheme https unless { ssl_fc }        
+
+
+4. After saving the haproxt.cfg file restart haproxy service
+systemctl restart haproxy.service
+
+
+5. Open the browser and go to Settings> Privacy and Security > Certificates > View Certificates > Authorities and select the certificate and click on edit trust. Check both the box under edit trust settings then click ok and restart the browser.
+
+
+*********************************************************************************************
+openssl req -new -newkey rsa:4096 -nodes -keyout snakeoil.key -out snakeoil.csr
+
+
+openssl x509 -req -sha256 -days 365 -in snakeoil.csr -signkey snakeoil.key -out snakeoil.pem
+
+
+cat example.com.crt example.com.key > example.com.pem
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Follow the below given steps to generate the SSL certificate:
+1.--> download the attached file and move it to the new directory where you want to generate the certificate.
+
+
+2.--> give the execute permission to the file:
+sudo chmod +x filename
+
+
+3.--> Now run the command:
+./filename keenable.com            ##keenable.com = domain name of your website
+
+
+4.--> Run below the command to create the PEM file:
+cat keenable.com.crt  keenable.com.key > keenable.com.pem
+
+
+5.--> Add PEM file to your HAProxy in frontend section.
+
+
+6.--> After this add rootCA.crt to your browser:
+browser-->settings-->Privacy & Security-->Certificates-->view certificates-->Authorities-->Import-->Here Import your rootCA.crt.
+
+
+7. Restart the Browser.
+
+
+
+
+++++++++++++
+test
+++++++++++++
+#! /bin/bash
+
+
+if [ "$#" -ne 1 ]
+then
+  echo "Error: No domain name argument provided"
+  echo "Usage: Provide a domain name as an argument"
+  exit 1
+fi
+
+
+DOMAIN=$1
+
+
+# Create root CA & Private key
+
+
+openssl req -x509 \
+            -sha256 -days 356 \
+            -nodes \
+            -newkey rsa:2048 \
+            -subj "/CN=${DOMAIN}/C=IN/L=INDIA" \
+            -keyout rootCA.key -out rootCA.crt 
+
+
+# Generate Private key 
+
+
+openssl genrsa -out ${DOMAIN}.key 2048
+
+
+# Create csf conf
+
+
+cat > csr.conf <<EOF
+[ req ]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
+
+
+[ dn ]
+C = IN
+ST = UP
+L = NOIDA
+O = K&A
+OU = IT
+CN = ${DOMAIN}
+
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+
+[ alt_names ]
+DNS.1 = ${DOMAIN}
+DNS.2 = www.${DOMAIN}
+IP.1 = 192.168.1.5 
+IP.2 = 192.168.1.6
+
+
+EOF
+
+
+# create CSR request using private key
+
+
+openssl req -new -key ${DOMAIN}.key -out ${DOMAIN}.csr -config csr.conf
+
+
+# Create a external config file for the certificate
+
+
+cat > cert.conf <<EOF
+
+
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+
+[alt_names]
+DNS.1 = ${DOMAIN}
+
+
+EOF
+
+
+# Create SSl with self signed CA
+
+
+openssl x509 -req \
+    -in ${DOMAIN}.csr \
+    -CA rootCA.crt -CAkey rootCA.key \
+    -CAcreateserial -out ${DOMAIN}.crt \
+    -days 365 \
+    -sha256 -extfile cert.conf
+
+
+
+
++++++

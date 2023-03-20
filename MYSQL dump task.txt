@@ -1,0 +1,373 @@
+﻿MYSQL Task
+
+
+
+
+1 Create databases DB1DB2 = then create table TABLE,TABLE2 in DB1 and insert few records in it with datatypes likewise NAME<varchar>, CONTACT<int> etc. including auto incremented ID column.
+
+
+mysql> create database DB1;
+mysql> create database DB2;
+
+
+mysql> show databases;
++--------------------+
+| Database               |
++--------------------+
+| DB1                    |
+| DB2                    |
+| earth                  |
+| hello                  |
+| information_schema |
+| moon                   |
+| mysql                  |
+| performance_schema |
+| sun                    |
+| sys                    |
++--------------------+
+10 rows in set (0.32 sec)
+
+
+mysql> CREATE TABLE TABLE1 (ID int NOT NULL AUTO_INCREMENT, Name varchar(10) NOT NULL,CONTACT int, PRIMARY KEY (ID));
+
+
+mysql> SHOW TABLES;
++---------------+
+| Tables_in_DB1 |
++---------------+
+| TABLE1             |
++---------------+
+1 row in set (0.02 sec)
+
+
+mysql> INSERT INTO  TABLE1 ( Name ,CONTACT) VALUES ('JAI',12345);
+Query OK, 1 row affected (0.07 sec)
+
+
+mysql> INSERT INTO  TABLE1 ( Name ,CONTACT) VALUES ('veeru',54321);
+Query OK, 1 row affected (0.06 sec)
+
+
+mysql> INSERT INTO  TABLE1 ( Name ,CONTACT) VALUES ('gabbar',13579);
+Query OK, 1 row affected (0.04 sec)
+
+
+mysql> INSERT INTO  TABLE1 ( Name ,CONTACT) VALUES ('sambha',24680);
+Query OK, 1 row affected (0.05 sec)
+
+
+mysql> select * from TABLE1;
++----+--------+---------+
+| ID | Name   | CONTACT |
++----+--------+---------+
+|  1 | JAI        |   12345 |
+|  2 | veeru  |   54321 |
+|  3 | gabbar |   13579 |
+|  4 | sambha |   24680 |
++----+--------+---------+
+4 rows in set (0.01 sec)
+
+
+
+
+************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Increase the varchar data type size limit from the table for the column suppose you have opted varchar(10), then increase it to varchar(20)].
+
+
+mysql> DESC TABLE1;
++---------+-------------+------+-----+---------+----------------+
+| Field   | Type            | Null | Key | Default | Extra              |
++---------+-------------+------+-----+---------+----------------+
+| ID          | int             | NO   | PRI | NULL        | auto_increment |
+| Name        | varchar(10) | NO   |         | NULL        |                    |
+| CONTACT | int             | YES  |         | NULL        |                    |
++---------+-------------+------+-----+---------+----------------+
+3 rows in set (0.09 sec)
+
+
+
+
+mysql> ALTER TABLE TABLE1 CHANGE COLUMN NAME NAME VARCHAR(20);
+Query OK, 0 rows affected (0.06 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+
+mysql> DESC TABLE1;
++---------+-------------+------+-----+---------+----------------+
+| Field   | Type            | Null | Key | Default | Extra              |
++---------+-------------+------+-----+---------+----------------+
+| ID          | int             | NO   | PRI | NULL        | auto_increment |
+| NAME        | varchar(20) | YES  |         | NULL        |                    |
+| CONTACT | int             | YES  |         | NULL        |                    |
++---------+-------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+
+
+
+
+
+************************************************************************************************
+
+
+3. study about the manual page for mysqldump utility and understand the options like single Transaction, routines, triggers, max allowed packets etc.
+
+
+
+
+
+
+
+
+
+
+Triggers in SQL
+
+
+Triggers are stored programs / procedures, which are automatically executed or fired when some events occur. Events can be any of the following -
+
+
+1. Database manipulation (DML): statement like - DELETE, INSERT, or UPDATE)
+2. Database definition (DDL): statement like - CREATE, ALTER, or DROP
+3. Database operation like - LOGON, LOGOFF, STARTUP, or SHUTDOWN
+
+
+Triggers can be defined on the table, view, schema, or database with which the event is associated.
+
+
+
+
+Benefits of Triggers
+
+
+Triggers can be written for the following purposes -
+
+
+* Gain strong Control over Security
+* Enforcing referential integrity
+* Event logging and storing information on table access 
+* Auditing
+* Synchronous replication of tables
+
+
+
+
+Syntax of Triggers:
+
+
+CREATE (OR REPLACE TRIGGER trigger_name
+(BEFORE | AFTER)
+{INSERT [OR] | UPDATE [OR] | DELETE}
+ON table_name
+[FOR EACH ROW]
+DECLARE
+Declaration-statements
+BEGIN
+Executable-statements
+END;
+
+
+
+
+
+
+
+
+
+
+
+
+Where,
+* CREATE [OR REPLACE] TRIGGER trigger_name Creates or replaces an existing trigger with the trigger_name.
+* (BEFORE AFTER} - This specifies when the trigger will be executed.
+* [INSERT [OR] | UPDATE [OR] | DELETE} - This specifies the DML operation.
+* [ON table_name] - This specifies the name of the table associated with the trigger.
+* > [FOR EACH ROW] - This specifies a row-level trigger, i.e., the trigger will be executed for each row being affected. Otherwise the trigger will execute just once when the SQL statement is executed, which is called a table level trigger.
+
+
+
+
+Example of Triggers:
+
+
+* create trigger salary_difference
+* before insert or delete or update on emp
+* for each row
+* Declare
+* salary_difference number;
+* Begin
+* . salary_difference:= new.salary:old.salary;
+* dbms_output.put_line('Old salary: ' || :old.salary);
+* dbms_output.put_line('New salary: ' || :new.salary);
+* dbms_output.put_line('Salary difference: ' || salary_difference);
+
+
+
+
+
+
+MySQL Transaction
+A transaction in MySQL is a sequential group of statements, queries, or operations such as select, insert, update or delete to perform as a one single work unit that can be committed or rolled back. If the transaction makes multiple modifications into the database, two things happen:
+* Either modification is successful when the transaction is committed.
+* Or, all modifications are undone when the transaction is rollback.
+In other words, a transaction cannot be successful without completing each operation available in the set. It means if any statement fails, the transaction operation cannot produce results.
+A transaction in MySQL starts with the first executable SQL statement and ends when it finds a commit or rolled back either explicitly or implicitly. It explicitly uses COMMIT or ROLLBACK statement and implicitly when a DDL statement is used.
+
+
+
+
+
+
+
+
+
+
+
+
+************************************************************************************************
+
+
+
+
+4.Take backup for complete database DB1 and restore it to DB2.
+
+
+
+
+Dump of DB1:
+root@Master:~# mysqldump -u root -p --set-gtid-purged=OFF DB1 > DB1dump.sql
+
+
+Restore dump to DB2:
+root@Master:~# sudo mysql -u root -p  DB2 < DB1dump.sql
+
+
+
+
+************************************************************************************************
+
+
+5.Take the dump for TABLE1(with data) from DB1 TABLE2(only structure, without data) from DB1 restore the table to another database DB3 with name TABLE1_DATA and TABLE2_STRUCT respectively.
+
+
+
+
+Dump for DB1 TABLE1(with data):
+root@Master:/home# sudo mysqldump -u root -p --set-gtid-purged=OFF DB1 TABLE1 > DB1T1DATA.sql
+
+
+
+
+Dump for DB1 TABLE2(only structure, without data):
+root@Master:/home# sudo mysqldump -u root -p --set-gtid-purged=OFF --no-data DB1 TABLE2 > DB1T2structure.sql
+
+
+
+
+Restore to DB3 with name TABLE1_DATA:
+
+
+After creating a mysql dump file we could do the following:
+
+
+sed -i 's/`old-table-name`/`new-table-name`/g' old-table-name.dump
+
+
+The sed command will search and replace the old table name with the new table name from within the mysql dump file.
+
+
+mysql -u root -p DB3  < DB1T1DATA.sql
+
+
+
+
+
+
+Restore to DB3 with name TABLE2_STRUCT:
+
+
+After creating a mysql dump file you could do the following:
+
+
+sed -i 's/`old-table-name`/`new-table-name`/g' old-table-name.dump
+
+
+mysql -u root -p DB3 < DB1T2structure.sql
+
+
+
+
+************************************************************************************************
+
+
+Remarks: mysqldump commands:-
+mysqldump to back up all databases
+mysqldump -u root -p --all-databases > backup_all_databases.sql
+
+
+mysqldump to back up only data
+mysqldump -u root -p --no-create-info DBname > backup_data_only.sql
+
+
+mysqldump to back up only structure
+mysqldump -u root -p --no-data DBname > structure_only.sql
+
+
+mysqldump to back up all tables in the database
+mysqldump -u root -p DBname city country category > selected_tables.sql
+
+
+mysqldump to back up a single table
+mysqldump -u root -p DBname inventory > backup_single_table.sql
+
+
+Restore the database in MySQL from the file
+mysql -u root -p DBname < DBdump.sql

@@ -1,0 +1,209 @@
+﻿THOMAS COOK SERVER DETAILS 
+
+
+* PRODUCTION DR REPLICATION DETAILS 
+We have a total of five  production DR (disaster recovery) Replication Server.
+We have five master servers having one slave and one DR slave each
+Details of the Database Replication in Production is given below:-
+PRODUCTION DR REPLICATION
+	PRODUCTION
+	MASTER
+	SLAVE
+	DR
+	TC-TATA-IBOOK SERVER
+	172.16.200.54
+	172.16.200.172
+	10.0.4.9
+	SOTCLT-TBOOK
+	10.99.46.40
+	10.99.46.41
+	10.0.4.6
+	SOTCLT
+	10.99.46.38
+	10.99.46.39
+	10.0.4.4
+	ASTRACMS
+	172.16.200.168
+	172.16.200.169
+	10.0.2.11
+	ASTRATXN
+	172.16.200.196
+	172.16.200.171
+	10.0.2.10
+	
+
+* PRODUCTION MASTER SLAVE REPLICATION
+We have a total of two production master slave replications Server. 
+ We have two master servers having one slave on both master servers .
+Details of the Master Slave Replication in Production is given below:-
+PRODUCTION MASTER SLAVE REPLICATION
+	PRODUCTION
+	MASTER
+	SLAVE
+	ASTRA-AIRARABIA-VISTARA
+	10.10.1.167
+	10.10.1.173
+	CANVASICONIC MANTRA
+	10.10.1.177
+	10.10.1.178
+	
+
+
+
+* PRODUCTION MASTER DB 
+We have only one production master database. 
+Details of the master database is given below :-
+PRODUCTION MASTER
+	PRODUCTION
+	MASTER
+	LTOB CLOUD REPLICATION
+	10.10.1.64
+	
+
+
+
+
+
+
+
+* TYPES OF ENVIRONMENT ( DEV, UAT, SIT )
+
+
+We have three types of environments on application . For example :-  DEV(Developer performs unit testing ) environment, SIT (system integration Testing ) environment , and UAT (user acceptance Testing) environment.
+We have a total of eight Dev environments , eight UAT environments and four SIT environments . 
+Details of types of environments is given below :- 
+TYPES OF ENVIRONMENT
+	Environment
+	Application
+	Hostname
+	Role
+	IP
+	Dev
+	LTOB
+	
+
+	DB
+	172.16.177.152
+	Dev
+	VISA
+	
+
+	DB
+	172.16.177.153
+	Dev
+	IBOOK
+	
+
+	DB
+	172.16.177.154
+	Dev
+	ASTRA
+	
+
+	MASTER DB
+	172.16.177.159
+	Dev
+	ASTRA
+	
+
+	SLAVE DB
+	172.16.177.160
+	Dev
+	ASTRA HOLIDAYPLUS
+	
+
+	DB
+	172.16.177.164
+	Dev
+	ASTRA-AIRARABIA-AIRARABIACMS-VISTARA-JET
+	
+
+	DB
+	172.16.177.167
+	Dev
+	CANVAS-ICONIC-TCTAPP
+	
+
+	DB
+	172.16.177.169
+	UAT
+	IBOOK
+	
+
+	MYSQL8.0 DB
+	172.16.177.151
+	UAT
+	ASTRA HOLIDAYPLUS
+	
+
+	DB
+	172.16.177.164
+	UAT
+	ASTRA-AIRARABIA-AIRARABIACMS-VISTARA-JET
+	
+
+	DB
+	172.16.177.167
+	UAT
+	CANVAS-ICONIC-TCTAPP
+	
+
+	DB
+	172.16.177.169
+	UAT
+	LTOB-TCB2B-SOTCLT
+	
+
+	DB
+	172.16.177.76
+	UAT
+	VISA-TCILVT
+	
+
+	DB
+	172.16.177.77
+	UAT
+	IBOOK
+	
+
+	DB
+	172.20.3.4
+	UAT
+	ASTRA
+	
+
+	DB
+	10.10.1.83
+	SIT
+	ASTRA
+	
+
+	MASTER DB
+	172.16.177.159
+	SIT
+	ASTRA
+	
+
+	SLAVE DB
+	172.16.177.160
+	SIT
+	ASTRA HOLIDAYPLUS
+	
+
+	DB
+	172.16.177.164
+	SIT
+	ASTRA-AIRARABIA-AIRARABIACMS-VISTARA-JET
+	
+
+	DB
+	172.16.177.167
+	
+
+
+
+
+
+  
+
+Environment

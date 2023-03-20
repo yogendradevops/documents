@@ -1,0 +1,322 @@
+﻿ANSIBLE AWX 
+
+
+AWX is an open-source web application sponsored by Red Hat that provides a user interface and API to perform all Ansible tasks. 
+
+
+AWX facilitates us to centrally manage Ansible playbooks, inventories and secrets, and scheduled jobs using a web interface. Ansible AWX is an upstream project which is sponsored by Red Hat from which the Red Hat Ansible Tower project is derived.
+
+
+Link Used:
+* https://www.linuxtechi.com/install-ansible-awx-on-ubuntu/
+* https://warlord0blog.wordpress.com/2021/02/24/upgrading-ansible-awx/
+* https://geekdudes.wordpress.com/2019/12/12/upgrading-migrating-awx-ansible-on-centos-7/
+* https://gist.github.com/it-pappa/f5c035cf50345d716f601c05f97dfc77
+
+
+
+
+
+
+Installing Dependencies and Configuring Ansible AWX
+
+
+
+
+1. Run each command below to update your system packages and install the docker-compose-plugin.
+
+
+# Update packages
+sudo apt-get update
+
+
+# Install Docker Compose
+sudo apt-get install docker-compose
+
+
+2. Next, run the following command to verify the docker-compose version installed on your machine.
+
+
+docker-compose version
+
+
+
+
+3. Run each command below to install packages as prerequisites to work with Ansible AWX.
+
+
+# Installs NodeJS as AWS has a dependency on NodeJS.
+sudo apt install nodejs npm -y
+
+
+# Installs Python3, which runs Ansible Playbook later.
+sudo apt install python3-pip git pwgen unzip -y
+
+
+# Installs requests to allow you to send HTTP/1.1 requests easily.
+sudo pip3 install requests==2.22.0 docker-compose==1.29.2
+
+
+4. Now, run the following commands to download (wget) the AWX package archive from the public Git repository, and then unzip the package.
+
+
+# Download the AWX package archive
+wget https://github.com/ansible/awx/archive/15.0.0.zip
+
+
+# Unzip the AWX package archive
+unzip 15.0.0.zip
+
+
+
+
+5. Run the below commands to change (cd) to the AWX installation directory (awx-15.0.0/installer/), and generate the random password (pwgen).
+
+
+cd awx-15.0.0/installer/
+pwgen -N 1 -s 30
+
+
+Note down the generated password as we'll use it as a secret key in the AWX console.
+
+
+
+
+6. Lastly, in the text editor, open the inventory file within the AWX installer directory (awx-15.0.0/installer/). The inventory file contains the configurations of AWX, which will be used while logging the AWX UI.
+
+
+In the inventory file, change the value of admin_password to password and secret_key with the random password we generated in step five.
+Installing and Starting Ansible AWX with Ansible Playbook
+Installing and Starting Ansible AWX with Ansible Playbook
+
+
+The install.yml Ansible playbook comes with the Ansible AWX package you extracted. This playbook contains tasks to execute commands to build a Docker image and run multiple containers.
+
+
+1. Invoke the ansible-playbook command below to run the install.yml Ansible Playbook.
+ansible-playbook -i inventory install.yml
+
+
+2. Next, run the docker command below to list all available Docker containers.
+Docker ps
+
+
+The output below shows the running containers (awx_tasks, awx_redis, awx_web, and awx_postgres), confirming that AWX is installed correctly.
+
+
+3. Finally, open your favourite browser and navigate to Ansible AWX (https://AWX-HOST-IP:80). Be sure to replace AWX-HOST-IP with your Ansible host’s IP address. You’ll see the Ansible AWX login page on your browser if all goes well, as shown below.
+
+
+Provide your username (admin) and password (password), and click on Log in to access the Ansible AWX dashboard. These credentials are the ones you configured in the last step of the “Installing Dependencies and Configuring Ansible AWX” section.
+
+
+After logging in, your browser redirects to the AWX Dashboard, as shown below:
+  
+
+  
+
+
+
+
+
+sudo docker exec -it awx_postgres bash  # entering the docker container
+
+
+psql -U awx
+
+
+\list
+
+
+SELECT * FROM auth_user;
+
+
+cat awx-15.0.0/installer/inventory | grep postgres_data
+postgres_data_dir="~/.awx/pgdocker
+Migrating the old data:
+
+
+sudo docker exec -it awx_postgres bash  # old container, old db
+
+
+pg_dump -U awx -d awx > /var/lib/postgresql/data/12/data/dump
+# ctrl + d exit container
+
+
+Stop all other containers except awx_postgres.
+
+
+sudo docker exec -it awx_postgres bash  # new container, new db
+
+
+
+
+
+
+
+
+# preparation and backup
+* \connect postgres
+
+
+* SELECT pg_terminate_backend (pid) FROM pg_stat_activity WHERE datname = 'awx'; # closes all db connections
+
+
+* ALTER DATABASE awx RENAME TO awx_empty;
+* CREATE DATABASE awx;
+
+
+# restoring the dump
+* ctrl + d exit psql
+
+
+* cat db-backup-22-09-22.sql | docker exec -i awx_postgres psql -U awx -d awx
+ takes a few minutes
+
+
+# leave awx_postgres and enter awx_task:
+* sudo docker exec -it awx_task bash
+* awx-manage migrate
+# output:
+Operations to perform:
+ Apply all migrations: auth, conf, contenttypes, main, oauth3_provider, sessions, sites, social_django, sso, taggit
+Running migrations:
+ Applying auth.0009_alter_user_last_name_max_length... OK
+ Applying auth.0010_alter_group_name_max_length... OK
+ Applying auth.0011_update_proxy_permissions... OK
+ Applying conf.0006_v331_ldap_group_type... OK
+
+
+sudo systemctl restart docker
+
+
+# To change the Login Password:
+* docker ps
+* docker exec -it awx_web bash
+* awx-manage changepassword admin
+
+
+======================================================================
+
+
+After logging in, your browser redirects to the AWX Dashboard, as shown below:
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+Upgrade Ansible AWX-15.0.0 to Ansible AWX-17.1.0:
+
+
+Stop all other containers except awx_postgres.
+
+
+Download the AWX package archive
+* wget https://github.com/ansible/awx/archive/15.0.0.zip
+
+
+Unzip the AWX package archive
+* unzip 15.0.0.zip
+
+
+Run the below commands to change (cd) to the AWX installation directory (awx-17.1.0/installer/), and generate the random password (pwgen).
+
+
+* cd awx-17.1.0/installer/
+* pwgen -N 1 -s 30
+
+
+Note down the generated password as we'll use it as a secret key in the AWX console.
+
+
+Lastly, in the text editor, open the inventory file within the AWX installer directory (awx-17.1.0/installer/). The inventory file contains the configurations of AWX, which will be used while logging the AWX UI.
+
+
+In the inventory file, change the value of admin_password to password and secret_key with the random password we generated using command pwgen
+Installing and Starting Ansible AWX with Ansible Playbook.
+Installing and Starting Ansible AWX with Ansible Playbook
+
+
+The install.yml Ansible playbook comes with the Ansible AWX package you extracted. This playbook contains tasks to execute commands to build a Docker image and run multiple containers.
+
+
+1. Invoke the ansible-playbook command below to run the install.yml Ansible Playbook.
+
+
+ansible-playbook -i inventory install.yml
+
+
+2. Next, run the docker command below to list all available Docker containers.
+
+
+docker ps
+
+
+The output below shows the running containers (awx_tasks, awx_redis, awx_web, and awx_postgres), confirming that AWX is installed correctly.
+
+
+3. Finally, open your favourite browser and navigate to Ansible AWX (https://AWX-HOST-IP:80). Be sure to replace AWX-HOST-IP with your Ansible host’s IP address. You’ll see the Ansible AWX login page on your browser if all goes well, as shown below.
+
+
+Provide your username (admin) and password (password), and click on Log in to access the Ansible AWX dashboard. These credentials are the ones you configured in the last step of the “Installing Dependencies and Configuring Ansible AWX” section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+After logging in, your browser redirects to the AWX Dashboard, as shown below:
+
+
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+***************************************************************************************

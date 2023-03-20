@@ -1,0 +1,385 @@
+﻿ProxySQL on Container
+
+
+Task: Deploy ProxySQL with a mysql master slave as a backend in Container
+
+
+Steps:-
+
+
+1. Install prodman:
+
+
+sudo apt install podman
+
+
+2. Create master slave container:
+Master
+
+
+podman run --name master -p 3310:3306  --network thomusnetwork --ip 172.168.0.10 -v /home/yogendra/thomas_cook/replication/master/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat -itd mysql:latest
+
+
+Slave
+
+
+podman run --name slave -p 3320:3306  --network thomusnetwork --ip 172.168.0.20 -v /home/yogendra/thomas_cook/replication/slave/my.cnf:/etc/my.cnf -e MYSQL_ROOT_PASSWORD=redhat -itd mysql:latest
+6230f12fc1b6927a77f2e51b1c127175659562e1e6d00f202cebad0e065d9131
+
+
+
+
+3. Configure Master Slave configuration files:
+
+
+Master
+
+
+[mysqld]
+bind-address = 172.168.0.10
+server-id = 1
+log-bin=/var/lib/mysql/master-bin
+default_authentication_plugin=mysql_native_password
+
+
+Slave
+
+
+[mysqld]
+bind-address = 172.168.0.20
+server-id = 2
+log-bin=/var/lib/mysql/slave-bin
+default_authentication_plugin=mysql_native_password
+
+
+
+
+4. Restart Containers:
+
+
+podman restart master slave
+
+
+5. Check configuration files:
+Master
+
+
+podman exec slave cat /etc/my.cnf
+
+
+Slave
+
+
+podman exec master cat /etc/my.cnf
+
+
+
+
+6. Install mysql-client:
+
+
+sudo apt install mysql-client-core-8.0
+
+
+
+
+7. Login mysql master and slave instance:
+
+
+Master
+
+
+mysql -u root -predhat -h 127.0.0.1 -P 3310
+
+
+
+
+Slave
+
+
+mysql -u root -predhat -h 127.0.0.1 -P 3320
+
+
+
+
+8. Configure Replication:
+Master
+
+
+CREATE USER 'keenable'@'172.168.0.20' IDENTIFIED BY 'Redhat@1234';
+
+
+GRANT REPLICATION SLAVE ON *.* TO 'keenable'@'172.168.0.20';
+show master status\G
+*************************** 1. row ***************************
+             File: master-bin.000001
+         Position: 682
+     Binlog_Do_DB: 
+ Binlog_Ignore_DB: 
+Executed_Gtid_Set: 
+1 row in set (0.00 sec)
+
+
+Slave
+
+
+
+
+STOP SLAVE;
+
+
+RESET SLAVE;
+
+
+CHANGE MASTER TO MASTER_HOST ='172.168.0.10', MASTER_USER ='keenable', MASTER_PASSWORD ='Redhat@1234', MASTER_LOG_FILE = 'master-bin.000001', MASTER_LOG_POS = 682;
+
+
+start slave;
+
+
+show slave status\G
+
+
+
+
+
+
+9. Create ProSQL Container:
+
+
+podman run -dt --name proxysql -v /home/yogendra/thomas_cook/proxysql/conf:/etc/proxysql:z -v /home/yogendra/thomas_cook/proxysql/lib:/var/lib/proxysql:z -p 6032:6032 -p 6033:6033 docker.io/proxysql/proxysql:latest
+
+
+10. Login ProxySQL Admin interface:
+
+
+podman exec -it proxysql mysql -u admin -padmin -h 127.0.0.1 -P 6032 --prompt='ProxySQLAdmin> '
+
+
+
+
+11.  Add backend database servers to ProxySQL:
+
+
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'172.168.0.10',3306);
+
+
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (2,'172.168.0.20',3306);
+
+
+12.  Load the changes into Runtime to apply the changes.
+
+
+LOAD MYSQL SERVERS TO RUNTIME;
+
+
+13.  Save the changes into Disk for persistence.
+
+
+SAVE MYSQL SERVERS TO DISK;
+
+
+
+
+
+
+
+
+14. Check the status of the backend servers:
+
+
+ ProxySQL> select * from mysql_servers;
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| hostgroup_id | hostname     | port | gtid_port | status | weight | compression | max_connections | max_replication_lag | use_ssl | max_latency_ms | comment |
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| 1            | 172.168.0.10 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
+| 2            | 172.168.0.20 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+2 rows in set (0.001 sec)
+
+
+
+
+ ProxySQL> select * from runtime_mysql_servers;
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| hostgroup_id | hostname     | port | gtid_port | status | weight | compression | max_connections | max_replication_lag | use_ssl | max_latency_ms | comment |
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| 1            | 172.168.0.10 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
+| 2            | 172.168.0.20 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
++--------------+--------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+2 rows in set (0.006 sec)
+
+
+
+
+15.  Load mysql servers to runtime and 
+
+
+ProxySQL> load mysql servers to runtime;
+Query OK, 0 rows affected (0.014 sec)
+
+
+ ProxySQL> save mysql servers to disk;
+Query OK, 0 rows affected (0.112 sec)
+
+
+
+
+16. Configure ProxySQL Nodes for Monitoring:
+Login to MySQL database instance and execute following commands to create the monitoring user with necessary privileges.
+
+
+Master
+
+
+mysql> CREATE USER 'monitor'@'%' IDENTIFIED BY 'Redhat@1234';
+
+
+mysql>  GRANT SELECT ON sys.* TO  'monitor'@'%';
+
+
+mysql>  FLUSH PRIVILEGES;
+
+
+
+
+Login to ProxySQL admin panel using mysql command and define monitoring username/password in global variables:
+
+
+ProxySQL
+
+
+
+
+Admin> UPDATE global_variables SET variable_value='monitor' WHERE variable_name='mysql-monitor_username';
+
+
+Admin>  UPDATE global_variables SET variable_value='Redhat@1234' WHERE variable_name='mysql-monitor_password';
+
+
+Admin>  UPDATE global_variables SET variable_value='2000' WHERE variable_name IN ('mysql-monitor_connect_interval','mysql-monitor_ping_interval','mysql-monitor_read_only_interval');
+
+
+
+
+Load the changes into Runtime to apply the changes.
+
+
+Admin> LOAD MYSQL VARIABLES TO RUNTIME;
+
+
+Admin>  LOAD MYSQL SERVERS TO RUNTIME;
+
+
+
+
+Save the changes into Disk for persistence.
+
+
+Admin>  SAVE MYSQL VARIABLES TO DISK;
+
+
+Admin>  SAVE MYSQL SERVERS TO DISK;
+
+
+
+
+
+
+
+
+
+
+17. Query the connection log table to verify the connectivity between ProxySQL and MySQL cluster nodes:
+
+
+Admin> SELECT * FROM monitor.mysql_server_connect_log ORDER BY time_start_us DESC LIMIT 10;
++--------------+------+------------------+-------------------------+---------------+
+| hostname     | port | time_start_us    | connect_success_time_us | connect_error |
++--------------+------+------------------+-------------------------+---------------+
+| 172.168.0.20 | 3306 | 1678973515270209 | 2037                    | NULL          |
+| 172.168.0.10 | 3306 | 1678973515238499 | 2305                    | NULL          |
+| 172.168.0.20 | 3306 | 1678973513262279 | 2018                    | NULL          |
+| 172.168.0.10 | 3306 | 1678973513236643 | 2491                    | NULL          |
+| 172.168.0.20 | 3306 | 1678973511272965 | 3299                    | NULL          |
+| 172.168.0.10 | 3306 | 1678973511236834 | 4043                    | NULL          |
+| 172.168.0.10 | 3306 | 1678973509268850 | 1916                    | NULL          |
+| 172.168.0.20 | 3306 | 1678973509234671 | 1818                    | NULL          |
+| 172.168.0.10 | 3306 | 1678973507262169 | 735                     | NULL          |
+| 172.168.0.20 | 3306 | 1678973507232348 | 4116                    | NULL          |
++--------------+------+------------------+-------------------------+---------------+
+10 rows in set (0.001 sec)
+
+
+18. Login to MySQL database instance and create a user for ProxySQL client instance:
+
+
+mysql> CREATE USER 'testuser'@'%' IDENTIFIED BY 'Redhat@1234';
+
+
+mysql> GRANT ALL ON *.* TO 'testuser'@'%';
+
+
+mysql> FLUSH PRIVILEGES;
+
+
+19. Login to ProxySQL admin panel and execute following commands to add the same MySQL user in ProxySQL configuration.
+
+
+INSERT INTO mysql_users(username,password,default_hostgroup) VALUES ('testuser','Redhat@1234',1);
+
+
+ LOAD MYSQL USERS TO RUNTIME;
+
+
+ SAVE MYSQL USERS TO DISK;
+
+
+
+
+20. To configure query caching in ProxySQL, we can follow these steps:
+
+
+1. Enable query caching in ProxySQL by setting mysql-query_cache_enabled to true:
+
+
+ProxySQL> UPDATE global_variables SET variable_value='true' WHERE variable_name='mysql-query_cache_enabled';
+
+
+ProxySQL> LOAD MYSQL VARIABLES TO RUNTIME;
+
+
+ProxySQL> SAVE MYSQL VARIABLES TO DISK;
+
+
+2. Define the rules for caching queries with mysql_query_rules:
+
+
+ProxySQL> INSERT INTO mysql_query_rules (rule_id,active,match_pattern,destination_hostgroup,apply) VALUES (20,1,'^select' ,2,1);
+
+
+This rule will cache select statements that match the regular expression ^select
+
+
+
+
+
+
+3. Set the maximum amount of memory that can be used by the query cache with mysql-query_cache_size:
+
+
+ProxySQL> UPDATE mysql_query_rules set cache_ttl=5000 WHERE active=1 AND destination_hostgroup=2;
+
+
+
+
+
+
+4. Load the query rules to runtime and save them to disk:
+
+
+ProxySQL> LOAD MYSQL QUERY RULES TO RUNTIME;
+ProxySQL> SAVE MYSQL QUERY RULES TO DISK;
+
+
+======================================================================

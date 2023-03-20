@@ -1,0 +1,783 @@
+﻿Test Case of Mysql Upgrade
+ 
+Before upgrade MySQL Master
+* Version - 5.6.51
+
+
+Databases:
+  
+
+
+
+Database Size :-  6.43750000 MB
+Command :- 
+SELECT table_schema "database", sum(data_length + index_length)/1024/1024 "size in MB" FROM information_schema.TABLES GROUP BY table_schema;
+
+
+  
+
+
+
+Total Table in Sakila Database :-  23
+
+
+mysql> show tables;
++----------------------------+
+| Tables_in_sakila               |
++----------------------------+
+| actor                          |
+| actor_info                     |
+| address                        |
+| category                       |
+| city                           |
+| country                        |
+| customer                       |
+| customer_list                  |
+| film                           |
+| film_actor                     |
+| film_category                  |
+| film_list                      |
+| film_text                      |
+| inventory                      |
+| language                       |
+| nicer_but_slower_film_list |
+| payment                        |
+| rental                         |
+| sales_by_film_category         |
+| sales_by_store                 |
+| staff                          |
+| staff_list                     |
+| store                          |
++----------------------------+
+23 rows in set (0.00 sec)
+
+
+
+
+======================================================================
+
+
+
+
+Total table count of sakila database:
+
+
+mysql> SELECT SUM(TABLE_ROWS) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+
+
+Total Trigger :-  6 
+Total Routine :-6
+Commands :- 
+* select count(routine_name) from information_schema.routines;
+* select count(trigger_name) from information_schema.triggers;
+
+
+
+
+  
+
+
+
+======================================================================
+
+
+Slave  Node:
+Databases
+  
+
+
+
+Database Size :-  6.43750000 MB
+Command :- 
+* SELECT table_schema "database", sum(data_length + index_length)/1024/1024 "size in MB" FROM information_schema.TABLES GROUP BY table_schema;
+  
+
+
+
+
+
+Total Table :-  23
+
+
+mysql> show tables;
++----------------------------+
+| Tables_in_sakila               |
++----------------------------+
+| actor                          |
+| actor_info                     |
+| address                        |
+| category                       |
+| city                           |
+| country                        |
+| customer                       |
+| customer_list                  |
+| film                           |
+| film_actor                     |
+| film_category                  |
+| film_list                      |
+| film_text                      |
+| inventory                      |
+| language                       |
+| nicer_but_slower_film_list |
+| payment                        |
+| rental                         |
+| sales_by_film_category         |
+| sales_by_store                 |
+| staff                          |
+| staff_list                     |
+| store                          |
++----------------------------+
+23 rows in set (0.00 sec)
+
+
+=======================================================
+
+
+Total table count of sakila database 
+
+
+mysql> SELECT SUM(TABLE_ROWS) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+Total trigger :- 6
+Total Routine :- 6
+
+
+Commands :- 
+select count(routine_name) from information_schema.routines;
+select count(trigger_name) from information_schema.triggers;
+
+
+  
+
+
+
+
+
+==================================================================
+
+
+PCS Cluster Status :-
+#pcs status 
+  
+
+
+
+===========================================================
+
+
+Slave 5.6.51 Upgrade To 5.7.40
+
+
+Take a database dump
+Trigger dump 
+  # mysqldump -u root -p --trigger --no-create-info --no-data --no-create-db --skip-opt sakila > outputfile.sql
+Size :- 7.3 k
+
+
+Full database dump 
+ # Mysqldump -u root -p -A -R -E  --triggers --single-transaction > full_backup.sql
+Size :- 4.0 M
+
+
+Copy configuration file 
+# cp /etc/my.cnf  /etc/my.cnf.backup
+
+
+Check mysql server is upgradable or not 
+# mysqlcheck -u root -p --all-databases --check-upgrade
+Enter password:
+mysql.columns_priv                                     OK
+mysql.db                                               OK
+mysql.event                                            OK
+mysql.func                                             OK
+mysql.general_log                                      OK
+mysql.help_category                                    OK
+mysql.help_keyword                                     OK
+mysql.help_relation                                    OK
+mysql.help_topic                                       OK
+mysql.innodb_index_stats                               OK
+mysql.innodb_table_stats                               OK
+mysql.ndb_binlog_index                                 OK
+mysql.plugin                                           OK
+mysql.proc                                             OK
+mysql.procs_priv                                       OK
+mysql.proxies_priv                                     OK
+mysql.servers                                          OK
+mysql.slave_master_info                                OK
+mysql.slave_relay_log_info                             OK
+mysql.slave_worker_info                                OK
+mysql.slow_log                                         OK
+mysql.tables_priv                                      OK
+mysql.time_zone                                        OK
+mysql.time_zone_leap_second                            OK
+mysql.time_zone_name                                   OK
+mysql.time_zone_transition                             OK
+mysql.time_zone_transition_type                        OK
+mysql.user                                             OK
+sakila.actor                                           OK
+sakila.address                                         OK
+sakila.category                                        OK
+sakila.city                                            OK
+sakila.country                                         OK
+sakila.customer                                        OK
+sakila.film                                            OK
+sakila.film_actor                                      OK
+sakila.film_category                                   OK
+sakila.film_text                                       OK
+sakila.inventory                                       OK
+sakila.language                                        OK
+sakila.payment                                         OK
+sakila.rental                                          OK
+sakila.staff                                           OK
+sakila.store                                           OK
+
+
+
+
+Stop mysql service 
+# systemctl stop mysql 
+
+
+Download the package of  5.7.40  
+Wget https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.40-1.el7.x86_64.rpm-bundle.tar
+
+
+Extract the package
+# tar -xvf mysql-5.7.40-1.el7.x86_64.rpm-bundle.tar
+
+
+
+
+Now we will use the  rpm command to upgrade the package of  mysql server 
+
+
+# rpm -Uvh *.rpm    
+  
+
+
+
+( while  I ran this command I got failed dependencies error then I installed perl(json )  package for avoid this error . )
+
+
+
+
+# yum install perl-JSON -y 
+
+
+After installed dependencies  run  rpm -Uvh *.rpm    Command 
+   
+Start mysql server 
+# systemctl start mysqld
+
+
+
+
+Upgrade mysql server 
+# mysql_upgrade -uroot -p
+Output 
+
+
+
+
+Then we checked the version of mysql version using command
+Mysql -V
+
+
+Ohhhhh great it is updated !!!  MySQL Version- 5.7.40
+
+
+Now we login into the database and check the replication and tables
+
+
+Ohhh we found that replication is not  working. We have to configure the replication again…
+
+
+After that we will check the tables , triggers, routines and databases.
+
+
+Database Status 
+
+
+After upgrading the database we found one database  “SYS” .
+Show database 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Tables :- 23 
+ # Show tables ;
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Trigger 
+  
+
+
+
+
+
+Routine status 
+
+
+  
+
+
+
+  
+
+  
+
+
+
+
+
+
+
+When we checked the routines and triggers we found that the routines and triggers increased. This  is because the new database called SYS is created with an extra routine and trigger .
+
+
+=======================================================
+
+
+Now upgrade  5.7.40 to 8.0.19 
+
+
+Copy configuration file 
+# cp /etc/my.cnf /etc/my.cnf.backup
+
+
+Stop mysql service 
+# systemctl stop mysql
+
+
+Download mysql 8.0.19  RPM Bundle 
+ # wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.0.19-1.el7.x86_64.rpm-bundle.tar
+
+
+Extract the package
+ # tar -xvf mysql-8.0.19-1.el7.x86_64.rpm-bundle.tar
+
+
+
+
+Now we will use the  rpm command to upgrade the package of  mysql server 
+sudo rpm -Uvh *.rpm
+  
+
+
+
+Dependencies error :- 
+( while  I ran this command I got failed dependencies error then I installed openssl package for avoid this error . )
+
+
+ # yum install openssl-devel
+
+
+After installed dependencies  run  rpm -Uvh *.rpm    Command 
+# sudo rpm -Uvh *.rpm
+
+
+Start mysql server 
+# sudo systemctl start mysqld
+
+
+After upgrading we checked below given things :-
+
+
+Test case :- 
+* Replication is working properly.
+* Trigger and routine are same 
+* Table count same 
+* Database contain are same 
+* When we checked Pcs status  cluster in note running on slave node 
+   
+
+
+Then we run the command to start the pcs cluster 
+ # pcs cluster start master.testing.com
+ # pcs cluster start slave.testing.com
+After running this command pcs status:-
+
+
+  
+
+
+
+Show database 
+  
+
+
+
+=============================================================================
+
+
+Total table count of sakila database 
+
+
+mysql> SELECT SUM(TABLE_ROWS)
+        ->        FROM INFORMATION_SCHEMA.TABLES
+        ->        WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+
+
+
+
+======================================================================
+Tables :- 23 
+ # Show tables ;
+  
+
+  
+
+Trigger 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Routine status 
+
+
+  
+
+
+
+  
+
+
+
+  
+
+===========================================================
+
+
+Master server upgrade 5.6.7 to 5.7.40 
+* Replication status running
+* Pcs status running 
+
+
+Take a database dump
+Trigger dump 
+  # mysqldump -u root -p --trigger --no-create-info --no-data --no-create-db --skip-opt sakila > master.sql
+Size :- 7.3 k
+
+
+Full database dump 
+ # Mysqldump -u root -p -A -R -E  --triggers --single-transaction > master_full_backup.sql
+Size :- 4.0 M
+
+
+Copy configuration file 
+# cp /etc/my.cnf  /etc/my.cnf.backup
+
+
+Check mysql server is upgradable or not 
+# mysqlcheck -u root -p --all-databases --check-upgrade
+Enter password:
+mysql.columns_priv                                     OK
+mysql.db                                               OK
+mysql.event                                            OK
+mysql.func                                             OK
+mysql.general_log                                      OK
+mysql.help_category                                    OK
+mysql.help_keyword                                     OK
+mysql.help_relation                                    OK
+mysql.help_topic                                       OK
+mysql.innodb_index_stats                               OK
+mysql.innodb_table_stats                               OK
+mysql.ndb_binlog_index                                 OK
+mysql.plugin                                           OK
+mysql.proc                                             OK
+mysql.procs_priv                                       OK
+mysql.proxies_priv                                     OK
+mysql.servers                                          OK
+mysql.slave_master_info                                OK
+mysql.slave_relay_log_info                             OK
+mysql.slave_worker_info                                OK
+mysql.slow_log                                         OK
+mysql.tables_priv                                      OK
+mysql.time_zone                                        OK
+mysql.time_zone_leap_second                            OK
+mysql.time_zone_name                                   OK
+mysql.time_zone_transition                             OK
+mysql.time_zone_transition_type                        OK
+mysql.user                                             OK
+sakila.actor                                           OK
+sakila.address                                         OK
+sakila.category                                        OK
+sakila.city                                            OK
+sakila.country                                         OK
+sakila.customer                                        OK
+sakila.film                                            OK
+sakila.film_actor                                      OK
+sakila.film_category                                   OK
+sakila.film_text                                       OK
+sakila.inventory                                       OK
+sakila.language                                        OK
+sakila.payment                                         OK
+sakila.rental                                          OK
+sakila.staff                                           OK
+sakila.store                                           OK
+
+
+
+
+Stop mysql service 
+# systemctl stop mysql 
+ 
+Download the package of  5.7.40  
+Wget https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.40-1.el7.x86_64.rpm-bundle.tar
+
+
+Extract the package
+# tar -xvf mysql-5.7.40-1.el7.x86_64.rpm-bundle.tar
+
+
+Now we will use the  rpm command to upgrade the package of  mysql server 
+
+
+# rpm -Uvh *.rpm    
+  
+
+
+
+( while  I ran this command I got failed dependencies error then I installed perl(json )  package for avoid this error . )
+
+
+
+
+# yum install perl-JSON -y 
+
+
+After installed dependencies  run  rpm -Uvh *.rpm    Command 
+# rpm -Uvh *.rpm    
+
+
+Start mysql server 
+# systemctl start mysqld
+
+
+Upgrade mysql server 
+# mysql_upgrade -uroot -p
+
+
+Check version 
+  
+
+
+
+After upgrading server details 
+
+
+* Replication was not working so reconfigured the replication.
+* Tables are same
+* After upgrading server by default created a SYS database with extra routine and trigger 
+* Pcs status is running  
+
+
+
+
+PCS STATUS
+  
+
+
+
+
+
+================================================================
+
+
+
+
+Database details 
+  
+
+===========================================================
+Tables :- 23 
+ # Show tables ;
+  
+
+  
+
+====================================================================
+Trigger 
+  
+
+=======================================================
+
+
+Routine status 
+
+
+  
+
+
+
+  
+
+
+
+  
+
+===========================================================
+mysql> select table_name, table_rows from information_schema.tables where table_schema='sakila';
++----------------------------+------------+
+| table_name                     | table_rows |
++----------------------------+------------+
+| actor                          |            200 |
+| actor_info                     |           NULL |
+| address                        |            603 |
+| category                       |             16 |
+| city                           |            600 |
+| country                        |            109 |
+| customer                       |            599 |
+| customer_list                  |           NULL |
+| film                           |           1000 |
+| film_actor                     |           5462 |
+| film_category                  |           1000 |
+| film_list                      |           NULL |
+| film_text                      |           1000 |
+| inventory                      |           4581 |
+| language                       |              6 |
+| nicer_but_slower_film_list |           NULL |
+| payment                        |          16086 |
+| rental                         |          16008 |
+| sales_by_film_category         |           NULL |
+| sales_by_store                 |           NULL |
+| staff                          |              2 |
+| staff_list                     |           NULL |
+| store                          |              2 |
++----------------------------+------------+
+23 rows in set (0.00 sec)
+
+
+===================================================
+
+
+Now upgrade  5.7.40 to 8.0.19 
+
+
+Copy configuration file 
+# cp /etc/my.cnf /etc/my.cnf.backup
+
+
+Stop mysql service 
+# systemctl stop mysql
+
+
+Download mysql 8.0.19  RPM Bundle 
+ # wget https://downloads.mysql.com/archives/get/p/23/file/mysql-8.0.19-1.el7.x86_64.rpm-bundle.tar
+
+
+Extract the package
+ # tar -xvf mysql-8.0.19-1.el7.x86_64.rpm-bundle.tar
+
+
+
+
+Now we will use the  rpm command to upgrade the package of  mysql server 
+sudo rpm -Uvh *.rpm
+
+
+Dependencies error :- 
+( while  I ran this command I got failed dependencies error then I installed openssl package for avoid this error . )
+
+
+
+
+ # yum install openssl-devel
+
+
+After installed dependencies  run  rpm -Uvh *.rpm    Command 
+# sudo rpm -Uvh *.rpm
+
+
+Start mysql server 
+# sudo systemctl start mysqld
+Check upgrade version 
+
+
+  
+
+
+
+Testcase 
+
+
+* Replication is working 
+* Pcs status is running 
+* Trigger and routine are same 
+* Table count  same 
+* Database contain are same 
+
+
+================================================
+Submitted by Nidhi & Yogendra
+=================================================

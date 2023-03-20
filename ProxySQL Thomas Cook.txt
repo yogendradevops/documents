@@ -1,0 +1,1008 @@
+﻿ProxySQL -Thomas Cook
+
+
+Task: Deploy ProxySQL with a mysql master slave as a backend in your local environment. Try Caching in proxysql - https://proxysql.com/documentation/query-cache/ as the first Usecase.
+
+
+Steps to follow:
+
+
+Step 1: Create two virtual machines of Ubuntu 22.04.1
+Step 2: Install mysql-server on both the machines
+Step 3: Configure master-slave replication 
+Step 4: Download and install ProxySQL on another machine
+Step 5: Configure the ProxySQL for query caching
+Step 6: Test the query caching 
+
+
+After creating Virtual Machines we need to Install mysql-server and configure Master Slave Replication:
+
+
+Master Node IP- 192.168.122.164
+Slave Node IP- 192.168.122.235
+
+
+Master Node
+
+
+yogendra@kvm:~$ sudo apt install mysql-server
+
+
+Open the configuration file
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+
+
+The [mysqld] section specifies settings for the MySQL server itself.
+Here, we have set the server-id to 1, which is a unique identifier for this server in the replication group. 
+The log-bin parameter specifies the name of the binary log file that will be used for replication, and binlog_format specifies the format of the binary log.
+
+
+Now enter the below given lines:
+
+
+[mysqld]
+bind-address = 192.168.122.164
+server-id = 1
+log-bin=/var/lib/mysql/master-bin
+default_authentication_plugin=mysql_native_password
+
+
+
+
+
+
+Save the file and restart the mysql service
+
+
+sudo systemctl restart mysql
+
+
+Now login to mysql master node and configure for replication:
+
+
+sudo mysql -u root -p
+
+
+Create User and Grant Replication:
+
+
+mysql> CREATE USER 'keenable'@'192.168.122.235' IDENTIFIED BY 'Redhat@1234';
+Query OK, 0 rows affected (0.06 sec)
+
+
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'keenable'@'192.168.122.235';
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql> show master status\G
+*************************** 1. row ***************************
+             File: master-bin.000002
+         Position: 2722
+     Binlog_Do_DB: 
+ Binlog_Ignore_DB: 
+Executed_Gtid_Set: 
+1 row in set (0.01 sec)
+
+
+
+
+
+
+Slave Node
+
+
+yogendra@kvm:~$ sudo apt install mysql-server
+
+
+Open the configuration file
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+
+
+Now enter the below given lines:
+
+
+[mysqld]
+bind-address = 192.168.122.235
+server-id = 2
+log-bin=/var/lib/mysql/master-bin
+default_authentication_plugin=mysql_native_password
+
+
+Save the file and restart the mysql service
+
+
+sudo systemctl restart mysql
+
+
+Now login to mysql master node and configure it for replication:
+
+
+sudo mysql -u root -p
+
+
+mysql> STOP SLAVE;
+Query OK, 0 rows affected, 2 warnings (0.00 sec)
+
+
+mysql> RESET SLAVE;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+mysql> CHANGE MASTER TO MASTER_HOST ='192.168.122.164', MASTER_USER ='keenable', MASTER_PASSWORD ='Redhat@1234', MASTER_LOG_FILE = 'master-bin.000002', MASTER_LOG_POS = 2722;
+Query OK, 0 rows affected, 8 warnings (0.05 sec)
+
+
+mysql> start slave;
+Query OK, 0 rows affected, 1 warning (0.04 sec)
+
+
+mysql> show slave status\G
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for source to send event
+                  Master_Host: 192.168.122.164
+                  Master_User: keenable
+                  Master_Port: 3306
+                Connect_Retry: 60
+              Master_Log_File: master-bin.000002
+          Read_Master_Log_Pos: 2919
+               Relay_Log_File: kvm-relay-bin.000004
+                Relay_Log_Pos: 2895
+        Relay_Master_Log_File: master-bin.000002
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB: 
+          Replicate_Ignore_DB: 
+           Replicate_Do_Table: 
+       Replicate_Ignore_Table: 
+      Replicate_Wild_Do_Table: 
+  Replicate_Wild_Ignore_Table: 
+                   Last_Errno: 0
+                   Last_Error: 
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 2919
+              Relay_Log_Space: 3515
+              Until_Condition: None
+               Until_Log_File: 
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File: 
+           Master_SSL_CA_Path: 
+              Master_SSL_Cert: 
+            Master_SSL_Cipher: 
+               Master_SSL_Key: 
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error: 
+               Last_SQL_Errno: 0
+               Last_SQL_Error: 
+  Replicate_Ignore_Server_Ids: 
+             Master_Server_Id: 1
+                  Master_UUID: 85560ebf-bf11-11ed-910f-5254006e6e89
+             Master_Info_File: mysql.slave_master_info
+                    SQL_Delay: 0
+          SQL_Remaining_Delay: NULL
+      Slave_SQL_Running_State: Replica has read all relay log; waiting for more updates
+           Master_Retry_Count: 86400
+                  Master_Bind: 
+      Last_IO_Error_Timestamp: 
+     Last_SQL_Error_Timestamp: 
+               Master_SSL_Crl: 
+           Master_SSL_Crlpath: 
+           Retrieved_Gtid_Set: 
+            Executed_Gtid_Set: 
+                Auto_Position: 0
+         Replicate_Rewrite_DB: 
+                 Channel_Name: 
+           Master_TLS_Version: 
+       Master_public_key_path: 
+        Get_master_public_key: 1
+            Network_Namespace: 
+1 row in set, 1 warning (0.00 sec)
+
+
+ProxySQL
+
+
+
+
+Download Proxy using below given command:
+wget https://github.com/sysown/proxysql/releases/download/v2.5.1/proxysql_2.5.1-ubuntu22_amd64.deb
+
+
+Now install the downloaded package using below given command:
+yogendra@yogendra:~/Downloads$ sudo dpkg -i proxysql_2.5.1-ubuntu22_amd64.deb 
+
+
+Start the ProxySQL and check the status:
+yogendra@yogendra:~/Downloads$ systemctl start proxysql
+yogendra@yogendra:~/Downloads$ systemctl status proxysql
+● proxysql.service - High Performance Advanced Proxy for MySQL
+     Loaded: loaded (/lib/systemd/system/proxysql.service; enabled; vendor preset: enabled)
+     Active: active (running) since Fri 2023-03-10 12:59:17 IST; 1s ago
+    Process: 22864 ExecStart=/usr/bin/proxysql --idle-threads -c /etc/proxysql.cnf $PROXYSQL_OPTS (code=exited, status=0/SUCCESS)
+   Main PID: 22866 (proxysql)
+      Tasks: 25 (limit: 8576)
+     Memory: 13.6M
+        CPU: 821ms
+     CGroup: /system.slice/proxysql.service
+             ├─22866 /usr/bin/proxysql --idle-threads -c /etc/proxysql.cnf
+             └─22867 /usr/bin/proxysql --idle-threads -c /etc/proxysql.cnf
+
+
+Mar 10 12:59:16 yogendra systemd[1]: Starting High Performance Advanced Proxy for MySQL...
+Mar 10 12:59:16 yogendra proxysql[22864]: 2023-03-10 12:59:16 [INFO] Using config file /etc/proxysql.cnf
+Mar 10 12:59:16 yogendra proxysql[22864]: 2023-03-10 12:59:16 [INFO] Current RLIMIT_NOFILE: 102400
+Mar 10 12:59:16 yogendra proxysql[22864]: 2023-03-10 12:59:16 [INFO] Using OpenSSL version: OpenSSL 3.0.8 7 Feb 2023
+Mar 10 12:59:16 yogendra proxysql[22864]: 2023-03-10 12:59:16 [INFO] No SSL keys/certificates found in datadir (/var/lib/proxysql). Generating new keys/certificates.
+Mar 10 12:59:17 yogendra systemd[1]: Started High Performance Advanced Proxy for MySQL.
+
+
+
+
+
+
+ProxySQL runs its administration service on default port 6032/tcp. We can use MySQL client tools to connect to the ProxySQL admin panel and configure the load balancer as per our requirements.
+
+
+The default administrative user for ProxySQL is admin with password admin.
+
+
+
+
+
+
+yogendra@yogendra:~/Downloads$ mysql -u admin -padmin -h 127.0.0.1 -P6032 --prompt='Admin> '
+  
+
+
+
+Admin> show databases;
+  
+
+
+
+
+
+Admin> SELECT * FROM mysql_servers;
+
+
+Admin> SELECT * FROM mysql_servers;
+
+
+Admin> SELECT * from mysql_replication_hostgroups;
+
+
+Admin> SELECT * from mysql_query_rules;
+  
+
+
+
+Add our backend database servers to the ProxySQL server pool.
+We have already configured replication between MySQL nodes before configuring ProxySQL.
+
+
+Admin> INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'192.168.122.164',3306);
+
+
+Admin> INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (2,'192.168.122.235',3306);
+  
+
+
+
+Admin> SELECT * FROM mysql_servers;
+  
+
+
+
+
+
+To Check the backend run below given query:
+
+
+Admin> SELECT hostgroup_id,hostname,port,status FROM mysql_servers;
+  
+
+
+
+Admin>  SELECT * FROM mysql_servers;
+  
+
+
+
+
+
+Configure ProxySQL Nodes for Monitoring:
+ProxySQL requires a database user in the MySQL cluster for monitoring of MySQL nodes.
+
+
+Login to MySQL database instance and execute following commands to create the monitoring user with necessary privileges.
+
+
+Configure Monitor User:-
+mysql> CREATE USER 'monitor'@'%' IDENTIFIED BY 'Redhat@1234';
+Query OK, 0 rows affected (0.12 sec)
+
+
+mysql>  GRANT SELECT ON sys.* TO  'monitor'@'%';
+Query OK, 0 rows affected (0.02 sec)
+
+
+mysql>  FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.05 sec)
+
+
+
+
+Login to ProxySQL admin panel using mysql command.
+
+
+Define monitoring username/password in global variables
+
+
+
+
+Admin> UPDATE global_variables SET variable_value='monitor' WHERE variable_name='mysql-monitor_username';
+
+
+Admin>  UPDATE global_variables SET variable_value='Redhat@1234' WHERE variable_name='mysql-monitor_password';
+  
+
+
+
+
+
+Admin>  UPDATE global_variables SET variable_value='2000' WHERE variable_name IN ('mysql-monitor_connect_interval','mysql-monitor_ping_interval','mysql-monitor_read_only_interval');
+  
+
+
+
+Load the changes into Runtime to apply the changes.
+
+
+Admin> LOAD MYSQL VARIABLES TO RUNTIME;
+
+
+Admin>  LOAD MYSQL SERVERS TO RUNTIME;
+
+
+
+
+Save the changes into Disk for persistence.
+
+
+Admin>  SAVE MYSQL VARIABLES TO DISK;
+
+
+Admin>  SAVE MYSQL SERVERS TO DISK;
+
+
+  
+
+
+
+
+
+Query the connection log table to verify the connectivity between ProxySQL and MySQL cluster nodes
+
+
+Admin> SELECT * FROM monitor.mysql_server_connect_log ORDER BY time_start_us DESC LIMIT 10;
+  
+
+Configure ProxySQL users for MySQL cluster:-
+
+
+Login to MySQL database instance using mysql command and execute following commands to create a database user.
+
+
+mysql> Show databases;
+
+
+mysql> use testing
+mysql> create table test ( id integer auto_increment primary key, name varchar(20), contact_number integer);
+mysql> insert into test (name, contact_number) values ('yogendra', 9999);
+mysql> select * from test;
+mysql> CREATE USER 'testuser'@'%' IDENTIFIED BY 'Redhat@1234';
+mysql> GRANT ALL ON testing.* TO 'testuser'@'%';
+mysql> FLUSH PRIVILEGES;
+
+
+
+
+
+
+Login to ProxySQL admin panel and execute following commands to add the same MySQL database user in ProxySQL configuration.
+
+
+ INSERT INTO mysql_users(username,password,default_hostgroup) VALUES ('testuser','Redhat@1234',1);
+
+
+ LOAD MYSQL USERS TO RUNTIME;
+
+
+ SAVE MYSQL USERS TO DISK;
+
+
+  
+
+
+
+
+
+Now connect to MySQL database cluster via ProxySQL load balancer {6033 Port}:-
+
+
+mysql -u testuser -pRedhat@1234 -h 127.0.0.1 -P6033
+
+
+
+
+  
+
+
+
+mysql> select @@hostname;
+
+
+mysql> show databases;
+
+
+  
+
+
+
+
+
+Now Again Connect To Admin Panel {6032} ➖CHeck The Query
+
+
+mysql -u admin -padmin -h 127.0.0.1 -P6032 --prompt='ProxySQL> '
+
+
+ProxySQL> SELECT * FROM stats_mysql_query_digest GROUP BY hostgroup;
+
+
+  
+
+
+
+
+
+
+
+ProxySQL> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+  
+
+
+
+________________
+
+
+
+
+
+
+Query Caching:
+
+
+Query Caching can help reduce the number of queries sent to the MySQL database server, thereby reducing the load on the server and improving the overall performance of the database.
+
+
+mysql -u admin -padmin -h 127.0.0.1 -P6032 --prompt='ProxySQL> '
+
+
+To configure query caching in ProxySQL, we can follow these steps:
+
+
+1. Enable query caching in ProxySQL by setting mysql-query_cache_enabled to true:
+
+
+ProxySQL> UPDATE global_variables SET variable_value='true' WHERE variable_name='mysql-query_cache_enabled';
+
+
+ProxySQL> LOAD MYSQL VARIABLES TO RUNTIME;
+
+
+ProxySQL> SAVE MYSQL VARIABLES TO DISK;
+
+
+
+
+
+
+2. Define the rules for caching queries with mysql_query_rules:
+
+
+ProxySQL> INSERT INTO mysql_query_rules (rule_id,active,match_pattern,destination_hostgroup,apply) VALUES (20,1,'^select' ,2,1);
+
+
+This rule will cache select statements that match the regular expression ^select
+
+
+
+
+
+
+3. Set the maximum amount of memory that can be used by the query cache with mysql-query_cache_size:
+
+
+ProxySQL> UPDATE mysql_query_rules set cache_ttl=5000 WHERE active=1 AND destination_hostgroup=2;
+
+
+
+
+4. Load the query rules to runtime and save them to disk:
+
+
+ProxySQL> LOAD MYSQL QUERY RULES TO RUNTIME;
+ProxySQL> SAVE MYSQL QUERY RULES TO DISK;
+
+
+
+
+________________
+
+
+
+
+TEST CASES:
+
+
+Check if any query is cached ?
+
+
+Admin> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+Empty set (0.04 sec)
+
+
+  
+
+
+
+We can see there is no query cached.
+
+
+Now Login to ProxySQL backed client server  on port 6033 and execute the select command so that the proxysql will cache it because we have defined the rule to cache the select query.
+
+
+mysql -u testuser -pRedhat@1234 -h 127.0.0.1 -P6033
+
+
+Show databases;
+Use testing
+Select * from test;
+  
+
+
+
+Now we will login the ProxySQL Admin server on port 6032 to check the query is cached:
+
+
+Admin> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
++----+----------+------------+------------------------------------------------------+
+| hg | sum_time | count_star | digest_text                                          |
++----+----------+------------+------------------------------------------------------+
+| 1  | 4636     | 1          | show tables                                          |
+| 1  | 4266     | 1          | show databases                                       |
+| 2  | 2485     | 1          | SELECT ? FROM stats_mysql_query_digest_reset LIMIT ? |
+| 2  | 1270     | 1          | select * from test                                   |
+| 2  | 1120     | 1          | SELECT DATABASE()                                    |
++----+----------+------------+------------------------------------------------------+
+5 rows in set (0.01 sec)
+
+
+  
+
+
+
+We can see there is no caching showing in the output this is because the first time the query is run from the backend server and cached by the proxysql server according to the rule defined so from the next time the query output will be shown from the proxysql server.
+
+
+To see that the query is cached we need to hit the same command from the proxysql backend server again.
+
+
+Now we can clearly see that the query is cached as the sum_time is 0 and the hg is -1 in the in the output:
+
+
+Admin> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
++----+----------+------------+------------------------------------------------------+
+| hg | sum_time | count_star | digest_text                                          |
++----+----------+------------+------------------------------------------------------+
+| 1  | 4636     | 1          | show tables                                          |
+| 1  | 4266     | 1          | show databases                                       |
+| 2  | 2485     | 1          | SELECT ? FROM stats_mysql_query_digest_reset LIMIT ? |
+| 2  | 2440     | 2          | select * from test                                   |
+| 2  | 1120     | 1          | SELECT DATABASE()                                    |
+| -1 | 0        | 7          | select * from test                                   |
++----+----------+------------+------------------------------------------------------+
+6 rows in set (0.02 sec)
+
+
+  
+
+
+
+
+
++++++++++++
+
+
+
+
+
+
+
+
+
+
+We will create another rule for the command to be cached:
+
+
+Login ProxySQL admin server on port 6032 and run below commands to change rule to cache the commands starting with show:
+
+
+Admin> INSERT INTO mysql_query_rules (rule_id,active,match_pattern,destination_hostgroup,apply) VALUES (30,1,'^show' ,1,1);
+Query OK, 1 row affected (0.01 sec)
+
+
+Admin> UPDATE mysql_query_rules set cache_ttl=5000 WHERE active=1 AND destination_hostgroup=1;
+Query OK, 1 row affected (0.01 sec)
+
+
+Admin>   LOAD MYSQL QUERY RULES TO RUNTIME;
+Query OK, 0 rows affected (0.00 sec)
+
+
+Admin>   SAVE MYSQL QUERY RULES TO DISK;
+Query OK, 0 rows affected (0.04 sec)
+
+
+
+
+Now Login to ProxySQL backed client server  on port 6033 and execute the show command so that the proxysql will cache it because we have defined the rule to cache the query starting with show .
+
+
+mysql -u testuser -pRedhat@1234 -h 127.0.0.1 -P6033
+
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| performance_schema |
+| testing            |
++--------------------+
+3 rows in set (0.01 sec)
+
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| performance_schema |
+| testing            |
++--------------------+
+3 rows in set (0.00 sec)
+
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| performance_schema |
+| testing            |
++--------------------+
+3 rows in set (0.00 sec)
+
+
+
+
+  
+
+
+
+Now we will login the ProxySQL Admin server on port 6032 to check the query is cached:
+
+
+
+
+Admin> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
++----+----------+------------+------------------------------------------------------+
+| hg | sum_time | count_star | digest_text                                          |
++----+----------+------------+------------------------------------------------------+
+| 1  | 183970   | 2          | show databases                                       |
+| 1  | 45672    | 2          | show tables                                          |
+| 2  | 17639    | 2          | SELECT DATABASE()                                    |
+| 2  | 2485     | 1          | SELECT ? FROM stats_mysql_query_digest_reset LIMIT ? |
+| 2  | 2440     | 2          | select * from test                                   |
+| -1 | 0        | 7          | select * from test                                   |
+| -1 | 0        | 3          | show databases                                       |
++----+----------+------------+------------------------------------------------------+
+7 rows in set (0.02 sec)
+
+
+
+
+  
+
+
+
+We can clearly see that the query is cached as the hg is -1 and the sum_time is 0 for the show databases command that means the query is cached. Hence the query caching is working properly.
+
+
+
+
+======================================================================
+
+
+
+
+Read/Write Split
+
+
+To set up ProxySQL Read/Write Split using commands, we can follow these general steps:
+
+
+1. Install ProxySQL on your server:
+
+
+2. Configure ProxySQL:
+
+
+We have already installed and configured the proxysql using the steps given at the beginning of this document.
+
+
+Before we can use ProxySQL to split read and write queries, we need to add our MySQL servers to the ProxySQL configuration. We can do this using the ProxySQL command line interface (CLI), which we can access by running the following command:
+
+
+mysql -u admin -padmin -h 127.0.0.1 -P 6032 --prompt='ProxySQLAdmin> '
+
+
+
+
+This command connects us to the ProxySQL CLI as the admin user. From here, you can add our MySQL servers using the following commands:
+
+
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,192..168.122.164,3306);
+
+
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (2,192.168.122.235,3306);
+
+
+These commands add two MySQL servers to hostgroup 1. We can add more servers and hostgroups as needed.
+
+
+Admin> select * from mysql_servers;
++--------------+-----------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| hostgroup_id | hostname        | port | gtid_port | status | weight | compression | max_connections | max_replication_lag | use_ssl | max_latency_ms | comment |
++--------------+-----------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| 1            | 192.168.122.164 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
+| 2            | 192.168.122.235 | 3306 | 0         | ONLINE | 1      | 0           | 1000            | 0                   | 0       | 0              |         |
++--------------+-----------------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+
+
+
+
+
+
+3. Configure hostgroups:
+
+
+Next, we need to configure hostgroups for read and write queries. We can do this using the following commands:
+
+
+INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup ) VALUES (100, 1, '^(INSERT|UPDATE|DELETE)', 1 );
+
+
+INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup ) VALUES (101, 1, '^(SELECT|SHOW|)', 2 );
+
+
+These commands create two rules for splitting read and write queries. Rule 100 sends write queries (INSERT|UPDATE|DELETE) to hostgroup 1, rule 101 sends read queries (SELECT|SHOW|) to hostgroup 2.
+Admin> select * from mysql_query_rules\G
+*************************** 1. row ***************************
+              rule_id: 100
+               active: 1
+             username: NULL
+           schemaname: NULL
+               flagIN: 0
+          client_addr: NULL
+           proxy_addr: NULL
+           proxy_port: NULL
+               digest: NULL
+         match_digest: NULL
+        match_pattern: ^(INSERT|UPDATE|DELETE)
+ negate_match_pattern: 0
+         re_modifiers: CASELESS
+              flagOUT: NULL
+      replace_pattern: NULL
+destination_hostgroup: 1
+            cache_ttl: NULL
+   cache_empty_result: NULL
+        cache_timeout: NULL
+            reconnect: NULL
+              timeout: NULL
+              retries: NULL
+                delay: NULL
+    next_query_flagIN: NULL
+       mirror_flagOUT: NULL
+     mirror_hostgroup: NULL
+            error_msg: NULL
+               OK_msg: NULL
+          sticky_conn: NULL
+            multiplex: NULL
+  gtid_from_hostgroup: NULL
+                  log: NULL
+                apply: 0
+           attributes: 
+              comment: NULL
+*************************** 2. row ***************************
+              rule_id: 101
+               active: 1
+             username: NULL
+           schemaname: NULL
+               flagIN: 0
+          client_addr: NULL
+           proxy_addr: NULL
+           proxy_port: NULL
+               digest: NULL
+         match_digest: NULL
+        match_pattern: ^(SELECT|SHOW|)
+ negate_match_pattern: 0
+         re_modifiers: CASELESS
+              flagOUT: NULL
+      replace_pattern: NULL
+destination_hostgroup: 2
+            cache_ttl: NULL
+   cache_empty_result: NULL
+        cache_timeout: NULL
+            reconnect: NULL
+              timeout: NULL
+              retries: NULL
+                delay: NULL
+    next_query_flagIN: NULL
+       mirror_flagOUT: NULL
+     mirror_hostgroup: NULL
+            error_msg: NULL
+               OK_msg: NULL
+          sticky_conn: NULL
+            multiplex: NULL
+  gtid_from_hostgroup: NULL
+                  log: NULL
+                apply: 0
+           attributes: 
+              comment: NULL
+2 rows in set (0.00 sec)
+
+
+
+
+
+
+Test the Read/Write Split:
+
+
+After configuring Read/Write Split to check that the Read Write Split is working correctly we need to login ProxySQL user interface on port 6033 and run below commands and check the rules is working:
+
+
+ mysql -u testuser -pRedhat@1234 -h 127.0.0.1 -P6033
+
+
+
+
+
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| performance_schema |
+| testing            |
++--------------------+
+3 rows in set (0.02 sec)
+
+
+mysql> use testing
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+
+Database changed
+mysql> show tables;
++-------------------+
+| Tables_in_testing |
++-------------------+
+| customers         |
+| my_table          |
+| person            |
+| test              |
++-------------------+
+4 rows in set (0.00 sec)
+
+
+mysql> select * from test;
++----+----------+----------------+
+| id | name     | contact_number |
++----+----------+----------------+
+|  1 | yogendra |           9999 |
++----+----------+----------------+
+1 row in set (0.00 sec)
+
+
+mysql> select * from customers;
++-------------+----------+---------------------+--------------+
+| customer_id | name     | email               | phone_number |
++-------------+----------+---------------------+--------------+
+|           1 | John Doe | johndoe@example.com | 555-1234     |
++-------------+----------+---------------------+--------------+
+1 row in set (0.01 sec)
+
+
+mysql> CREATE TABLE customers ( customer_id INTEGER PRIMARY KEY, name TEXT, email TEXT, phone_number TEXT);
+Query OK, 0 rows affected (0.08 sec)
+
+
+mysql> INSERT INTO customers (customer_id, name, email, phone_number) VALUES (1, 'John Doe', 'johndoe@example.com', '555-1234');
+Query OK, 1 row affected (0.02 sec)
+
+
+
+
+Now we will check that the rules that we create is working:
+
+
+Login ProxySQL admin interface and run below given command to check the command runs on which hostgroup:
+
+
+Admin> SELECT hostgroup hg, sum_time, count_star, digest_text FROM stats_mysql_query_digest ORDER BY sum_time DESC;
+
+
+
+
++----+----------+------------+---------------------------------------------------------------------------------------------+
+| hg | sum_time | count_star | digest_text                                                                                 |
++----+----------+------------+---------------------------------------------------------------------------------------------+
+| 1  | 191075   | 1          | CREATE TABLE customers (customer_id INTEGER PRIMARY KEY,name TEXT,email TEXT,phone_number TEXT) |
+| 1  | 88121    | 1          | INSERT INTO customers (customer_id,name,email,phone_number) VALUES (?,?,?,?)                    |
+| 2  | 29574    | 4          | show tables                                                                                 |
+| 2  | 19909    | 1          | show databases                                                                              |
+| 2  | 17594    | 2          | SELECT * FROM `customers` WHERE ?=?                                                         |
+| 2  | 17378    | 4          | SELECT @@ server_id                                                                         |
+| 1  | 16419    | 1          | CREATE TABLE apple (customer_id INTEGER PRIMARY KEY,name TEXT,email TEXT,phone_number TEXT) |
+| 2  | 11781    | 2          | SELECT DATABASE()                                                                           |
+| 2  | 9776     | 1          | select * from test                                                                          |
+| 2  | 8456     | 2          | show databases                                                                              |
+| 2  | 4371     | 2          | SELECT @@server_id                                                                          |
+| 2  | 4159     | 1          | select * from task                                                                          |
+| 2  | 3405     | 2          | SELECT * FROM `my_table` WHERE ?=?                                                          |
+| 2  | 2802     | 2          | SELECT @@hostname                                                                           |
+| 2  | 2327     | 2          | SELECT * FROM `task` WHERE ?=?                                                              |
+| 2  | 2317     | 2          | SELECT * FROM `test` WHERE ?=?                                                              |
+| 2  | 2286     | 2          | SELECT * FROM `person` WHERE ?=?                                                            |
+| 2  | 1916     | 1          | INSERT INTO apple (customer_id,name,email,phone_number) VALUES (?,?,?,?)                    |
+| 2  | 1223     | 1          | SELECT @@ hostname                                                                          |
+| 2  | 938      | 1          | show tabels                                                                                 |
+| 1  | 0        | 51         | select @@version_comment limit ?                                                            |
+| -1 | 0        | 38         | SELECT @@hostname                                                                           |
+| -1 | 0        | 2          | SELECT @@server_id                                                                          |
++----+----------+------------+---------------------------------------------------------------------------------------------+
+23 rows in set (0.03 sec)
+
+
+
+
+
+
+We can see that the Select , Show query output is from hostgroup 2 i.e slave and CREATE and INSERT query output is from hostgroup 1 i.e master.Hence Real/Write Split rule is working properly.
+
+
+
+
+
+
+=======================================================
