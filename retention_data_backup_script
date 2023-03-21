@@ -1,0 +1,62 @@
+######################
+# move_daily_data.sh #
+######################
+
+#!/bin/bash
+
+#This script creates a new directory with the current date in the destination directory and moves all files from the source directory to the destination directory.
+#This line runs the move_daily_data.sh script every day at midnight (00:00).
+#0 0 * * * /path/to/move_daily_data.sh
+
+
+TODAY=$(date +%Y-%m-%d)
+SOURCE_DIR=/path/to/source/directory
+DEST_DIR=/path/to/destination/directory/daily/$TODAY
+
+mkdir -p $DEST_DIR
+mv $SOURCE_DIR/* $DEST_DIR
+
+==========================================================================================================================================================================================================
+#######################
+# move_weekly_data.sh #
+#######################
+
+#!/bin/bash
+
+#This script creates a new directory with the current week number in the destination directory and moves all files from the daily destination directory to the weekly destination directory.
+#This line runs the move_weekly_data.sh script every Sunday at midnight (00:00).
+#0 0 * * 0 /path/to/move_weekly_data.sh
+
+
+WEEK=$(date +%Y-%m-%V)
+SOURCE_DIR=/path/to/destination/directory/daily
+DEST_DIR=/path/to/destination/directory/weekly/$WEEK
+
+mkdir -p $DEST_DIR
+mv $SOURCE_DIR/* $DEST_DIR
+
+
+==========================================================================================================================================================================================================
+########################
+# move_monthly_data.sh #
+########################
+
+
+#!/bin/bash
+
+#This script creates a new directory with the current month in the destination directory and moves all files from the weekly destination directory to the monthly destination directory.
+#This line runs the move_monthly_data.sh script on the first day of every month at midnight (00:00).
+#crontab
+#0 0 1 * * /path/to/move_monthly_data.sh
+
+
+MONTH=$(date +%Y-%m)
+SOURCE_DIR=/path/to/destination/directory/weekly
+DEST_DIR=/path/to/destination/directory/monthly/$MONTH
+
+mkdir -p $DEST_DIR
+mv $SOURCE_DIR/* $DEST_DIR
+
+
+==========================================================================================================================================================================================================
+
