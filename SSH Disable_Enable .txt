@@ -1,0 +1,62 @@
+﻿Disable/Enable SSH
+
+
+Everyone knows that Linux systems come with root user access and by default, root access is enabled for the outside world.
+For security reasons, it’s not a good idea to have ssh root access enabled for unauthorised users. Because any hacker can try to brute force your password and gain access to your system.
+
+
+So, it’s better to have another account that you regularly use and then switch to the root user by using the ‘su –‘ command when necessary. Before we start, make sure you have a regular user account and with that, you su or sudo to gain root access.
+In Linux, it’s very easy to create a separate account, log in as a root user and simply run the adduser command to create a separate user. Once the user is created, just follow the below steps to disable root login via SSH.
+We use sshd master configuration file to disable root login and this may decrease and prevent the hacker from gaining root access to your Linux box. We also see how to enable root access again as well as how to limit ssh access based on users’ list.
+Disable SSH Root Login
+To disable root login, open the main ssh configuration file /etc/ssh/sshd_config with your choice of editor.
+# vi /etc/ssh/sshd_config
+Search for the following line in the file.
+#PermitRootLogin no
+Remove the ‘#‘ from the beginning of the line.  Make the line look similar to this.
+PermitRootLogin no
+Next, we need to restart the SSH daemon service.
+# systemctl restart sshd
+OR
+# /etc/init.d/sshd restart
+
+
+Now try to log in with the root user, you will get a “Permission denied” error.
+$ ssh root@192.168.1.189
+root@192.168.1.189's password: 
+Permission denied, please try again.
+
+
+So, from now onwards login as a normal user and then use the ‘su’ command to switch to root user.
+$ ssh root@192.168.0.102
+localadmin@192.168.1.189's password:
+Last login: Mon July 04 15:04:58 2022 from 192.168.1.122
+
+
+$ su -
+Password:
+Last login: Mon July 04 15:05:07 IST 2022 on pts/1
+
+
+Enable SSH Root Login
+To enable ssh root logging, open the file /etc/ssh/sshd_config.
+# vi /etc/ssh/sshd_config
+Search for the following line and remove the ‘#‘ at the beginning and save the file.
+PermitRootLogin yes
+Restart the sshd service.
+# systemctl restart sshd
+OR
+# /etc/init.d/sshd restart
+
+
+Now try to log in with the root user.
+$ ssh root@192.168.1.189
+root@192.168.1.189's password:
+Last login: Mon July 04 15:14:54 2022 from 192.168.1.122
+
+
+Limit SSH User Logins
+If you have a large number of user accounts on the systems, then it makes sense that we limit remote SSH access to those users who really need it. Open the /etc/ssh/sshd_config file.
+# vi /etc/ssh/sshd_config
+Add an AllowUsers line at the bottom of the file with a space separated by a list of usernames. For example, user tecmint and sheena both have access to remote ssh.
+AllowUsers  localadmin keen

@@ -1,0 +1,85 @@
+﻿Assignment Of JMX Panel
+
+
+
+
+Q1. Why is CPU usage always in %? 
+
+
+CPU usage is always expressed as a percentage because it is a measure of how much of the total available computing power is being used at any given moment. It is expressed as a percentage because it is a relative measure rather than an absolute one, allowing us to compare the number of computing resources being used at different times.
+
+
+Q2. Can we find the absolute value of CPU usage?
+No, it is not possible to find an absolute value of CPU usage. CPU usage is a relative measure of how much of the total available computing power is being used at any given moment, and therefore cannot be expressed in absolute values.
+
+
+Q3. Why is RAM always shown in absolute value? 
+
+
+RAM is always expressed in absolute values because it is a measure of the amount of memory available to the system. Unlike CPU usage, RAM is an absolute measure, meaning that the amount of RAM available will remain the same regardless of the amount of processing power being used. 
+
+
+JMX Panel :
+
+
+Heap Used : 
+Heap space is used for the dynamic memory allocation of Java objects and JRE classes at runtime. New objects are always created in heap space, and the references to these objects are stored in stack memory.
+
+
+Start Time : When the JMX metrics dashboard application starts, that time shows in your panel.
+
+
+  
+
+
+
+UP Time : up metric that Prometheus creates automatically.this case it means the service should be accessible via HTTP or TCP and therefore the user should be able to use it.
+  
+
+
+
+JVM Version: The java. vm. version is the jvm version number, something like "25.0-b70" whereas the java. version is the normal java language version you're used to seeing "1.8. 0".
+
+
+
+
+Java Heap Space :
+
+
+Java Heap space is used by java runtime to allocate memory to Objects and JRE classes. Whenever we create an object, it’s always created in the Heap space. Garbage Collection runs on the heap memory to free the memory used by objects that don’t have any reference. Any object created in the heap space has global access and can be referenced from anywhere of the application.
+
+
+Compressed class Space:
+The reserved space for the Compressed class space is set up at JVM initialization time, and its size can not be changed later. The maximum reserved space size that the Hotspot JVM allows for the Compressed class space is 3GB, and it can be configured using the JVM option -XX:CompressedClassSpaceSize=n.
+
+
+Java Metaspace:
+So what is Metaspace and how is it different from Permgen Space?
+With JDK8, the permGen Space has been removed. So where will the metadata information be stored now? This metadata is now stored in a native memory called as "MetaSpace". This memory is not a contiguous Java Heap memory. It allows for improvements over PermGen space in Garbage collection, auto tuning, concurrent de-allocation of metadata.
+
+
+PS Eden Spaces:
+
+
+PS Eden Space: The amount of memory (in Megabytes) used in the Eden component of the "Young Generation" memory. PS Survivor Space: The amount of memory (in Megabytes) used in the Survivor component of the "Young Generation" memory. PS Old Gen: The amount of memory (in Megabytes) used in the "Old Generation" memory.
+
+
+
+
+PS Old Gen: 
+The amount of memory (in Megabytes) used in the "Old Generation" memory.
+
+
+PS Survivor Space: The amount of memory (in Megabytes) used in the Survivor component of the "Young Generation" memory. PS Old Gen: The amount of memory (in Megabytes) used in the "Old Generation" memory.
+
+
+Metaspace: Metaspace memory the VM uses to store class metadata. Class metadata are the runtime representation of java classes within a JVM process - basically any information the JVM needs to work with a Java class. That includes, but is not limited to, runtime representation of data from the JVM class file format.
+
+
+Code Cache: JVM Code Cache is an area where JVM stores its bytecode compiled into native code. We call each block of the executable native code a method. The method might be a complete or inlined Java method. The just-in-time (JIT) compiler is the biggest consumer of the code cache area.
+
+
+Threads Used: 
+A Java thread is the execution path in a program. Everything that runs in Java is run in threads. Every application in the JVM world has threads, at least one, even if you don't call it explicitly. It all starts with the main method of your code, which is run in the main application thread.
+GC count: 
+Use the JVM Garbage Collection attributes to view garbage collection data for a monitored Java virtual machine (JVM) that is summarized over the last 5 minutes. Allocation Failure Count Indicates the number of allocation failures that occurred in the interval.

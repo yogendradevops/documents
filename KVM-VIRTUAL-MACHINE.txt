@@ -1,0 +1,49 @@
+﻿KVM-VIRTUAL-MACHINE
+Install the RHEL FOR 64Bit.
+Create the Yum Server For RHEL 64Bit.
+
+
+[root@station27 ~]# yum install kvm* qemu* libvirt* python-virtinst*
+[root@station27 ~]# /etc/init.d/libvirtd start
+[root@station27 ~]# virsh -c qemu:///system list
+[root@station27 ~]# yum install bridge-utils*
+[root@station27 ~]# /etc/init.d/NetworkManager stop
+[root@station27 ~]# chkconfig NetworkManager off
+[root@station27 ~]# /etc/init.d/network restart
+[root@station27 ~]# cd /etc/sysconfig/network-scripts/
+[root@station27 ~]# vim ifcfg-br0
+
+
+################################################################
+DEVICE=br0
+TYPE=Bridge
+BOOTPROTO=static
+GATEWAY=192.168.0.1
+IPADDR=192.168.0.100
+NETMASK=255.255.255.0
+ONBOOT=yes
+################################################################
+
+
+[root@station27 ~]# vim ifcfg-eth0
+
+
+##############################################################
+DEVICE=eth0
+HWADDR=00:1e:90:f3:f0:02
+ONBOOT=yes
+TYPE=Ethernet
+IPV6INIT=no
+USERCTL=no
+BRIDGE=br0
+##############################################################
+
+
+[root@station27 ~]# vim /boot/grub/grub.conf
+No Reboot The Xen Kernel
+
+
+[root@station27 ~]# init 6
+[root@station27 ~]# yum install virt-manager*
+[root@station27 ~]# virt-manager
+And Install Your KVM VIRTUAL MACHINE

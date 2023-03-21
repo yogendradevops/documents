@@ -1,0 +1,91 @@
+﻿How do I disable SSH login for the root user?
+Instructions
+Add the user. In the following example, we will use the user name admin. The command adduser will automatically create the user, initial group, and home directory.
+
+[root@root ~]# adduser admin
+[root@root ~]# id admin
+uid=10018(admin) gid=10018(admin) groups=10018(admin)
+[root@root ~]# ls -lad /home/admin/
+drwx------ 2 admin admin 4096 Jun 25 16:01 /home/admin/
+1. 
+Set the password for the admin user. When prompted, type and then retype the password.
+
+[root@root ~]# passwd admin
+Changing password for user admin.
+New UNIX password:
+Retype new UNIX password:
+passwd: all authentication tokens updated successfully.
+[root@root ~]#
+   2. 
+   3. For sudo permissions for your new admin user, use the following command.
+
+[root@root ~]# echo 'admin ALL=(ALL) ALL' >> /etc/sudoers
+
+SSH to the server with the new admin user and ensure that the login works.
+
+[root@root ~]# ssh admin@my.ip.or.hostname
+admin@my.ip.or.hostname's password:
+      4. [admin@admin ~]$
+
+Verify that you can su (switch user) to root with the admin user.  
+
+[admin@admin ~]$ su -
+Password:
+[root@root ~]$ whoami
+root
+         5. 
+To disable root SSH login, edit /etc/ssh/sshd_config with your favorite text editor.
+
+
+[root@root ~]# vi /etc/ssh/sshd_config
+
+
+Change this line:
+
+
+#PermitRootLogin yes
+
+
+Edit to this:
+
+
+PermitRootLogin no
+            6. 
+Ensure that you are logged into the box with another shell before restarting sshd to avoid locking yourself out of the server.
+
+# systemctl restart sshd
+# service sshd restart
+# /etc/init.d/ssh restart
+
+
+
+[root@root ~]# /etc/init.d/sshd restart
+Stopping sshd: [ OK ]
+Starting sshd: [ OK ]
+[root@root ~]#
+               7. 
+
+
+
+
+Changing the Default SSH Port
+
+
+                                                 
+To change the SSH port:
+                  * Log on to the server as an administrator.
+                  * Open the SSH configuration file sshd_config with the text editor vi:
+vi /etc/ssh/sshd_config
+                  * Search for the entry Port 22.
+                  * Replace port 22 with a port between 1024 and 65536. 
+                                 
+                                                 
+                     * Save the file.
+                     * Restart the service.
+
+         Ubuntu
+service ssh restart
+         CentOS 7
+systemctl restart sshd
+        To establish an SSH connection after this change, enter the following command:
+ssh root@IP_address_of_the_server -p NewPort

@@ -1,0 +1,141 @@
+﻿16 Top Command Examples in Linux [Monitor Linux Processes]
+
+
+The top command (table of processes) displays the processor activity of your Linux box and also displays tasks managed by the kernel in real-time. It also shows information about CPU and memory utilization of a list of running processes.
+
+
+1. List All Running Linux Processes
+To list all running Linux Processes, simply type top on the command line to get the information of running tasks, memory, cpu, and swap. Press ‘q‘ to quit window.
+# top
+
+
+2. Sort Linux Processes by PID
+To sort all Linux running processes by Process ID, press M and T keys.
+3. Sort Linux Processes by Memory and CPU Usage
+To sort all Linux running processes by Memory usage, press M and P keys.
+4. Sort Linux Processes by Running Time
+To sort all Linux running processes by running time, press M and T keys.
+5. Display Linux Processes By Specific User
+To display all user-specific running processes information, use the -u option will list specific User process details.
+# top -u tecmint
+6. Highlight Running Process in Top
+Press ‘z‘ option will display the running process in color which may help you to identify the running process easily.
+7. List Absolute Path of Running Linux Processes
+Press ‘c‘ option in running top command will display the absolute path of the running process.
+
+
+8. Set Refresh Interval for Top Command
+By default screen refresh interval is set to 3.0 seconds, the same can be changed by pressing the ‘d‘ option in running the top command to set desired interval time.
+9. Kill Running Linux Process Using Top Command
+You can kill a process after finding the PID of the process by pressing the ‘k‘ option in running the top command without closing the top window as shown below.
+10. Sort Linux Processes by CPU Utilisation
+To sort all running processes by CPU utilization, simply press Shift+P key.
+11. Renice a Linux Process
+You can use the ‘r‘ option to change the priority of the process also called Renice.
+12. Check Linux CPU Cores
+To list the load information of your CPU cores, simply press 1 to list the CPU core details.
+13. Save Top Command Results in File
+To save the running top command results output to a file /root/.toprc use the following command.
+# top -n 1 -b > top-output.txt
+
+
+14. List Linux Idle Processes
+Press 'i' to get the list of idle/sleeping processes.
+15. Getting Top Command Help
+Press the ‘h‘ option to obtain the top command help.
+16. Exit Top Command After Specific Repetition
+The output of the top command keeps refreshing until you press ‘q‘. With the below command, it will automatically exit after 10 repetitions.
+# top -n 10
+
+
+
+
+
+
+9 Useful Commands to Get CPU Information on Linux
+1. Get CPU Info Using cat Command
+You can simply view the information of your system CPU by viewing the contents of the /proc/cpuinfo file with the help of cat command as follows:
+$ cat /proc/cpuinfo
+
+
+To get a little specific, you can employ the grep command – a CLI tool for searching plain-text data for lines matching a regular expression. This can help you only output vendor name, model name, number of processors, number of cores, etc:2. lscpu Command – Shows CPU Architecture Info
+The command lscpu prints CPU architecture information from sysfs and /proc/cpuinfo as shown below:
+$ lscpu
+
+
+3. cpuid Command – Shows x86 CPU
+The command cpuid dumps complete information about the CPU(s) collected from the CPUID instruction, and also discover the exact model of x86 CPU(s) from that information.
+Make sure to install it before running it.
+$ sudo apt install cpuid        #Debian/Ubuntu systems
+$ sudo yum install cpuid        #RHEL/CentOS systems 
+$ sudo dnf install cpuid        #Fedora 22+ 
+
+
+Once installed, run cpuid to collect information concerning the x86 CPU.
+$ cpuid
+
+
+
+
+
+
+4. dmidecode Command – Shows Linux Hardware Info
+dmidecode is a tool for retrieving hardware information of any Linux system. It dumps a computer’s DMI (a.k.a SMBIOS) table contents in a human-readable format for easy retrieval. The SMBIOS specification defines various DMI types, for CPU, use “processor” as follows:
+$ sudo dmidecode --type processor
+
+
+5. Inxi Tool – Shows Linux System Information
+Inxi is a powerful command-line system information script intended for both console and IRC (Internet Relay Chat). You can use it to instantly retrieve hardware information.
+You can install like so:
+$ sudo apt install inxi         #Debian/Ubuntu systems
+$ sudo yum install inxi                #RHEL/CentOS systems 
+$ sudo dnf install inxi                #Fedora 22+ 
+
+
+To display complete CPU information, including per CPU clock-speed and CPU max speed (if available), use the -C flag as follows:
+$ inxi -C
+
+
+6. lshw Tool – List Hardware Configuration
+lshw is a minimal tool for gathering in-depth information on the hardware configuration of a computer. You can use the -C option to select the hardware class, CPU in this case:
+$ sudo lshw -C CPU
+
+
+
+
+
+
+
+
+
+
+7. hardinfo – Shows Hardware Info in GTK+ Window
+hardinfo displays hardware information in a GTK+ window, you can install it as follows:
+$ sudo apt install hardinfo         #Debian/Ubuntu systems
+$ sudo yum install hardinfo        #RHEL/CentOS systems 
+$ sudo dnf install hardinfo        #Fedora 22+ 
+
+
+Once you have it installed, type:
+$ hardinfo 
+
+
+It also enables you to generate a system hardware info report by clicking on the “Generate Report” button. From the interface below, click on “Generate” to proceed. Note that you can choose the hardware info category to be generated.
+Once you have generated the report in html format, you can view it from a web browser as shown below.
+
+
+8. hwinfo – Shows Present Hardware Info
+hwinfo is used to extract info about the hardware present in a Linux system. To display info about your CPU, use the --cpu
+$ hwinfo --cpu
+
+
+9. nproc – Print Number of Processing Units
+nproc command is used to show the number of processing unit present on your computer:
+$ nproc
+
+
+For additional usage info and options, read through the man pages of these commands like this:
+$ man commandname
+lsblk (list block) Command
+lsblk prints information including name, type, mountpoint concerning all available or particular mounted block device(s) excluding RAM disks.
+$ lsblk

@@ -1,0 +1,231 @@
+﻿Log Format
+The layout and formatting of log events are controlled by the Log format directive. The default Apache log format is CLF (Common Log Format). But Apache gives you the flexibility to change fields included in each log by enabling you to specify your format string. These are a few default CLF:
+
+
+The following string is what you’d use to represent the combined format in the Apache settings:
+"%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i""
+
+
+
+
+* %h – Remote host (client IP address)
+* %l – User identity, or dash, if none (often not used)
+* %u – Username, via HTTP authentication, or dash if not used
+* %t – Timestamp of when Apache received the HTTP request
+* %r – The actual request itself from the client
+* %>s – The status code Apache returns in response to the request
+* %b – The size of the request in bytes.
+* %{Referrer}i – Referrer header, or dash if not used  (In other words, did they click a URL on another site to come to your site)
+* %{User-agent}i – User agent (contains information about the requester’s browser/OS/etc)
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+These five fields are recommended as they are crucial for troubleshooting issues and monitoring server health – 
+1. %>s: Requests HTTP status code. The final request after internal redirection is shown.
+2. %U: The requested URL path excluding the additional query string is displayed.
+3. %a: This is used to identify the traffic from a particular source. It displays the IP of the client who is making the request.
+4. %T: Time taken to process the request in seconds. It is useful to measure the speed of the site.
+5. %{Name}e: It is also known as request ID. On every request, it will log a unique identifier. This is primarily useful for tracking requests from your Apache server to your web server.
+
+
+
+
+Apache/httpd:
+
+
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referrer}i\" \"%{User-Agent}i\" \"%{JSESSP}C\" %{X-Forwarded-For}i %D \"%{_ga}C\" \"%{_gid}C\" " combined
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+%h→Remote hostname. Will log the IP address if HostnameLookups is set to Off, which is the default. If it logs the hostname for only a few hosts, you probably have access control directives mentioning them by name. See the Require host documentation.
+
+
+%l→Identity of user
+
+
+%u→Remote user if the request was authenticated. May be bogus if return status (%s) is 401 (unauthorised).
+
+
+%t→Time the request was received, in the format [18/Sep/2011:19:18:28 -0400]. The last number indicates the timezone offset from GMT
+
+
+%r→First line of request.
+
+
+%>s→Status. For requests that have been internally redirected, this is the status of the original request. Use %>s for the final status.
+
+
+%b→Size of response in bytes, excluding HTTP headers. In CLF format, i.e. a '-' rather than a 0 when no bytes are sent.
+
+
+%{Referer}i→Referrer header, or dash if not used  (In other words, did they click a URL on another site to come to your site)
+
+
+%{User-Agent}i→ User agent (contains information about the requester’s browser/OS/etc)
+
+
+%{JSESSP}C→The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.
+
+
+%{X-Forwarded-For}i→The X-Forwarded-For (XFF) HTTP header field is a common method for identifying the originating IP address of a client connecting to a web server through an HTTP proxy or load balancer.
+
+
+%D→Time taken to serve the request, in microseconds.
+
+
+
+
+%{_ga}C→The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.
+
+
+
+
+%{_gid}C→The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.
+LOGS:
+10.249.83.215 - - [25/Dec/2022:06:45:15 +0530] "GET /oauth2/authorize?client_id=mygovinnovateindia2020&redirect_uri=https%3A%2F%2Finnovateindia.mygov.in%2Fwp-content%2Fplugins%2Fwordpress-social-login%2Fhybridauth%2F%3Fhauth.done%3DMyGov&response_type=code&state=82aa29f79861c9ec106e0196e5558e6e&scope=user_profile&login_provider= HTTP/1.1" 302 - "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; Android 10; SM-J600G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36" "-" 152.57.76.67 153891 "GA1.2.438056880.1671782837" "GA1.2.2091273002.1671782837"
+
+
+10.249.83.215 - - [25/Dec/2022:06:45:14 +0530] "GET /user/register?n=7011306464&destination=oauth2/authorize&r=b8c7df2a62f5f31289b3da0957c76dad HTTP/1.1" 200 7983 "https://auth.mygov.in/user/login?destination=oauth2/authorize" "Mozilla/5.0 (Linux; Android 8.1.0; SM-J710F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36" "-" 49.36.191.121 914393 "GA1.2.847449601.1671634334" "GA1.2.1152558568.1671634334"
+
+
+10.249.83.215 - - [25/Dec/2022:06:45:14 +0530] "POST /user/92476881/edit/ HTTP/1.1" 302 - "https://auth.mygov.in/user/92476881/edit/" "Mozilla/5.0 (Linux; Android 12; vivo 1920) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Mobile Safari/537.36" "-" 49.34.101.185 1358561 "GA1.2.306214938.1671930391" "GA1.2.842562130.1671930391"
+
+
+10.249.83.215 - - [25/Dec/2022:06:45:15 +0530] "GET /user/login?destination=oauth2/authorise HTTP/1.1" 200 20082 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; Android 10; SM-J600G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36" "-" 152.57.76.67 980503 "GA1.2.438056880.1671782837" "GA1.2.2091273002.1671782837"
+
+
+10.249.83.215 - - [25/Dec/2022:06:45:15 +0530] "GET /user/login?destination=oauth2/authorise HTTP/1.1" 200 20082 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; Android 11; moto g(9)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36" "-" 110.227.60.140 982723 "GA1.2.348168223.1653053604" "GA1.2.579420361.1671871837"
+
+
+10.249.83.215 - - [25/Dec/2022:06:45:16 +0530] "POST /user/register?n=8095809473&destination=oauth2/authorize&r=1e86278517bc2c2e2b033daa753a2308 HTTP/1.1" 200 26466 "https://auth.mygov.in/user/register?n=8095809473&destination=oauth2/authorize&r=1e86278517bc2c2e2b033daa753a2308" "Mozilla/5.0 (Linux; Android 9; SM-J415F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.136 Mobile Safari/537.36" "-" 112.79.197.241 677339 "GA1.2.591034477.1671882365" "GA1.2.1989136266.1671882365"
+
+
+
+
+======================================================================
+
+
+%{VARNAME}C →The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.
+
+
+
+
+
+
+======================================================================
+
+
+
+
+Nginx:
+            log_format  main-mygov  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for" '
+                             ' $request_time $upstream_response_time $pipe';
+
+
+$remote_addr-> → source IP address of the client
+
+
+$remote_user → user name with basic authentication
+
+
+[$time_local] →  local time in common log format 
+
+
+"$request" →full original request line
+
+
+$status → response status
+
+
+$body_bytes_sent →number of bytes sent to a client, not counting the response header
+
+
+"$http_referer" → When a web browser moves from one website to another and between pages of a website, it can optionally pass the URL it came from. This is called the HTTP_REFERER.
+
+
+'"$http_user_agent" → In computing, a user agent is any software, acting on behalf of a user, which "retrieves, renders and facilitates end-user interaction with Web content".
+
+
+"$http_x_forwarded_for" →The X-Forwarded-For (XFF) HTTP header field is a common method for identifying the originating IP address of a client connecting to a web server through an HTTP proxy or load balancer.
+
+
+
+
+$request_time →request processing time in seconds with a milliseconds resolution; time elapsed between the first bytes were read from the client and the log write after the last bytes were sent to the client
+
+
+
+
+$upstream_response_time →keeps time spent on receiving the response from the upstream server; the time is kept in seconds with millisecond resolution. Times of several responses are separated by commas and colons like addresses in the $upstream_addr variable.
+
+
+$pipe;
+
+
+
+
+LOGS:
+127.0.0.1 - - [26/Dec/2022:03:08:18 +0530] "GET /hi/podcast/mygov-corona-samvaad-52/ HTTP/1.1" 200 16538 "-" "Mozilla/5.0 (compatible; Yeti/1.1; +https://naver.me/spd)" "211.249.46.164, 23.200.75.104, 23.200.142.205, 10.249.83.215"  2.187 2.186 .
+
+
+127.0.0.1 - - [26/Dec/2022:03:08:18 +0530] "GET /manifest.json HTTP/1.1" 206 1 "https://www-mygov-in.translate.goog/" "Mozilla/5.0 (Linux; Android 12; V2037) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36" "2409:4053:e14:5a3f::3ccb:9811, 49.44.178.199, 104.71.61.44, 10.249.83.215"  0.000 - .
+
+
+127.0.0.1 - - [26/Dec/2022:03:08:18 +0530] "GET /manifest.json HTTP/1.1" 200 504 "https://www-mygov-in.translate.goog/" "Mozilla/5.0 (Linux; Android 12; V2037) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36" "2409:4053:e14:5a3f::3ccb:9811, 49.44.178.199, 104.71.61.44, 10.249.83.215"  0.000 - .
+
+
+127.0.0.1 - - [26/Dec/2022:03:08:18 +0530] "GET /manifest.json HTTP/1.1" 206 1 "https://www-mygov-in.translate.goog/" "Mozilla/5.0 (Linux; Android 12; V2037) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36" "2409:4053:e14:5a3f::3ccb:9811, 49.44.178.199, 104.71.61.44, 10.249.83.215"  0.000 - .
+
+
+127.0.0.1 - - [26/Dec/2022:03:08:18 +0530] "GET /manifest.json HTTP/1.1" 304 0 "https://www-mygov-in.translate.goog/" "Mozilla/5.0 (Linux; Android 12; V2037) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36" "2409:4053:e14:5a3f::3ccb:9811, 49.44.178.199, 104.71.61.44, 10.249.83.215"  0.000 - .
+
+
+127.0.0.1 - - [26/Dec/2022:03:08:24 +0530] "GET /sites/default/files/app-files/splash-file.json HTTP/1.1" 206 1 "-" "MyGov/18 CFNetwork/1240.0.4 Darwin/20.5.0" "92.8.133.114, 62.24.252.38, 104.80.194.206, 10.249.83.215"  0.000 - .
+
+
+======================================================================
+
+
+Varnish:
+Format:
+/usr/bin/varnishncsa -F '%{X-Forwarded-For}i %l %u %t %r %s %b  \"%{Referrer}i\" \"%{User-agent}i\" %T %{Varnish:time_firstbyte}x %{Varnish:handling}x'
+
+
+
+
+
+
+LOGS:
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/fonts/fontawesome-webfont.woff2?v=4.7.0 HTTP/1.1" 200 77160 "https://innovateindia.mygov.in/wp-content/themes/innovate/style.css" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/js/font-size.js HTTP/1.1" 200 729 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/favicon.ico HTTP/1.1" 200 1893 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; U; Android 7.1.2; en-in; Redmi 5A Build/N2G47H) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.128 Mobile Safari/537.36 XiaoMi/MiuiBrowser/9.8.5"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/fonts/Roboto-Regular.woff2 HTTP/1.1" 200 65916 "https://innovateindia.mygov.in/wp-content/themes/innovate/style.css" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/images/nic.png HTTP/1.1" 200 4241 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/fonts/handsean-webfont.woff2 HTTP/1.1" 304 0 "https://innovateindia.mygov.in/wp-content/themes/innovate/style.css" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/js/skip-link-focus-fix.js HTTP/1.1" 304 0 "https://innovateindia.mygov.in/" "Mozilla/5.0 (Linux; U; Android 12; V2036 Build/SP1A.210812.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36 OPR/62.2.2254.60938"
+
+
+10.249.83.215 - - [26/Dec/2022:18:03:34 +0530] "GET http://innovateindia.mygov.in/wp-content/themes/innovate/assets/fonts/Roboto-Bold.woff2 HTTP/1.1" 200 65972 "https://innovateindia.mygov.in/wp-content/themes/innovate/style.css" "Mozilla/5.0 (Linux; Android 12; 220333QBI) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Mobile Safari/537.36"
+
+
+
+
+======================================================================

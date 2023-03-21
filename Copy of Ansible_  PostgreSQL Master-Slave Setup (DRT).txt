@@ -1,0 +1,189 @@
+﻿Ansible:  PostgreSQL Master-Slave Setup (DRT)
+
+
+indianrenters@101:~/ansible$ ls -lrth
+total 44K
+-rw-rw-r-- 1 indianrenters indianrenters  269 Dec  7 12:23 disable-firewall.yml
+-rw-rw-r-- 1 indianrenters indianrenters  143 Dec  7 12:27 disbale-selinux.yml
+-rw-rw-r-- 1 indianrenters indianrenters  238 Dec  7 21:50 inventory
+-rw-rw-r-- 1 indianrenters indianrenters  241 Dec  7 21:54 create-directory.yml
+-rw-rw-r-- 1 indianrenters indianrenters 3.1K Dec  7 22:56 postgresql-conf.yml
+-rw-rw-r-- 1 indianrenters indianrenters  719 Dec  7 23:18 create-master.yml
+-rw-rw-r-- 1 indianrenters indianrenters  225 Dec  7 23:45 restart-master.yml
+-rw-rw-r-- 1 indianrenters indianrenters  290 Dec  8 12:40 pg_hba_conf.yml
+-rw-rw-r-- 1 indianrenters indianrenters  222 Dec  8 23:24 remove-slave.yml
+-rw-rw-r-- 1 indianrenters indianrenters  317 Dec 11 21:51 create-role.yml
+-rw-rw-r-- 1 indianrenters indianrenters  635 Dec 11 21:52 create-slave.yml
+indianrenters@101:~/ansible$ cat inventory
+[slave]
+10.194.75.138  ansible_connection=ssh ansible_user=developer ansible_ssh_pass=Adminfldb$123
+
+
+[master]
+10.194.75.139  ansible_connection=ssh ansible_user=developer ansible_ssh_pass=Adminfldb$123
+
+
+[all]
+10.194.75.138
+10.194.75.139
+
+
+indianrenters@101:~/ansible$ cat create-directory.yml
+---
+  - hosts: master
+        tasks:
+          - name: create a pgmasterdata directory
+            file:
+              path: /home/developer/pgmasterdata
+              owner: developer
+              group: developer
+              mode: 0777
+              state: directory
+
+
+indianrenters@101:~/ansible$ cat postgresql-conf.yml
+---
+  - hosts: master
+        tasks:
+
+
+          - name: Replace line
+            become: true
+            ansible.builtin.replace:
+              path: /home/developer/pgmasterdata/postgresql.conf
+              regexp: '{{item.From}}'
+              replace: '{{item.To}}'                 
+            with_items:
+              - { From: '#port = 5432', To: 'port = 5432' }
+              - { From: 'max_connections = 100', To: 'max_connections = 1500' }
+              - { From: '#superuser_reserved_connections = 3', To: 'superuser_reserved_connections = 30' }
+              - { From: 'shared_buffers = 128MB', To: 'shared_buffers = 16GB' }
+              - { From: '#work_mem = 4MB', To: 'work_mem = 8MB' }
+              - { From: '#maintenance_work_mem = 64MB', To: 'maintenance_work_mem = 2GB' }
+              - { From: '#effective_io_concurrency = 1', To: 'effective_io_concurrency = 200' }
+              - { From: '#max_worker_processes = 8', To: 'max_worker_processes = 16' }
+              - { From: '#max_parallel_workers_per_gather = 2', To: 'max_parallel_workers_per_gather = 8' }
+              - { From: '#max_parallel_workers = 8', To: 'max_parallel_workers = 16' }
+              - { From: '#wal_buffers = -1', To: 'wal_buffers = 16MB' }
+              - { From: 'max_wal_size = 1GB', To: 'max_wal_size = 2GB' }
+              - { From: 'min_wal_size = 80MB', To: 'min_wal_size = 1GB' }
+              - { From: '#checkpoint_completion_target = 0.5', To: 'checkpoint_completion_target = 0.7' }
+              - { From: '#max_wal_senders = 10', To: 'max_wal_senders = 6' }
+              - { From: '#hot_standby_feedback = off', To: 'hot_standby_feedback = on' }
+              - { From: '#random_page_cost = 4.0', To: 'random_page_cost = 1.0' }
+              - { From: '#effective_cache_size = 4GB', To: 'effective_cache_size = 8GB' }
+              - { From: '#default_statistics_target = 100', To: 'default_statistics_target = 100' }
+              - { From: '#logging_collector = off', To: 'logging_collector = on' }
+              - { From: '#log_rotation_age = 1d', To: 'log_rotation_age = 1d' }
+              - { From: '#log_rotation_size = 10MB', To: 'log_rotation_size = 0' }
+              - { From: '#log_min_duration_statement = -1', To: 'log_min_duration_statement = 60s' }
+              - { From: '#log_checkpoints = off', To: 'log_checkpoints = on' }
+              - { From: '#log_connections = off', To: 'log_connections = on' }
+              - { From: '#log_disconnections = off', To: 'log_disconnections = on' }
+              - { From: "#log_line_prefix = '%m [%p]'", To: "log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d'" }
+              - { From: '#log_lock_waits = off', To: 'log_lock_waits = on' }
+              - { From: "#log_statement = 'none'", To: "log_statement = 'ddl'" }
+              - { From: '#log_temp_files = -1', To: 'log_temp_files = 0' }
+              - { From: '#autovacuum = on', To: 'autovacuum = on' }
+              - { From: "timezone = 'Etc/UTC'", To: "timezone = 'UTC'" }
+              - { From: '#wal_keep_size = 0', To: 'wal_keep_size = 16'}
+              - { From: '#wal_level = replica', To: 'wal_level = replica' }
+            delegate_to: '10.194.75.139'
+          - debug:
+              var: pgbase.stdout_lines
+
+
+indianrenters@101:~/ansible$ cat create-master.yml
+---
+  - hosts: master
+        tasks:
+
+
+          - name: create master container
+            containers.podman.podman_container:
+              name: master
+              image: localhost/postgres:13.8
+              shm_size: 256M
+              publish:
+              - "5432:5432"
+              state: started
+              restart_policy: always
+              detach: true
+              env:
+                  POSTGRES_DB: postgres
+                  POSTGRES_USER: postgres
+                  POSTGRES_PASSWORD: postgres
+              volumes:
+                - /home/developer/pgmasterdata:/var/lib/postgresql/data
+                  #when: "'master' in inventory_hostname"
+            delegate_to: '10.194.75.139'
+            register: master          
+          - debug:
+              var: master.stdout_lines
+
+
+indianrenters@101:~/ansible$ cat restart-master.yml
+---
+  - hosts: master
+        tasks:
+
+
+          - name:  restart master container
+            shell: podman restart master
+            delegate_to: '10.194.75.139'
+            register: restart
+          - debug:
+              var: restart.stdout_lines
+
+
+indianrenters@101:~/ansible$ cat pg_hba_conf.yml
+---
+  - hosts: master
+        tasks:
+
+
+          - name: add pg_hba.conf file
+            ansible.builtin.shell: echo "host        replication  all  10.194.75.138/32  trust" >> /home/developer/pgmasterdata/pg_hba.conf
+            delegate_to: '10.194.75.139'
+          - debug:
+              var: pgbase.stdout_lines
+
+
+
+
+indianrenters@101:~/ansible$ cat create-role.yml
+---
+  - hosts: master
+        tasks:
+
+
+          - name: create ROLE
+            ansible.builtin.shell: podman exec -it master psql -U postgres -c "CREATE USER replicator WITH REPLICATION ENCRYPTED PASSWORD 'redhat@123'"
+            delegate_to: '10.194.75.139'
+            register: role
+          - debug:
+              var: role.stdout_lines
+indianrenters@101:~/ansible$ cat create-slave.yml
+---
+  - hosts: slave
+        tasks:
+
+
+          - name: create slave container
+            containers.podman.podman_container:
+              name: pgslave
+              image: localhost/postgres:13.8
+              shm_size: 256M
+              publish:
+              - "5432:5432"
+              state: started
+              restart_policy: always
+              detach: true
+              env:
+                  POSTGRES_DB: postgres
+                  POSTGRES_USER: postgres
+                  POSTGRES_PASSWORD: postgres
+              volumes:
+                - /home/developer/pgslavedata:/var/lib/postgresql/data
+                  #when: "'slave' in inventory_hostname"
+            delegate_to: '10.194.75.138'

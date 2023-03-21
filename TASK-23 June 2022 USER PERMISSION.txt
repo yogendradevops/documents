@@ -1,0 +1,439 @@
+﻿TASK-23 June 2022
+
+
+Create a new user and provide it root user privilege.
+	Create a normal user and give it only sudo particular permission not full permission as a root user.
+	
+
+
+
+How to Give Root Privileges to a User in Linux
+The “root” super user is the king of users in Linux/Unix. Having root access grants full and unlimited access to the Linux box.
+The root or super user has full permission to read(r), write (w) and execute(x)  any file. By default root user id is '0'.
+
+
+Remember: It's safer to perform superuser tasks using sudo command than log in as a root account.
+Method  1: Adding to Root Group using usermod
+Let's see how we can grant normal user root access by adding to the root group.
+adduser user1
+adduser user2
+groupadd test
+
+
+These are the groups I have in my Linux box.
+groups
+root bin daemon sys adm disk wheel
+I am going to add user1 to root group as follows:
+usermod -G root user1
+The following usermod command given below provides the existing user with the root privilege
+usermod -g 0 -o root_user
+Method 2: Adding to Root Group using Useradd Command
+I have added a new user, 'user3' to the root group using one single command:
+useradd -m -G root user3
+groups user3
+user3 : user3 root
+Another option using useradd command
+useradd -c “Imitation Root” -d /home/root_user -m -k /etc/skel -s /bin/bash -u 0 -o -g root root_user
+
+
+Method 3: Editing /etc/passwd file
+Edit /etc/passwd for the particular user. Change the user's UID and GID to '0'. This will give root permissions to user.
+root:x:0:0:root:/root:/bin/bash
+temproot:x:128:128:temproot
+Now, temproot user should have root privilege:
+root:x:0:0:root:/root:/bin/bash
+temproot:x:0:0:temproot
+Note: This is not the recommended method for granting root access
+Method 4: Setting as Sudo User
+The sudo configuration file is /etc/sudoers and you can edit this file using visudo command: # visudo.
+Using visudo protects from conflicts and guarantees that the right syntax is used.
+To give full access (grant root privileges) to specific users
+Add the entry given below in the file:
+bob, tom ALL=(ALL) ALL
+Following this method is not a good idea because this allows both bob and tom to use the su command to grant themselves permanent root privileges. Thereby skipping the command logging features of sudo.
+Granting access to specific files to one particular user
+This entry allows bob and all the other members of the group operator to gain access to all the program files in the /sbin and /usr/sbin directories, as well as the privilege of running the command /usr/oracle/backup.pl.
+bob, %operator ALL= /sbin/, /usr/sbin, /usr/oracle/backup.pl
+
+
+*********************************************************************************************************
+
+
+2.HowTo: Grant Root Access to User – Root Privileges – Linux
+Check SSH Server Settings: If you have disabled root access in SSH server settings, by setting PermitRootLogin no in /etc/ssh/sshd_config – you won’t be able to login if your user has UID 0.
+
+
+Grant Root Privileges To New User
+Let’s say you need to create a new user and grant him root access to the server.
+To create a user with exactly the same privileges as root user, we have to assign him the same user ID as the root user has (UID 0) and the same group ID ( GID 0).
+Use the following commands to create a user john, grand him the same privileges as root and set him a password:
+$ sudo useradd -ou 0 -g 0 john
+$ sudo passwd john
+
+
+
+
+
+
+Grant Root Privileges To Existent User
+Perhaps you already have a user john and you want to grant him root privileges (make him a second root user):
+$ grep john /etc/passwd
+john:x:1001:1001::/home/alice:/bin/sh
+For this, it is required to edit the file /etc/passwd and just change UID and GID to 0:
+$ grep john /etc/passwd
+john:x:0:0::/home/john:/bin/sh
+Add User To Root Group
+If you just want to add john to root group, without granting him all root privileges, run the following command:
+$ sudo usermod -a -G root john
+Delete User With Root Privileges
+You won’t be able to delete a user with UID 0 using userdel command:
+
+
+$ sudo userdel john
+userdel: user john is currently used by process 1
+To delete him, firstly open the /etc/passwd file and change his UID.
+For example, change the line:
+john:x:0:0::/home/john:/bin/sh
+to something like:
+john:x:1111:0::/home/john:/bin/sh
+After this, you’ll be able to delete user john with userdel command:
+$ sudo userdel john
+
+
+
+
+*********************************************************************************************************
+3.Shell Script to Give Root Privileges to a User
+
+
+The sudo command is the most powerful command in Linux. It provides a mechanism for granting administrator privileges, using administrator privileges a normal user can do whatever he wants with the file system of the installed Linux system. Using sudo we can modify our system.
+Method  1: Adding to Root Group using usermod
+usermod command in Linux is used to modify the user account. Using usermod command we can assign groups, permissions to a specific user. There are mainly 7 groups in the Linux file system, these are as follows:
+* root
+* bin
+* daemon
+* sys
+* adm
+* disk
+* wheel
+To add a user to root using usermod, we have to run the following command in the terminal.
+usermod -G root user
+Here, the –G flag stands for Group and the root is the group for new user1.
+To add an existing user to the root group, follow the following command:
+usermod -g 0 -o user
+Here, the -g flag stands for Group id, and 0 represents the root group id, and the -o flag is for the existing user.
+
+
+
+
+
+
+
+
+Method  2: Adding to Root Group using useradd Command
+useradd command can be used to create a new user or update default new user information. It is a low-level utility for adding users. To add a user to the group using the useradd command, simply run the following command in your terminal.
+useradd -m -G root user
+Here, the –m flag is used to create the user’s home directory if it does not exist, and the -G flag represents the group.
+Method  3: Editing /etc/passwd file
+Open up the passwd file using any text editor, and change the group user id to 0  which represents root permission.
+Run the following command in the terminal :
+nano /etc/passwd
+Then modify the following permission for the user whom you want to give root access to.
+Before giving root permissions:
+root:x:0:0:root:/root:/bin/bash
+user:128:128:user
+After giving root permissions
+root:x:0:0:root:/root:/bin/bash
+user:0:0:user
+Here, if you see clearly we have modified line 2 that has the user whom we want to give root access, previously it has a value of 128 which is not a group ID for root. So we modified that line and replace the value with the 0, which represents the root group. After that, save the file and reboot your system.
+
+
+
+
+
+
+
+
+
+
+Method 4: Setting as Sudo User 
+To add a user to sudo user, we can modify the sudoers file located at /etc/sudoers. Open up the sudoers file using any text editor and add the following line at the end of the file to add a user to the sudo user.
+user ALL=(ALL) ALL
+Here, ALL represents that we are giving all(full permissions) to the user i.e. the user can run any command and the user just has to authenticate.
+* The first ALL is all hosts. i.e. if you have shared this sudoers file to many computers 
+* The second ALL is the user as you are running the command
+* The third ALL is that user can run the command.
+Method 5: To give root privileges to a user using a script
+To give root privileges to a user while executing a shell script, we can use the sudo bash command with the shebang. This will run the shell script as a root user. 
+Example:
+#!/usr/bin/sudo bash
+ ....
+ The rest of the shell script goes here
+ ....
+Shell Script to make directory using root privileges:
+#!/usr/bin/sudo bash
+echo "Enter a directory name"
+read newdir
+`mkdir $newdir`
+Save the above script as geeks.sh, to run the script type the following command in the terminal:
+sh geeks.sh
+Output:
+
+
+
+
+
+
+Method 6: Using an interactive dialog box
+We can use a tool called whiptail to create an interactive dialog box. To install this tool, run the following command in your terminal:
+sudo apt install whiptail
+Script:
+#!/usr/bin/bash
+
+
+# saving user's name in me variable
+me="$(whoami)"
+
+
+# Checking that the script is running as root.
+# entering in if case
+if [ "$(id -nu)" != "root" ]; then
+
+
+    # resetting cached credentials
+    sudo --reset-timestamp
+
+
+    # creating a dialog box to enter user password 
+    pswd=$(whiptail --title "GeeksforGeeks Authentication Script" \
+    --passwordbox "To run this script, administrative privilege is \
+    required. \n[sudo] Password for user $me:" 14 52 3>&2 2>&1 1>&3-)
+    
+    # executing the script with the password entered by user
+    exec sudo --stdin --prompt '' "$0" "$@" <<< "$pswd"
+
+
+    # if password is wrong it will return the status code 1
+    exit 1
+
+
+# exiting from if condition
+fi
+
+
+# Here, we will do the stuff that only sudo user can do 
+
+
+# creating a folder under the user's directory
+path="/home/amninder/new_folder_Geeks"
+
+
+mkdir $path
+
+
+echo "Folder Created!!"
+Output:
+In this script firstly we have created an interactive dialog prompt box for the user to enter the sudo password, then running the script with sudo permissions. Firstly, we are saving the user’s name in me variable for displaying the name in the interactive dialog box. Then using the id command with the if statement we’re checking if the running script is using the root permission, if not we are entering the if statement. Using sudo –reset-timestamp will clear the previously saved credentials and ask for the root password again. Then we have used the whiptail command to add a title, a password box in the interactive dialog box. Here 14 and 52 are the height and width of the dialog box respectively.
+“3>&2 2>&1 1>&3-“, we are swapping stdout and stderr.
+Here,
+0 – stdin
+1 – stdout
+2 – stderr
+3 – stdout
+ The 3>&2 in the script will create a new file descriptor and redirect it to 2 which is stderr. Now 2>&1 will redirect the file descriptor 2 to stdout and 1>&3 will redirect file descriptor 1 to 3 which is stdout. And save the password into pswd variable.
+If the user enters the wrong password 3 times, we are exiting the script and displaying exit code 1. And after finishing the if block, we can do the stuff that needs root permission. In this script, we are creating a folder after getting root permission.
+
+
+
+
+
+
+****************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**How to create a new user and provide the root or sudo privileges**
+                                                                        
+Introduction:
+In this blog we would learn about how to create a new user and add the same user to the root group or with sudo privileges. The sudo command provides a mechanism for granting administrator privileges and how to modify sudoers group in different ways & how to login with new user in the different ways.
+Step 1: Open the terminal and login with the root user.
+
+
+ Step 2: Now add a new user to the system with a new username with the below command.
+adduser new
+ 
+Step 3: Now provide the following information to create a new user.
+
+
+Step 4: Now new user is created. To verify that your user is created or not. Check it to the home directory.
+ cd /home
+ls
+  
+Step 5: Now add user to the sudo group.
+usermod -aG sudo new1
+ 
+In the second method go to /etc/group and add the sudo group to your new user name.
+  
+Step 6: Now, how to change the user to root to new user.
+su new1
+Then, provide password of the new user.
+ New user is now created with sudo privileges.
+**************************************************************************************************
+How to Set Up and Manage Sudo Permissions
+What Is Sudo?
+ sudo-sudoers 
+
+credit to: XKCD
+Sudo is a Linux program meant to allow a user to use root privileges for a limited timeframe to users and log root activity.  The basic thought is to give as few privileges as possible to a user while allowing  the user to accomplish a task. The term “Sudo” means substitute user, and do. It is a program used for managing of user permission based on a system configuration file. It allows users to run programs with the privileges of another user, by default, the superuser. The program is supplied for most UNIX and Linux-based operating systems.
+Syntax
+The sudo command is most often called like so.
+[root@host ~]# sudo <command>
+Security 
+Many experts state that we should not work with elevated root privileges in a default manner. This is due to possible security and error related issues which can occur when using this elevated permission level. Because the root user has full access to create, modify or delete settings, files and folders, any mistake committed by the root user will have global repercussions. 
+Many think that the sudo command deals with access restriction, but the opposite is true. Sudo allows us to run commands and programs with elevated or superuser privileges (as root). Through the use of the sudo configuration, programs and commands themselves are configured for a specific user. Compared to windows, sudo similar to utilizing the `run as’ option. Also, we need to note that under certain conditions, it is possible to run programs or commands with the privileges of anyone specified in that users’ configuration.
+In Ubuntu, the sudo command is always set up by default, as there is no root password until we create one. The initial user (that was created during installation) can do anything through sudo as they will be acting as the root user. The developers of Ubuntu purposely created this system in this way so that new users can begin using correct security practices when working with servers.
+Installation
+The sudo program is installed by default in almost all Linux distributions. The distributions which do not are Arch Linux, Gentoo, and the BSD family of distros.
+If we need to install sudo in Debian/Ubuntu, we would use the following command.
+apt-get install sudo
+If we need to install sudo in CentOS, we would use this command.
+yum install sudo
+Configuration
+Sudo
+The sudo.conf file contains information to configure the sudo front-end. It contains plugin variables related to the security policy and logging options.
+Here is a sample sudo.conf file.
+Plugins
+The sudo configuration also supports the use of plugins which can increase its functionality if needed without altering the original sudo functionality. Users can create third-party plugins that allow for specific needs to be met. 
+Logging
+We can add a variable in the /etc/sudo.conf file which will log all the user interactions to a file or other outputs. Sudo logging is broken down into 4 parts. 
+* Debug
+* Program
+* Log file location
+* Subsystem and level
+We can configure logging to include the following information.
+* To log what sudo did - /var/log/auth.log
+* To debug any issues with sudo - /var/log/sudo_debug
+* To capture a full sudo session - /var/log/sudo-io
+To configure this option, we would add the following parameter.
+Defaults log_host, log_year, logfile="/var/log/sudo.log"
+By default, the sudo logs are written to the syslog file. Additionally, we can specify where the logging output will be sent. 
+Defaults log_input, log_output
+This parameter tells sudo to write the text of the user’s session. There is a command log, messages of standard input/output channels (stdin, stderr, stdout), and a log with tty/pty.
+Debug
+This option can be set to capture issues when certain events occur. 
+Other Settings
+Sudo can enable additional settings such as:
+* Disable_coredump
+* Developer_mode
+* Group_source
+To name a few.
+Sudoers
+After sudo is installed, we would begin by editing the configuration file, which is located here.
+/etc/sudoers
+Originally, all the programs default settings were included within a single sudoers file. Later, the program developers added the option to use include statements, which allowed for the option to maintain a default or base sudoer file, while permitting the additional integration of more granular configurations into the main sudoers file. The main configuration for the sudo command is located in the /etc/sudoers file. Within this file are individual variables or configurations that define how commands can be accessed by certain users or groups. Additional configurations can be stored in the /etc/sudoers.d directory. Configuration files located within the sudoers.d directory are included in the sudoers file utilizing the 
+#includedir /etc/sudoers.d 
+variable. We can create a configuration for a user or group of users within the /etc/sudoers.d directory which would be regarded as part of the sudoer file.
+File Structure
+Let’s open the /etc/sudoers file to see what is included there. We will review the file using our nano editor. In ubuntu, the default file contains the following information.
+[root@host ~]# nano /etc/sudoers
+There are a wide range of parameters and configurations which can be added, but we will try to focus on the most relevant ones so that we have a solid understanding of how this system works. It should be noted that if edits to the file need to be made, the ‘visudo’ command should be used. Additionally, the format of the sudoers file MUST be syntactically correct in order for the program to function.
+Defaults
+In the sudoers file, there are sections which begin with ‘Defaults’. These are the preselected variables where no alternative is specified by the program. These settings are common to all users. 
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+Defaults env_reset: This setting causes commands to be executed with a new, minimal environment.
+Defaults mail_badpass: This setting send mail to the mailto user if the user running sudo does not enter the correct password.
+Default secure_path: This setting indicates the ‘Path’ to be used for every command run from sudo. If we do not explicitly trust the users running sudo, we can use this variable to have an alternate PATH environment variable which limits.
+Aliases
+There are four types of alias specifications used in the configuration.
+# Host alias specification
+# User privilege specification
+# Cmnd alias specification
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+* Host_Alias -  A list of hostname, ip addresses, networks or netgroups
+* User_Alias - This option specifies a group of users
+* Cmnd_Alias - A list or group of commands and directories This alias will include any file within a defined directory, but not in any subdirectories
+* Runas_Alias - This alias is nearly the same as user aliases, but we can specify users by uid's
+The main option we should be concerned with is the following parameter.
+# User privilege specification
+  root   ALL=(ALL:ALL) ALL
+To better define this setting we will explain further.
+* The first ALL is the users allowed to use the sudo command. 
+* The second ALL defines the hosts (servers) on which sudo can be employed. 
+* The third ALL is the user you are running the command as.
+* The last ALL defines the commands allowed.
+This option indicates that any user can execute a command from any terminal, acting as ALL (or any) user, and run can run any or ALL commands.
+To run commands through sudo, the user will need to enter a password. This creates a sudo user session where the password won’t be requested again for X minutes. The session lifetime is set by the server administrator through the sudo configuration. If a user needs to log off or end the sudo session, they can use the following command.
+[root@host ~]# sudo -k
+15 Sudo Examples
+Here are a few sudo examples you can use.
+
+
+Reboot the system.
+[bob@host ~]# sudo shutdown -r now
+List the files in the user bob’s public_html folder.
+[bob@host ~]# sudo -u bob ls /home/bob/public_html
+Revalidates or extends the timeframe of the current users sudo session.
+[bob@host ~]# sudo -v
+The -k flag (kill) essentially ends the sudo session for that user. 
+[bob@host ~]# sudo -k
+After opening and editing a file as a user in vim, using this sudo command in vim saves the file as the root user without losing our changes,
+[bob@host ~]# vim /etc/file.conf
+
+
+:w !sudo tee %
+Run the 251st command in our history file as root.
+[bob@host ~]# sudo !251
+Did you forget to run the last command as root? Rerun it again easily using the following command.
+[bob@host ~]# sudo !!
+Reads a protected file.
+[bob@host ~]# sudo cat /etc/passwd
+Append a repo to our /etc/apt/sources.list
+[bob@host ~]# sudo sh -c 'echo "deb http://us.archive.ubuntu.com/ubuntu/ focal universe" >> /etc/apt/sources.list'
+Make a backup copy of our /etc/apt/sources.list.
+[bob@host ~]# sudo cp /etc/apt/sources.list /etc/apt/sources.list.bk
+List which files have been modified in the last 60 minutes
+[bob@host ~]# sudo find / -mmin 60 -type f
+Limit the amount of cpu usage for a process
+[bob@host ~]# sudo cpulimit -p pid -l 50
+Set an immutable flag on a file.
+[bob@host ~]# sudo chattr +i <file>
+Use sudo to run multiple commands.
+[bob@host ~]# sudo -s <<< 'apt update -y && apt upgrade -y'
+Switch to superuser account.
+[bob@host ~]# sudo su
+Conclusion
+In this tutorial, we have learned what sudo is, how it is configured, and reviewed how it distributes specific rights to users.
+Would you like to learn more about the available on your server? Give us a call at 800.580.4985, or open a chat or ticket with us to speak with one of our knowledgeable technical support specialists or an experi
+enced systems administrator today!

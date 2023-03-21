@@ -1,0 +1,129 @@
+﻿Technical Session  [05-12-2022]
+
+
+
+
+guacamole-app= tomcat
+guacamole-postgres=database
+guacacd=process
+
+
+
+
+Pod 1
+
+
+* Process Exporter
+* Pgsql Exporter
+* Jmx exporter
+
+
+Pod 2
+* Prometheus
+* Grafana
+
+
+Prom QL screen UI query chal rahi hai ya nahi check karna hai
+
+
+Browser mai check karo k data de rahe hai ya nahi
+
+
+
+
+
+
+Tuesday:::::
+
+
+Scheme URl
+
+
+In url first part is scheme
+
+
+Study about gzip..xzzip…tar
+
+
+Study post and get in url
+Http response code
+Http version
+Http method
+
+
+Awk ‘{ print $9, $11, $19, $22 }’ haproxy.log |head -n5
+
+
+Grep vahan haproxy.log |Awk ‘{ print $9, $11, $19, $22 }’ haproxy log |head -n5
+
+
+
+
+Sort command =assending descending or abcd wise
+
+
+Uniq command
+
+
+
+
+======================================================================
+Update - 10/12/2022
+
+
+https://www.ibm.com/cloud/blog/jvm-vs-jre-vs-jdk
+
+
+Jdk
+Jre
+Jvm
+Byte code
+
+
+Hyperviserg
+threads
+Shell
+
+
+Instruction set
+
+
+Processor
+
+
+Processor is in percentage and ram is in absolute value
+
+
+
+
+
+
+
+
+Panel::::
+Heap used
+Uptime
+Gc time
+Class load
+Gc count
+Threads used
+
+
+
+
+
+
+Javac (jdk)
+Javaclass (jre) run then jvm will create 
+
+
+Book name = EATS SHOOTS AND LEAVES
+
+
+
+
+
+
+==
+Technorage heap memory 
+https://deepu.tech/memory-management-in-golang/

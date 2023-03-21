@@ -1,0 +1,217 @@
+﻿How to Get Hardware Information with Dmidecode Command on Linux
+With help of Dmidecode command we will come to know the details without opening system chasis. Dmidecode command works for RHEL/CentOS/Fedora/Ubuntu Linux.
+
+
+Dmidecode tool read DMI (some say SMBIOS) table to fetch data and displays useful system informations like hardware details, serial numbers and BIOS version, Processor etc. in human readable format. You may require root priviledge to execute dmidecode command.
+1. Basic Output of Dmidecode
+Below is the Demidecode command sample output.
+# dmidecode 2.11
+
+
+2. How to Get DMI Types
+DMI Id give us particular hardware information of system. Dmidecode with options ‘-t ‘or ‘–type‘ and ‘Id‘ will provide us the exact infromation. Id 6 will give us Memory Module information.
+[root@tecmint ~]# dmidecode -t 6
+
+
+Instead of going with ‘type_id‘ you can also use keyword with ‘-t‘ argument to the dmidecode command. 
+
+
+For example, to get the Cache information on system, you can execute below command instead of Id 7.
+[root@tecmint ~]# dmidecode -t cache
+
+
+3. How to Get Memory Information
+How do i get Memory information on system and how much memory is supported by system? The following command shows that the system can support maximum 4GB of RAM.
+[root@tecmint ~]# dmidecode -t 16
+
+
+
+
+4. How Do I Get BIOS information?
+To get the BIOS information of the system, run the following command with ‘-t’ option.
+[root@tecmint ~]# dmidecode -t bios
+5. How Do I Get the Manufacturer, Model and Serial Number?
+To get the information about Manufacturer, Model and Serial Number of system, use the following command as shown below.
+[root@tecmint ~]# dmidecode -t system
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+20 Netstat Commands for Linux Network Management
+netstat (network statistics) is a command-line tool for monitoring network connections both incoming and outgoing as well as viewing routing tables, interface statistics, etc.
+netstat is available on all Unix-like Operating Systems and also available on Windows OS as well. It is very useful in terms of network troubleshooting and performance measurement.
+netstat is one of the most basic network service debugging tools, telling you what ports are open and whether any programs are listening on ports.
+Update: The Linux netstat command is replaced by new ss command, which is capable of displaying more information about network connections and it is much faster than the older netstat command.
+The netstat tool is very important and much useful for Linux network administrators as well as system administrators to monitor and troubleshoot their network-related problems and determine network traffic performance.
+
+
+1. Listing all the LISTENING Ports of TCP and UDP Connections
+Listing all ports (both TCP and UDP) using netstat -a option.
+# netstat -a | more
+2. Listing TCP Ports connections
+Listing only TCP (Transmission Control Protocol) port connections using netstat -at.
+# netstat -at
+3. Listing UDP Ports connections
+Listing only UDP (User Datagram Protocol ) port connections using netstat -au.
+# netstat -au
+4. Listing all LISTENING Connections
+Listing all active listening ports connections with netstat -l.
+# netstat -l
+
+
+
+
+
+
+5. Listing all TCP Listening Ports
+Listing all active listening TCP ports by using option netstat -lt.
+# netstat -lt
+
+
+6. Listing all UDP Listening Ports
+Listing all active listening UDP ports by using option netstat -lu.
+# netstat -lu
+
+
+7. Listing all UNIX Listening Ports
+Listing all active UNIX listening ports using netstat -lx.
+# netstat -lx
+
+
+8. Showing Statistics by Protocol
+Displays statistics by protocol. By default, statistics are shown for the TCP, UDP, ICMP, and IP protocols. The -s parameter can be used to specify a set of protocols.
+# netstat -s
+
+
+9. Showing Statistics by TCP Protocol
+Showing statistics of only TCP protocol by using option netstat -st.
+# netstat -st
+
+
+10. Showing Statistics by UDP Protocol
+# netstat -su
+
+
+11. Displaying Service name with PID
+Displaying service name with their PID number, using option netstat -tp will display “PID/Program Name“.
+# netstat -tp
+
+
+
+
+
+
+
+
+12. Displaying Promiscuous Mode
+Displaying Promiscuous mode with -ac switch, netstat print the selected information or refresh screen every five seconds. The default screen refreshes every second.
+# netstat -ac 5 | grep tcp
+
+
+
+
+13. Displaying Kernel IP routing
+Display Kernel IP routing table with netstat and route command.
+# netstat -r
+
+
+14. Showing Network Interface Transactions
+Showing network interface packet transactions including both transferring and receiving packets with MTU size.
+# netstat -i
+
+
+15. Showing Kernel Interface Table
+Showing Kernel interface table, similar to ifconfig command.
+# netstat -ie
+
+
+16. Displaying IPv4 and IPv6 Information
+Displays multicast group membership information for both IPv4 and IPv6.
+# netstat -g
+
+
+17. Print Netstat Information Continuously
+To get netstat information every few seconds, then use the following command, it will print netstat information continuously, say every few seconds.
+# netstat -c
+
+
+18. Finding non-supportive Address
+Finding un-configured address families with some useful information.
+# netstat --verbose
+
+
+19. Finding Listening Programs
+Find out how many listening programs running on a port.
+# netstat -ap | grep http
+
+
+20. Displaying RAW Network Statistics
+# netstat --statistics --raw

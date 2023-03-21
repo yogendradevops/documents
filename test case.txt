@@ -1,0 +1,353 @@
+﻿* mysql -u root -p
+   * STOP SLAVE;
+   * RESET SLAVE;
+   * CHANGE MASTER TO MASTER_HOST ='192.168.122.208', MASTER_USER ='cook', MASTER_PASSWORD ='redhat', MASTER_LOG_FILE = 'mysql-bin.000002', MASTER_LOG_POS = 402;
+   * SHOW SLAVE STATUS\G
+   * START SLAVE IO_THREAD;
+
+
+mysqlcheck --user=root --password=a --databases sakila --check-upgrade
+
+
+show triggers\G
+select count(routine_name) from information_schema.routines;
+select count(trigger_name) from information_schema.triggers;
+
+
+
+
+mysql> SELECT SUM(TABLE_ROWS)
+        ->        FROM INFORMATION_SCHEMA.TABLES
+        ->        WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+1 row in set (0.06 sec)
+
+
+mysql> SELECT SUM(TABLE_ROWS)
+        ->          FROM INFORMATION_SCHEMA.TABLES
+        ->          WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+1 row in set (0.01 sec)
+
+
+
+
+
+
+====================
+
+
+mysql> SELECT SUM(TABLE_ROWS)
+        ->          FROM INFORMATION_SCHEMA.TABLES
+        ->          WHERE TABLE_SCHEMA = 'sakila';
++-----------------+
+| SUM(TABLE_ROWS) |
++-----------------+
+|               47274 |
++-----------------+
+1 row in set (0.01 sec)
+
+
+mysql> SELECT CONCAT(
+        ->         'SELECT "',
+        ->         table_name,
+        ->         '" AS table_name, COUNT(*) AS exact_row_count FROM `',
+        ->         table_schema,
+        ->         '`.`',
+        ->         table_name,
+        ->         '` UNION '
+        -> )
+        -> FROM INFORMATION_SCHEMA.TABLES
+        -> WHERE table_schema = 'sakila';
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| CONCAT(
+        'SELECT "',
+        table_name,
+        '" AS table_name, COUNT(*) AS exact_row_count FROM `',
+        table_schema,
+        '`.`',
+        table_name,
+        '` UNION '
+) |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| SELECT "actor" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`actor` UNION                                                                                    |
+| SELECT "actor_info" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`actor_info` UNION                                                                          |
+| SELECT "address" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`address` UNION                                                                                |
+| SELECT "category" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`category` UNION                                                                              |
+| SELECT "city" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`city` UNION                                                                                      |
+| SELECT "country" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`country` UNION                                                                                |
+| SELECT "customer" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`customer` UNION                                                                              |
+| SELECT "customer_list" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`customer_list` UNION                                                                    |
+| SELECT "film" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`film` UNION                                                                                      |
+| SELECT "film_actor" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`film_actor` UNION                                                                          |
+| SELECT "film_category" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`film_category` UNION                                                                    |
+| SELECT "film_list" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`film_list` UNION                                                                            |
+| SELECT "film_text" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`film_text` UNION                                                                            |
+| SELECT "inventory" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`inventory` UNION                                                                            |
+| SELECT "language" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`language` UNION                                                                              |
+| SELECT "nicer_but_slower_film_list" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`nicer_but_slower_film_list` UNION                                          |
+| SELECT "payment" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`payment` UNION                                                                                |
+| SELECT "rental" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`rental` UNION                                                                                  |
+| SELECT "sales_by_film_category" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`sales_by_film_category` UNION                                                  |
+| SELECT "sales_by_store" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`sales_by_store` UNION                                                                  |
+| SELECT "staff" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`staff` UNION                                                                                    |
+| SELECT "staff_list" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`staff_list` UNION                                                                          |
+| SELECT "store" AS table_name, COUNT(*) AS exact_row_count FROM `sakila`.`store` UNION                                                                                    |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+23 rows in set (0.00 sec)
+
+
+==============
+
+
+
+
+
+
+SELECT table_schema "database", sum(data_length + index_length)/1024/1024 "size in MB" FROM information_schema.TABLES GROUP BY table_schema;
+
+
+
+
+mysqldump -u [username] -p -A -R -E --triggers --single-transaction > full_backup.sql
+
+
+SELECT table_schema "sakila",  ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB" FROM information_schema.tables GROUP BY table_schema;
+
+
+
+
+SLAVE:
+
+
+mysql> show triggers\G
+*************************** 1. row ***************************
+                 Trigger: customer_create_date
+                   Event: INSERT
+                   Table: customer
+               Statement: SET NEW.create_date = NOW()
+                  Timing: BEFORE
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 2. row ***************************
+                 Trigger: ins_film
+                   Event: INSERT
+                   Table: film
+               Statement: BEGIN
+        INSERT INTO film_text (film_id, title, description)
+            VALUES (new.film_id, new.title, new.description);
+  END
+                  Timing: AFTER
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 3. row ***************************
+                 Trigger: upd_film
+                   Event: UPDATE
+                   Table: film
+               Statement: BEGIN
+        IF (old.title != new.title) OR (old.description != new.description) OR (old.film_id != new.film_id)
+        THEN
+            UPDATE film_text
+                SET title=new.title,
+                    description=new.description,
+                    film_id=new.film_id
+            WHERE film_id=old.film_id;
+        END IF;
+  END
+                  Timing: AFTER
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 4. row ***************************
+                 Trigger: del_film
+                   Event: DELETE
+                   Table: film
+               Statement: BEGIN
+        DELETE FROM film_text WHERE film_id = old.film_id;
+  END
+                  Timing: AFTER
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 5. row ***************************
+                 Trigger: payment_date
+                   Event: INSERT
+                   Table: payment
+               Statement: SET NEW.payment_date = NOW()
+                  Timing: BEFORE
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 6. row ***************************
+                 Trigger: rental_date
+                   Event: INSERT
+                   Table: rental
+               Statement: SET NEW.rental_date = NOW()
+                  Timing: BEFORE
+                 Created: 2023-02-09 14:54:06.20
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+6 rows in set (0.00 sec)
+
+
+mysql> select count(routine_name) from information_schema.routines;
++---------------------+
+| count(routine_name) |
++---------------------+
+|                      54 |
++---------------------+
+1 row in set (0.00 sec)
+
+
+mysql> select count(trigger_name) from information_schema.triggers;
++---------------------+
+| count(trigger_name) |
++---------------------+
+|                       8 |
++---------------------+
+1 row in set (0.00 sec)
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+MASTER:
+
+
+mysql> show triggers\G
+*************************** 1. row ***************************
+                 Trigger: customer_create_date
+                   Event: INSERT
+                   Table: customer
+               Statement: SET NEW.create_date = NOW()
+                  Timing: BEFORE
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 2. row ***************************
+                 Trigger: ins_film
+                   Event: INSERT
+                   Table: film
+               Statement: BEGIN
+        INSERT INTO film_text (film_id, title, description)
+            VALUES (new.film_id, new.title, new.description);
+  END
+                  Timing: AFTER
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 3. row ***************************
+                 Trigger: upd_film
+                   Event: UPDATE
+                   Table: film
+               Statement: BEGIN
+        IF (old.title != new.title) OR (old.description != new.description) OR (old.film_id != new.film_id)
+        THEN
+            UPDATE film_text
+                SET title=new.title,
+                    description=new.description,
+                    film_id=new.film_id
+            WHERE film_id=old.film_id;
+        END IF;
+  END
+                  Timing: AFTER
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 4. row ***************************
+                 Trigger: del_film
+                   Event: DELETE
+                   Table: film
+               Statement: BEGIN
+        DELETE FROM film_text WHERE film_id = old.film_id;
+  END
+                  Timing: AFTER
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 5. row ***************************
+                 Trigger: payment_date
+                   Event: INSERT
+                   Table: payment
+               Statement: SET NEW.payment_date = NOW()
+                  Timing: BEFORE
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+*************************** 6. row ***************************
+                 Trigger: rental_date
+                   Event: INSERT
+                   Table: rental
+               Statement: SET NEW.rental_date = NOW()
+                  Timing: BEFORE
+                 Created: NULL
+                sql_mode: STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+                 Definer: root@localhost
+character_set_client: utf8mb4
+collation_connection: utf8mb4_general_ci
+  Database Collation: latin1_swedish_ci
+6 rows in set (0.00 sec)
+
+
+mysql> select count(routine_name) from information_schema.routines;
++---------------------+
+| count(routine_name) |
++---------------------+
+|                       6 |
++---------------------+
+1 row in set (0.00 sec)
+
+
+mysql> select count(trigger_name) from information_schema.triggers;
++---------------------+
+| count(trigger_name) |
++---------------------+
+|                       6 |
++---------------------+
+1 row in set (0.00 sec)
+
+
+mysql>

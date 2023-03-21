@@ -1,0 +1,46 @@
+﻿Booting Process Assignment:
+
+
+1 Create a Dual boot system with 2 linux distributions. - Ubuntu & Fedora
+I installed Fedora first on my PC after that I installed Ubuntu for dual boot on another partition.
+
+
+2 Configure GRUB for waiting 15 seconds before booting the operating system by default if no key is pressed.
+Open the GRUB config file using the terminal
+sudo gedit /etc/default/grub
+##Change GRUB_TIMEOUT=15  for for splash screen waiting 15 seconds
+GRUB_TIMEOUT=15
+
+
+3 Change the default Operating system
+Open the GRUB config file using the terminal
+sudo gedit /etc/default/grub
+I changed GRUB_DEFAULT=0 to GRUB_DEFAULT=saved
+To save the changes run command update-grub
+
+
+To set a default  OS run grub-set-default n    ##n= OS position in grub
+
+
+4 Update the kernel of ubuntu:
+I run below given commands:
+sudo apt-add-repository ppa:cappelikan/ppa 
+apt install mainline
+Open the Ubuntu mainline Kernel Installer and select the kernel to install.
+After this restart the system.
+uname -rsnm
+  
+
+   
+5 Change the default kernel that boots with ubuntu:
+GRUB_DEFAULT=”1>2”
+GRUB_TIMEOUT_STYLE=hidden
+GRUB_TIMEOUT=15
+GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+GRUB_CMDLINE_LINUX_DEFAULT="quit splash"
+GRUB_CMDLINE_LINUX=""
+
+
+6 How does BIOS work in virtual machines?
+A VM BIOS (virtual machine basic input/output system) is the set of instructions that controls the booting process of a virtual machine.
+Each hypervisor has a different process for accessing and editing VM BIOS. In Microsoft Hyper-V, administrators can access VM BIOS settings with the Hyper-V Manager. VMware VM BIOS settings can be adjusted through vSphere. Different VM versions or formats also have different VM BIOS settings. For example, in addition to adjusting boot order, BIOS settings for a Hyper-V Generation 2 VM offer a secure boot option, which is a feature that prevents unauthorised code from running on boot up.

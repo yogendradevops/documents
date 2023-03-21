@@ -1,0 +1,374 @@
+﻿Ansible Roles
+Roles provide a framework for fully independent or interdependent collections of files, tasks, templates, variables, and modules.
+The role is the primary mechanism for breaking a playbook into multiple files. This simplifies writing complex playbooks and makes them easier to reuse. The breaking of the playbook allows you to break the playbook into reusable components.
+Each role is limited to a particular functionality or desired output, with all the necessary steps to provide that result either within the same role itself or in other roles listed as dependencies.
+Roles are not playbooks. Roles are small functionality that can be used within the playbooks independently. Roles have no specific setting for which hosts the role will apply.
+Top-level playbooks are the bridge holding the hosts from your inventory file to roles that should be applied to those hosts.
+Creating a Role
+The directory structure for roles is essential to creating a new role, such as:
+Role Structure
+The roles have a structured layout on the file system. You can change the default structured of the roles as well.
+For example, let us stick to the default structure of the roles. Each role is a directory tree in itself. So the role name is the directory name within the /roles directory.
+Roles provide a framework for fully independent or interdependent collections of files, tasks, templates, variables, and modules.
+The role is the primary mechanism for breaking a playbook into multiple files. This simplifies writing complex playbooks and makes them easier to reuse. The breaking of the playbook allows you to break the playbook into reusable components.
+Each role is limited to a particular functionality or desired output, with all the necessary steps to provide that result either within the same role itself or in other roles listed as dependencies.
+Roles are not playbooks. Roles are small functionality that can be used within the playbooks independently. Roles have no specific setting for which hosts the role will apply.
+Top-level playbooks are the bridge holding the hosts from your inventory file to roles that should be applied to those hosts.
+Creating a Role
+The directory structure for roles is essential to creating a new role, such as:
+Role Structure
+The roles have a structured layout on the file system. You can change the default structured of the roles as well.
+For example, let us stick to the default structure of the roles. Each role is a directory tree in itself. So the role name is the directory name within the /roles directory.
+1. $ ansible-galaxy -h   
+Usage
+1. ansible-galaxy [delete|import|info|init|install|list|login|remove|search|setup] [--help] [options] ...   
+Options
+* -h: (help) it shows this help message and exit.
+* -v: (verbose) Verbose mode (-vvv for more, -vvvv to enable connection debugging).
+* --version: it shows program version number and exit.
+Roles are stored in separate directories and have a particular directory structure
+1. [root@ansible-server test2]# tree  
+2. .  
+3. `-- role1  
+4.     |-- defaults  
+5.     |   `-- main.yml  
+6.     |-- handlers  
+7.     |   `-- main.yml  
+8.     |-- meta  
+9.     |   `-- main.yml  
+10.     |-- README.md  
+11.     |-- tasks  
+12.     |   `-- main.yml  
+13.     |-- tests  
+14.     |   |-- inventory  
+15.     |   `-- test.yml  
+16.     `-- vars  
+17.         `-- main.yml  
+Explanation
+* The YAML file in the default directory contains a list of default variables that are to be used along with the playbook.
+* The handler's directory is used to store handlers.
+* The meta-directory is supposed to have information about the author and role dependencies.
+* The tasks directory is the main YAML file for the role.
+* The tests directory contains a sample YAML playbook file and a sample inventory file and is mostly used for testing purposes before creating the actual role.
+* The vars directory contains the YAML file in which all the variables used by the role will be defined. The directory templates and the directory files should contain files and templates that will be used by the tasks in the role.
+
+
+
+
+
+
+
+
+—------------------
+Ansible also lets you organise tasks in a directory structure called a Role
+Roles allow you to break down a complex playbook into separate, smaller chunks that can be coordinated by a central entry point.
+
+
+Here is a description of what each directory represents:
+* defaults: This directory lets you set default variables for included or dependent roles. Any defaults set here can be overridden in playbooks or inventory files.
+* files: This directory contains static files and script files that might be copied to or executed on a remote server.
+* handlers: All handlers that were in your playbook previously can now be added into this directory.
+* meta: This directory is reserved for role metadata, typically used for dependency management… For example, you can define a list of roles that must be applied before the current role is invoked.
+* templates: This directory is reserved for templates that will generate files on remote hosts. Templates typically use variables defined on files located in the vars directory, and on host information that is collected at runtime.
+* tasks: This directory contains one or more files with tasks that would normally be defined in the tasks section of a regular Ansible playbook. These tasks can directly reference files and templates contained in their respective directories within the role, without the need to provide a full path to the file.
+* vars: Variables for a role can be specified in files inside this directory and then referenced elsewhere in a role.
+If a file called main.yml exists in a directory, its contents will be automatically added to the playbook that calls the role. However, this does not apply to files and templates directories, since their contents need to be referenced explicitly.
+
+
+
+
+
+
+
+
+
+
+**********
+Ansible role is a set of tasks to configure a host to serve a certain purpose like configuring a service. Roles are defined using YAML files with a predefined directory structure. The concept of an Ansible role is simple; it is a group of variables, tasks, files, and handlers that are stored in a standardized file structure.
+
+
+
+
+****
+Ansible is an open source IT configuration management (CM) and automation platform, provided by Red Hat. It uses human-readable YAML templates so that users can program repetitive tasks to occur automatically, without learning an advanced language.
+Ansible replaces ad hoc scripting or manual CM with an automated and repeatable process. The tool pushes application code, programs and IT infrastructure setup instructions via modules to managed nodes, whether physical servers, virtual machines (VMs) or cloud instances. The tool also gives users the option to invert its setup to a pull architecture, where managed nodes request instructions from the tool, typically done to enable scaling.
+Why Ansible?
+* Ansible is free and Open Source.
+* Agentless. Ansible doesn’t require any agent on client machines unlike other automation tool exists in the market (Puppet, Chef, Salt.). It uses SSH protocol to connect the servers. Ansible required Python to make the use of modules on client machines. Ansible also works with a system which doesn’t have python installed using the “raw” module.
+* Ansible uses YAML language which is very easy to learn.
+* Supported by Red Hat.
+How Ansible work?
+Ansible works by connecting to your server using “SSH” and pushing out small programs, called “Ansible modules” to it. Using these modules, playbooks (a small piece of YAML code), we should be able to perform the specific task on all the ansible clients. The specific task could be installing the packages, restarting the services, rebooting the servers etc.
+  
+
+Ansible – Supported Operating Systems
+* Linux, including RHEL, CentOS, Fedora, Ubuntu, and others.
+* Windows and Windows Server
+* UNIX
+* OS X
+Key Features of Ansible:
+1. Models the IT infrastructure around the systems interrelating with each other, thus ensuring faster end results.
+2. Module library can reside on any system, without the requirement of any server, daemons or databases.
+3. No additional setup required, so once you have the instance ready you can work on it straight away.
+4. Easier and faster to deploy as it doesn’t rely on agents or additional custom security infrastructure.
+5. Uses a very simple language structure called playbooks. Playbooks are almost similar to the plain English language for describing automation jobs.
+6. Ansible has the flexibility to allow user-made modules that can be written in any programming language such as Ruby, Python. It also allows adding new server side behaviors extending Ansible’s connection types through Python APIs.
+
+
+
+
+*******
+Ansible role is an independent component which allows reuse of common configuration steps. Ansible role have to be used within the playbook. Ansible role is a set of tasks to configure a host to serve a certain purpose like configuring a service. Roles are defined using YAML files with a predefined directory structure.
+A role directory structure contains directories: defaults, vars, tasks, files, templates, meta, handlers.
+Each directory must contain a main.yml file which contains relevant content. Let’s look little closer to each directory.
+1. defaults: contains default variables for the role. Variables in default have the lowest priority so they are easy to override.
+2. vars: contains variables for the role. Variables in vars have higher priority than variables in defaults directory.
+3. tasks: contains the main list of steps to be executed by the role.
+4. files: contains files which we want to be copied to the remote host. We don’t need to specify a path of resources stored in this directory.
+5. templates: contains file template which supports modifications from the role. We use the Jinja2 templating language for creating templates.
+6. meta: contains metadata of role like an author, support platforms, dependencies.
+7. handlers: contains handlers which can be invoked by “notify” directives and are associated with service.
+********
+Ansible is a simple and powerful open source IT automation tool. It can be used to automate tasks that are executed on a server.
+Ansible is written in Python and uses SSH for remote connectivity. Ansible does not require any agents to be installed on the remote systems.
+Ansible manages both the configuration of the remote systems as well as their actual state. Ansible uses push-based model, which means that it will execute tasks only after receiving approval from the user.
+The Ansible configuration files are written in YAML or Jinja2 template formats and stored in plain text files called playbooks.
+
+
+
+
+*****
+Ansible has a huge number of benefits:
+* No Agent. As long as the box can be ssh’d into and it has python, it can be configured with Ansible.
+* Idempotent. Ansible’s whole architecture is structured around the concept of idempotency. The core idea here is that you only do things if they are needed and that things are repeatable without side effects. More than anything else this sold me over Puppet and Chef.
+* Declarative Not Procedural. Other configuration tools tend to be procedural — do this and then do that and so on. Ansible works by you writing a description of the state of the machine that you want and then it takes steps to fulfill that description.
+* Tiny Learning Curve. Roughly a week after starting to use Ansible, I was giving presentations on how to use it to a local Meetup. I’d contrast that heavily with Puppet and Chef which despite years of Ruby programming, I never felt comfortable enough to present to anyone.        
+*******
+Ansible Galaxy is a free site for finding, downloading, and sharing roles. It’s also pretty handy for creating them, which is what we are about to do here.
+
+
+
+
+https://redhatgov.io/workshops/ansible_automation/exercise1.5/
+Roles: Making your playbooks reusable
+  
+
+Section 1: Using Ansible Galaxy to initialise a new role
+Ansible Galaxy is a free site for finding, downloading, and sharing roles. It’s also pretty handy for creating them, which is what we are about to do here.
+Step 1:Navigate to your project
+Navigate to your apache-basic-playbook project.
+cd ~/apache-basic-playbook
+Step 2: Create a directory
+Create a directory called roles and cd into it.
+mkdir roles
+cd roles
+Step 3: Initialise new role
+Use the ansible-galaxy command to initialise a new role called apache-simple.
+ansible-galaxy init apache-simple
+Take a look around the structure you just created. It should look a lot like Figure 1 above. However, we need to complete one more step before moving onto Section 2. It is Ansible best practice to clean out role directories and files you won’t be using. For this role, we won’t be using anything from files, tests.
+Step 4: Remove directories
+Remove the files and tests directories
+cd ~/apache-basic-playbook/roles/apache-simple/
+rm -rf files tests
+Section 2: Breaking your site.yml playbook into the newly created apache-simple role
+In this section, we will separate the major parts of your playbook, including vars:, tasks:, template:, and handlers:.
+Step 1: Backup
+Make a backup copy of site.yml, then create a new site.yml.
+cd ~/apache-basic-playbook
+mv site.yml site.yml.bkup
+vim site.yml
+Step 2: Add play definition/Invoke role
+Add the play definition and the invocation of a single role.
+---
+- hosts: web
+  name: This is my role-based playbook
+  become: yes
+
+
+  roles:
+    - apache-simple
+Step 3: Add default variables
+Add some default variables to your role in roles/apache-simple/defaults/main.yml.
+vim roles/apache-simple/defaults/main.yml
+Add the following contents to the file:
+apache_test_message: This is a test message
+apache_webserver_port: 80
+Step 4: Add variables
+Add some role-specific variables to your role in roles/apache-simple/vars/main.yml.
+vim roles/apache-simple/vars/main.yml
+Add the following contents to the file:
+httpd_packages:
+  - httpd
+  - python3-mod_wsgi
+
+
+	
+
+	Step 5: Create role handler
+Create your role handler in roles/apache-simple/handlers/main.yml.
+vim roles/apache-simple/handlers/main.yml
+Add the following contents to the file:
+- name: restart apache service
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+Step 6: Add role tasks
+Add tasks to your role in roles/apache-simple/tasks/main.yml.
+vim roles/apache-simple/tasks/main.yml
+Add the following contents to the file:
+- name: install httpd packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ httpd_packages }}"
+  notify: restart apache service
+
+
+- name: create site-enabled directory
+  file:
+    name: /etc/httpd/conf/sites-enabled
+    state: directory
+
+
+- name: copy httpd.conf
+  template:
+    src: templates/httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+  notify: restart apache service
+
+
+- name: copy index.html
+  template:
+    src: templates/index.html.j2
+    dest: /var/www/html/index.html
+
+
+- name: start httpd
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+Step 7: Download templates
+Download a couple of templates into roles/apache-simple/templates/. And then, let’s clean up the templates from exercise 2.1, by removing the old templates directory.
+mkdir -p ~/apache-basic-playbook/roles/apache-simple/templates/
+cd ~/apache-basic-playbook/roles/apache-simple/templates/
+curl -O https://raw.githubusercontent.com/ansible/lightbulb/master/examples/apache-basic-playbook/templates/httpd.conf.j2
+curl -O https://raw.githubusercontent.com/ansible/lightbulb/master/examples/apache-basic-playbook/templates/index.html.j2
+rm -rf ~/apache-basic-playbook/templates/
+Section 3: Running your new role-based playbook
+Now that you’ve successfully separated your original playbook into a role, let’s run it and see how it works.
+Step 1: Run the playbook
+cd ~/apache-basic-playbook
+ansible-playbook site.yml
+Step 2: Verify your output
+If successful, your standard output should look similar to the figure below.
+ ansible-basic-playbook role-based stdout 
+
+Section 4: Review
+You should now have a completed playbook, site.yml - with a single role called apache-simple. The advantage of structuring your playbook into roles is that you can now add new roles to the playbook using Ansible Galaxy or simply writing your own. In addition, roles simplify changes to variables, tasks, templates, etc.
+________________
+
+
+
+
+
+
+****
+What are the Ansible Roles?
+Role enables the sharing and reuse of Ansible tasks. It contains Ansible playbook tasks plus all the supporting files, variables, templates, and handlers needed to run the tasks. A Role is a complete unit of automation that can be reused and shared.
+Why Ansible Roles?
+Roles play an important part in breaking the complex Ansible Playbooks, the core component of any Ansible configuration, into easy to reuse multiple files. With Ansible Roles you can:
+* Bundle automation content and make it reusable
+* Group multiple sets of tasks in an effective manner
+* Modify and reduce syntax errors
+* Release modules independent of Ansible Core releases
+Ansible Roles are equivalent to modules in Puppet and Cookbooks in Chef.
+The ‘ansible-galaxy’ commands
+The ‘ansible-galaxy’ command comes bundled with Ansible. You can create, install, and remove Roles using commands. It can be used for the following actions:
+* Init: A Role requires various directories and main.yml files. Using the init command you can initialize the base structure of a new Role and save the time required to create directories and files.
+* Info: With the info command you can see more details about a specific Role.
+* Install: You can download and install Roles from the Galaxy website using the install command. (Works similar to ‘pip install’ in python)
+* List: Use list to show the name and version of each Role installed in the roles_path. (Works similar to ‘pip freeze’ in python).
+* Remove: Use remove to delete a Role from roles_path.
+Ansible Role Structure and its significance
+* README.md – This is the Readme file for the role. Put the detailed information of all the input parameters for the role and example yml in the readme file.
+* tasks - You can enlist all tasks to be executed by the Role in tasks. Main.yml of the tasks is the entry point for the Role (this is where the execution starts). One can include other files into this file.
+* handlers - Contains handlers, which may be used by this role or even anywhere outside this role.
+* defaults - Default variables for the Role.
+* vars - Other variables which are of more priority than the defaults for Role.
+* files - This contains the files which can be deployed via Role.
+* templates - Contains templates which can be deployed via Role.
+* meta - You can define metadata for the Role in meta. Other Role dependencies, if any, should be mentioned in this file.
+* tests – CI tests to be executed.
+* library - Embedding Modules and Plugins in Roles (Not created by init command). If required one can define custom module in python in this folder and use it in the tasks.
+Writing an Ansible Role
+Writing an Ansible Role is fairly easy. Follow the aforementioned steps to write a Role:
+1. Initialise the role structure using the command:
+ansible-galaxy init &lt;role-name&gt;
+2. Go to role directory using:
+cd &lt;role-name&gt;
+3. Initialise for Git:
+git init
+4. Do the necessary changes required to add role functionality.
+5. Add files to Git using the command:
+git add *
+6. Commit the changes to Git:
+git commit -m “Initial commit for &lt;role-name&gt;”
+7. Set your public repository origin:
+git remote add origin &lt;github-url&gt;
+8. Push the changes to the repository using the command:
+git push origin master
+9. Release a version in the releases tab of GitHub which will be published in Galaxy as a Role.
+Publishing an Ansible Role
+Go to https://galaxy.ansible.com
+Log in to Galaxy using GitHub credentials.
+ Publishing an Ansible Role 
+
+Go to “My Content” tab. Click on “add content” of namespace where the role is pushed on GitHub.
+ Publishing an Ansible Role1 
+
+Select the role repository to add to.
+ Select role repository 
+
+After adding the repository, you can find it in the tab “My Imports”.
+Click on the import icon, in the top right corner, to import the latest release in Ansible Galaxy.
+ release Ansible Galaxy 
+
+Best Practices to be followed while developing Ansible Roles
+* Name of git repo should be same as Role name.
+* Variables names in the Roles should be unique, should not override other Role/playbook variables. To achieve this, use Role prefix for every variable in the Role.
+* List the other Role dependencies in the meta/main.yml
+* Search for Ansible Galaxy role if you can reuse existing Role for the requirement.
+* Use Git tags as Role versions
+* As Role is a reusable component, it should not contain any inventories or playbooks.
+* Add test automation in the test folder. Integration with Travis CI is a simple and easy way to write CI pipeline for Ansible Roles.
+* Role variables defined in ‘vars’ have a very high precedence - they can only be overwritten by passing them on the command line in the specific task or in a block. Therefore all your variables should be defined in the ‘defaults’ unless those are constants.
+Ansible Galaxy is like a vault with valuables for Ansible users. You can check for anything you want to implement by simply searching it in Ansible Galaxy if the same problem is addressed by someone else you can simply reuse it instead of starting from the scratch. Even if you find something close to what you are looking for you can simply make the changes as per the requirement and use it. So, if you have developed interesting workflows using Ansible which you think can be reused, consider developing Ansible Roles for the same.
+****
+Ansible Role Structure and its significance
+* README.md – This is the Readme file for the role. Put the detailed information of all the input parameters for the role and example yml in the readme file.
+* tasks – You can enlist all tasks to be executed by the Role in tasks. Main.yml of the tasks is the entry point for the Role (this is where the execution starts). One can include other files into this file.
+* handlers – Contains handlers, which may be used by this role or even anywhere outside this role.
+* defaults – Default variables for the Role.
+* vars – Other variables which are of more priority than the defaults for Role.
+* files – This contains the files which can be deployed via Role.
+* templates – Contains templates which can be deployed via Role.
+* meta – You can define metadata for the Role in meta. Other Role dependencies, if any, should be mentioned in this file.
+* tests – CI tests to be executed.
+* library – Embedding Modules and Plugins in Roles (Not created by init command). If required one can define custom module in python in this folder and use it in the tasks.
+
+
+
+
+
+
+Bootloader
+Semantic Versioning
+Baccus naur form
+
+
+Uefi
+—
+Bios
+kernal

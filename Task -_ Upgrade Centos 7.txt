@@ -1,0 +1,213 @@
+﻿Task -> Upgrade Centos 7.6 to 7.9 using local Repositories
+
+
+======================================================================
+
+
+
+
+yogendra@yogendra:~/guacamole/videos/guacd/video-recording$ ssh 192.168.122.54
+yogendra@192.168.122.54's password:
+Last login: Thu Dec 29 21:59:22 2022 from gateway
+
+
+[yogendra@cent ~]$ cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+
+[yogendra@cent ~]$ cat /etc/redhat-release
+CentOS Linux release 7.6.1810 (Core)
+[yogendra@cent ~]$ uname -r
+3.10.0-957.el7.x86_64
+[yogendra@cent ~]$
+
+
+[yogendra@cent ~]$ lsblk
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0                  11:0        1  4.4G  0 rom  
+vda                 252:0        0   20G  0 disk
+├─vda1              252:1        0        1G  0 part /boot
+└─vda2              252:2        0   19G  0 part
+  ├─centos-root 253:0        0   17G  0 lvm  /
+  └─centos-swap 253:1        0        2G  0 lvm  [SWAP]
+
+
+[yogendra@cent ~]$ df -Th
+Filesystem                  Type          Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root xfs            17G  1.2G   16G   7% /
+devtmpfs                    devtmpfs  484M         0  484M   0% /dev
+tmpfs                       tmpfs         496M         0  496M   0% /dev/shm
+tmpfs                       tmpfs         496M   13M  483M   3% /run
+tmpfs                       tmpfs         496M         0  496M   0% /sys/fs/cgroup
+/dev/vda1                   xfs          1014M  160M  855M  16% /boot
+tmpfs                       tmpfs         100M         0  100M   0% /run/user/1000
+
+
+[yogendra@cent ~]$ mount /dev/sr0 /mnt/
+[sudo] password for yogendra:
+mount: /dev/sr0 is write-protected, mounting read-only
+
+
+[yogendra@cent ~]$ df -Th
+Filesystem                  Type          Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root xfs            17G  1.2G   16G   7% /
+devtmpfs                    devtmpfs  484M         0  484M   0% /dev
+tmpfs                       tmpfs         496M         0  496M   0% /dev/shm
+tmpfs                       tmpfs         496M   13M  483M   3% /run
+tmpfs                       tmpfs         496M         0  496M   0% /sys/fs/cgroup
+/dev/vda1                   xfs          1014M  160M  855M  16% /boot
+tmpfs                       tmpfs         100M         0  100M   0% /run/user/1000
+/dev/sr0                    iso9660   4.4G  4.4G         0 100% /mnt
+
+
+[yogendra@cent ~]$ mount /dev/sr0 /mnt/
+[sudo] password for yogendra:
+mount: /dev/sr0 is write-protected, mounting read-only
+
+
+[yogendra@cent ~]$ df -Th
+Filesystem                  Type          Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root xfs            17G  1.2G   16G   7% /
+devtmpfs                    devtmpfs  484M         0  484M   0% /dev
+tmpfs                       tmpfs         496M         0  496M   0% /dev/shm
+tmpfs                       tmpfs         496M   13M  483M   3% /run
+tmpfs                       tmpfs         496M         0  496M   0% /sys/fs/cgroup
+/dev/vda1                   xfs          1014M  160M  855M  16% /boot
+tmpfs                       tmpfs         100M         0  100M   0% /run/user/1000
+/dev/sr0                    iso9660   4.4G  4.4G         0 100% /mnt
+
+
+[yogendra@cent ~]$ cd /etc/yum.repos.d/
+
+
+[yogendra@cent yum.repos.d]$ ls
+local.repo  old  repo5.6
+
+
+[yogendra@cent yum.repos.d]$ vi local.repo
+
+
+[yogendra@cent yum.repos.d]$ cat local.repo
+[localrepo]
+name=Centos7.9
+gpgcheck=0
+enabled=1
+baseurl=file:///mnt/
+
+
+[yogendra@cent yum.repos.d]$ yum clean all
+Loaded plugins: fastestmirror
+Cleaning repos: localrepo
+Cleaning up list of fastest mirrors
+Other repos take up 18 M of disk space (use --verbose for details)
+
+
+[yogendra@cent yum.repos.d]$ yum repolist
+Loaded plugins: fastestmirror
+Determining fastest mirrors
+repo id                                                                      repo name                                                                    status
+!localrepo                                                                   Centos7.9                                                                    4,021
+repolist: 4,021
+
+
+[yogendra@cent yum.repos.d]$ yum update
+Loaded plugins: fastestmirror
+You need to be root to perform this command.
+[yogendra@cent yum.repos.d]$ sudo yum update
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+localrepo                                                                                                                            | 3.6 kB  00:00:00         
+(1/2): localrepo/group_gz                                                                                                            | 153 kB  00:00:00         
+(2/2): localrepo/primary_db                                                                                                          | 3.3 MB  00:00:00         
+Resolving Dependencies
+--> Running transaction check
+---> Package GeoIP.x86_64 0:1.5.0-13.el7 will be updated
+---> Package GeoIP.x86_64 0:1.5.0-14.el7 will be an update
+--> Processing Dependency: geoipupdate for package: GeoIP-1.5.0-14.el7.x86_64
+---> Package NetworkManager.x86_64 1:1.12.0-6.el7 will be updated
+---> Package NetworkManager.x86_64 1:1.18.8-1.el7 will be an update
+
+
+…
+…
+…
+  vim-minimal.x86_64 2:7.4.629-7.el7                                              xfsprogs.x86_64 0:4.5.0-22.el7                                       
+  yum.noarch 0:3.4.3-168.el7.centos                                               yum-plugin-fastestmirror.noarch 0:1.1.31-54.el7_8                            
+Replaced:
+  iwl7265-firmware.noarch 0:22.0.7.0-69.el7                                                                                                        
+Complete!
+
+
+[yogendra@cent ~]$ cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+
+[yogendra@cent ~]$ cat /etc/redhat-release
+CentOS Linux release 7.9.2009 (Core)
+
+
+[yogendra@cent ~]$ uname -r
+3.10.0-1160.el7.x86_64
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+======================================================================

@@ -1,0 +1,100 @@
+﻿GIT Sync MyGov 
+
+
+yogendra@yogendra:~/mygov$ ssh auditor@10.1.5.91
+
+
+auditor@somesh-pc:~$ ssh spjump
+
+
+auditor@somesh-pc:~$ ssh hydjump
+
+
+exit
+
+
+auditor@somesh-pc:~/yogendra$ ssh mybaseH
+
+
+auditor@somesh-VM1:~$ cd yogendra/
+
+
+auditor@somesh-VM1:~/yogendra$ cat WORK.txt
+
+
+campus staging:
+https://gitcloud.mygov.in/mygov/campus.git
+
+
+Rename to avoid overwrite
+mv campus campus_STG
+
+
+campus production:
+https://gitcloud.mygov.in/production/campus.git
+
+
+auditor@somesh-VM1:~/yogendra$ git clone https://gitcloud.mygov.in/mygov/campus.git
+
+
+Cloning into 'campus'...
+Username for 'https://gitcloud.mygov.in': somesh.admn
+Password for 'https://somesh.admn@gitcloud.mygov.in':
+
+
+
+
+auditor@somesh-VM1:~/yogendra$ mv campus campus_STG
+
+
+auditor@somesh-VM1:~/yogendra$ git clone https://gitcloud.mygov.in/production/campus.git
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/campus/landing.php campus/site/wp-content/themes/volunteer/campus/landing.php
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/campus/landing.php campus/site/wp-content/themes/volunteer/campus/ambassador_
+ambassador_form.php         ambassador_profile.php  
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/campus/ambassador_form.php campus/site/wp-content/themes/volunteer/campus/ambassador_form.php
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/campus/event_completion_form.php campus/site/wp-content/themes/volunteer/campus/event_completion_form.php
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/campus/event_completion_form.php campus/site/wp-content/themes/volunteer/footer
+footer-cap.php  footer.php          
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/footer-cap.php campus/site/wp-content/themes/volunteer/footer-cap.php
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/functions.php campus/site/wp-content/themes/volunteer/functions.php
+
+
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/template-influencer.php campus/site/wp-content/themes/volunteer/template-influencer.php
+auditor@somesh-VM1:~/yogendra$ cp campus_STG/site/wp-content/themes/volunteer/header-cap.php campus/site/wp-content/themes/volunteer/header-cap.php
+
+
+auditor@somesh-VM1:~/yogendra$ cd campus
+
+
+auditor@somesh-VM1:~/yogendra/campus$ git add .
+
+
+auditor@somesh-VM1:~/yogendra/campus$ git commit -m "sync 28122022_1254"
+
+
+
+
+auditor@somesh-VM1:~/yogendra/campus$ git config --global user.email "somesh.admn@mygov.in"
+
+
+auditor@somesh-VM1:~/yogendra/campus$ git config --global user.name "somesh.admn"
+
+
+auditor@somesh-VM1:~/yogendra/campus$ git commit -m "sync 28122022_1254"
+[master fa212c0] sync 28122022_1254
+ 5 files changed, 17 insertions(+), 17 deletions(-)
+auditor@somesh-VM1:~/yogendra/campus$ git push -u origin master
+Username for 'https://gitcloud.mygov.in': somesh.admn
+Password for 'https://somesh.admn@gitcloud.mygov.in':

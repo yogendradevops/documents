@@ -1,0 +1,140 @@
+﻿Haproxy + ngnix with same domain name 2 different url Doc:-
+     Haproxy + ngnix with same domain name 2 different url Doc:-
+
+
+Base OS RHEL7  and Two Virtual Machine
+
+
+ ngnix installation. (Base Machine IP 192.168.0.10
+create local yum 
+# rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+# yum install nginx
+# systemctl start nginx.service
+check with web :-
+http://IP
+
+
+# systemctl enable nginx
+# cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/web.conf
+
+
+# vim /etc/nginx/conf.d/web.conf
+server {
+listen       80;
+server_name  testserver.com;
+location / {
+root   /usr/share/nginx/html/test;
+index  index.html index.htm;
+}
+}
+
+
+# mkdir /usr/share/nginx/html/test
+# echo “This is Test Home” > /usr/share/nginx/html/test/index.html
+# systemctl restart nginx.service
+
+
+# vim  /etc/hosts
+127.0.0.1  testserver.com
+
+
+check with web :-
+http://testserver.com
+############################################################################################################
+############################################################################################################
+
+
+Configure Virtual Machine (1st VM IP 192.168.0.11)
+Configure local yum and install http
+# yum install httpd* -y
+# cd /var/www/html/web1
+# echo "This is WebSite1" > /var/www/html/web1/index.html
+# systemctl restart httpd
+# systemctl enable httpd
+
+
+
+
+Configure Virtual Machine (2nd VM IP 192.168.0.12)
+Configure local yum and install http
+# yum install httpd* -y
+# cd /var/www/html/web1
+# echo "This is WebSite2" > /var/www/html/web2/index.html
+# systemctl restart httpd
+# systemctl enable httpd
+
+
+##############################################################################################################
+##############################################################################################################
+
+
+change Ngnix Configugre file
+# vim /etc/nginx/conf.d/web.conf
+server {
+    listen       80;
+    server_name  testserver.com;
+
+
+#    charset koi8-r;
+#    access_log  /var/log/nginx/log/host.access.log  main;
+
+
+    location /web1 {
+        proxy_pass http://192.168.0.11/web1;
+#        root   /usr/share/nginx/html/prod;
+#        index  index.html index.htm;
+    }
+
+
+    location /web2 {
+        proxy_pass http://192.168.0.12/web2;
+#        root   /usr/share/nginx/html/prod;
+#        #        index  index.html index.htm;
+#            }
+#
+}
+
+
+# systemctl restart nginx.service
+##############################################################################################################
+##############################################################################################################
+
+
+if you want to SSL ngnix 
+# cd /etc/ngnix
+#  openssl genrsa -out privkey.pem 2048
+#  openssl req -new -x509 -key privkey.pem -out cacert.pem -days 1095
+
+
+# vim /etc/nginx/conf.d/web.conf
+server {
+    listen       443;
+    server_name  testserver.com;
+    ssl on;
+    ssl_certificate     /etc/nginx/cacert.pem;
+    ssl_certificate_key /etc/nginx/privkey.pem;
+    fastcgi_param   HTTPS               on;
+    fastcgi_param   HTTP_SCHEME         https;
+
+
+#    charset koi8-r;
+#    access_log  /var/log/nginx/log/host.access.log  main;
+
+
+    location /web1 {
+        proxy_pass http://192.168.0.11/web1;
+#        root   /usr/share/nginx/html/prod;
+#        index  index.html index.htm;
+    }
+
+
+    location /web2 {
+        proxy_pass http://192.168.0.12/web2;
+#        root   /usr/share/nginx/html/prod;
+#        #        index  index.html index.htm;
+#            }
+#
+}
+
+
+# systemctl restart nginx.service

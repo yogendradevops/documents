@@ -1,0 +1,60 @@
+﻿cat ip.sh |awk '{ print $2 }' > ip.txt
+
+
+In the above command cat ip.sh will print  the content of the file ip.sh in the terminal. 
+awk '{ print $2 }' will filter and print the 2nd line from the content of file cat ip.sh.
+> ip.txt will save the content of output awk '{ print $2 }' to file ip.txt
+
+
+—------------------------------------------------------------------------------------------------------------------------
+
+
+for i in `cat ip.txt` ; do geoiplookup $i >> abc.txt ; echo "$i" "ABC "  >> abc.txt; done
+
+
+This is the loop command in this command the i represent the content of the file ip.txt
+do geoiplookup $i  will do geoiplookup of the content of i ( i represent the content of file ip.txt)
+>> abc.tx this will create the file abc.txt with content output of geoiplookup $i 
+echo "$i" "ABC "  >> abc.txt; this will print the “content of i” and “ABC” and write the output in file abc.txt
+
+
+
+
+—------------------------------------------------------------------------------------------------------------------------
+
+
+cat abc.txt | sed ':a;N;$!ba;s/\n//g' | sed 's/ABC/\n /g' |grep India | awk -F 'India'  '{ print $2 }' > in_ip.txt
+
+
+In the above command cat abc.txt  will print the content of file abc.txt 
+sed 's/ABC/\n /g'  will filter the content and in place of ABC write enter means starts the new line after the ABC
+grep India grep the content India from the file.
+awk -F 'India'  '{ print $2 }' will find India from the file and print the 2nd line after India.
+> in_ip.txt will create new file with content of the output of awk -F 'India'  '{ print $2 }'
+
+
+—------------------------------------------------------------------------------------------------------------------------
+
+
+Use this solution with GNU sed:
+sed ':a;N;$!ba;s/\n/ /g' file
+
+
+This will read the whole file in a loop (':a;N;$!ba), then replaces the newline(s) with a space (s/\n/ /g). Additional substitutions can be simply appended if needed.
+Explanation:
+1. sed starts by reading the first line excluding the newline into the pattern space.
+2. Create a label via :a.
+3. Append a newline and next line to the pattern space via N.
+4. If we are before the last line, branch to the created label $!ba ($! means not to do it on the last line. This is necessary to avoid executing N again, which would terminate the script if there is no more input!).
+5. Finally the substitution replaces every newline with a space on the pattern space (which is the whole file).
+
+
+
+
+sed ':a;N;$!ba;s/\n/ /g' file
+1. :a create a label 'a'
+2. N append the next line to the pattern space
+3. $! if not the last line, ba branch (go to) label 'a'
+4. s substitute, /\n/ regex for new line, / / by a space
+5.  /g global match (as many times as it can)
+sed will loop through step 1 to 3 until it reach the last line, getting all lines fit in the pattern space where sed will substitute all \n characters

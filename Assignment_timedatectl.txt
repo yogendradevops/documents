@@ -1,0 +1,240 @@
+﻿Assignment
+
+
+Q1. What is daylight saving time? Why do we use UTC instead of GMT?
+
+
+Daylight Saving Time (DST)
+Daylight Saving Time (DST) is the practice of turning the clock ahead as warmer weather approaches and back as it becomes colder again.The goal of Daylight Saving Time is to make better use of daylight by prolonging the amount of time we can spend outside during daylight hours.
+It's important to note that Daylight Saving Time varies somewhat from country to country, and some countries do not observe Daylight Saving Time as part of their time zone.Examples include American Samoa, Guam, Northern Mariana Islands, U.S. Virgin Islands, Puerto Rico, Japan, India and China.
+Here are a few of the world's variations in observing Daylight Saving Time:
+* In Germany, DST starts the last Sunday in March and ends the last Sunday in October.
+* In Russia, the clock is set ahead beginning the last Sunday in March at 2 a.m. local time and set back the last Sunday in October at the same time.
+History of Daylight Saving Time?
+Daylight Saving Time was first suggested in 1895 by George Hudson, a New Zealand entomologist who collected insects in his free time. Hudson wanted more daylight hours after work to collect bugs, and Daylight Saving Time was his solution.
+The idea of Daylight Saving Time caught on in other countries, especially as energy savings and conservation became a concern during World War II. DST is now used in over 70 countries around the world.
+
+
+Greenwich Mean Time (GMT) is often interchanged or confused with Coordinated Universal Time (UTC). But GMT is a time zone and UTC is a time standard.
+Although GMT and UTC share the same current time in practice, there is a basic difference between the two:
+
+
+GMT is a time zone officially used in some European and African countries. The time can be displayed using both the 24-hour format (0 - 24) or the 12-hour format (1 - 12 am/pm).
+
+
+UTC is not a time zone, but a time standard that is the basis for civil time and time zones worldwide. This means that no country or territory officially uses UTC as a local time.
+
+
+
+
+Q2. Change timezone through timedatectl command.
+
+
+yogendar@yogendra:~$ timedatectl
+yogendar@yogendra:~$ sudo timedatectl set-timezone Africa/Monrovia
+yogendar@yogendra:~$ sudo timedatectl set-timezone Asia/Kolkata
+  
+
+
+
+*****************************************************************************************
+
+
+Q3. How many time zones are there?
+
+
+The earth has been divided into twenty-four time zones of one hour each. Each zone thus covers 15° of longitude.
+Time zone may be simply defined as a range of longitudes where a common standard time is used. These are regions on the globe that observe the same standard time. The local time in a given time zone is defined by its offset from Coordinated Universal Time (UTC), which is the primary time standard used throughout the world.
+
+
+How to calculate?
+It can be calculated this way-
+The earth rotates 360° in about 24 hours, which means 15° an hour or 1° in four minutes. Thus, when it is noon at Greenwich, the time at 15° east of Greenwich will be 15 × 4 = 60 minutes, i.e., 1 hour ahead of Greenwich time, but at 15° west of Greenwich, the time will be behind Greenwich time by one hour.
+Q4. Meaning of discrete?
+
+
+Discrete means separate, distinct & different. Discrete data is a count that involves integers — only a limited number of values is possible. This type of data cannot be subdivided into different parts. Discrete data includes discrete variables that are finite, numeric, countable, and non-negative integers.
+
+
+Q5. What is integer in computer science?
+
+
+An integer, in the context of computer programming, is a data type used to represent real numbers that do not have fractional values.
+Integers are commonly represented in a computer as a group of binary digits (bits). The size of the grouping varies so the set of integer sizes available varies between different types of computers.
+
+
+Different types of integer data types are stored on machines in different ways. For example, a short integer in many common programming languages is limited to a range of between 32,767 and -32,768. 
+
+
+
+
+Q6. What is the size of long (Minimum & Maximum)?
+
+
+The value of a long integer varies from -2147483648 to +2147483647. And in memory it takes at least 32 bits meaning 4 bytes .It can also take more depending on which operating system you use.
+
+
+for 32 bit operating systems it is 4 bytes .
+for 64 bit operating systems it is 8 bytes.
+
+
+Type -> Storage Size -> Value range
+long -> 4 bytes - > -2,147,483,648(min) to 2,147,483,647(max)
+unsigned long -> 4 bytes -> 0 to 4,294,967,295
+
+
+
+
+
+
+Q8. What is epoch?
+
+
+In a computing context, an epoch is the date and time relative to which a computer's clock and timestamp values are determined. The epoch traditionally corresponds to 0 hours, 0 minutes, and 0 seconds (00:00:00) Coordinated Universal Time (UTC) on a specific date, which varies from system to system. Most versions of Unix, for example, use January 1, 1970 as the epoch date; Windows uses January 1, 1601.
+
+
+
+
+Q9. Create scripts as below:
+
+
+9.1 Convert today's date and time in epoch
+#!/bin/bash
+orig="oct 28 22:03:46"
+epoch=$(date -d "${orig}" +"%s")
+epoch_to_date=$(date -d @$epoch +%Y%m%d_%H%M%S)
+
+
+echo "RESULTS:"
+echo "original = $orig"
+echo "epoch conv = $epoch"
+echo "epoch to human readable timestamp = $epoch_to_date"
+~                                                         
+
+
+  
+
+
+
+
+
+
+
+9.2 Convert another date and time into epoch
+#!/bin/bash
+orig="oct 02 21:03:46"
+epoch=$(date -d "${orig}" +"%s")
+epoch_to_date=$(date -d @$epoch +%Y%m%d_%H%M%S)
+
+
+echo "RESULTS:"
+echo "original = $orig"
+echo "epoch conv = $epoch"
+echo "epoch to human readable timestamp = $epoch_to_date"
+~                                                                   
+
+
+  
+
+
+
+
+
+Q10 Create Scripts:
+10.1 For Integer (int a = x, int b = y, int c = a+b, print c)
+#!/bin/bash
+a=2
+b=4
+c=a+b
+sum=$(( $a + $b ))
+c=$sum
+echo "a=2"
+echo "b=4"
+echo "c=a+b"
+echo "c is: $sum"
+
+
+Output:
+root@yogendra:/home/yogendar# ./integer
+a=2
+b=4
+c=a+b
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+10.2 Long (long a = x, long b = y, long c = a+b, print c)
+#!/bin/bash
+echo " enter long for a= "
+read a
+echo " enter long for b= "
+read b
+
+
+sum=$(( $a + $b ))
+c=$sum
+echo "a=$a"
+echo "b=$b"
+echo "c=a+b"
+echo "c is: $sum"
+  
+
+
+
+
+
+10.3 Divide by 0 (a = x, b = y, c = a+b, print c)
+
+
+!/bin/bash
+a=2
+b=4
+sum=$(( $a + $b ))
+num=0
+divide=`expr $sum / $num`
+echo "a=2"
+echo "b=4"
+echo "c=(a+b)/0"
+echo "c is: $divide"
+
+output:
+root@yogendra:/home/yogendar# ./divide
+expr: division by zero
+a=2
+b=4
+c=(a+b)/0
+c is:
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+Why is there so much dust in India ?
+
+
+We have a very unique seasonal climate and a very small rainy season. The soil gets dried for the rest of the year which makes it cracked and soil gets loose and when the wind blows the dust also blows with air.
+Some more reasons are :
+* The land around roads is not well covered.
+* Construction sites are open.
+* No strict rules and regulations by the government.
+* Less focus on creating green belts around roads.
+* Open area is more and so dust is.

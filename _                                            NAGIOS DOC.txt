@@ -1,0 +1,198 @@
+﻿Nagios Doc
+
+
+
+
+                                                 NAGIOS DOC
+
+
+ I have using RHEL and CentOS 6.4 64 Bit Machines
+ 
+Step 1: Install Required Packages and Dependencies
+
+
+We assume that you have fresh installed CentOS, Red hat or Fedora systems, So our first requirement is to
+install Apache and PHP first. Use the following commands to complete it. You can find detailed LAMP setup instruction here.
+
+
+Install Packages:
+# yum install httpd php php-cli gcc glibc glibc-common gd gd-devel net-snmp xinetd openssl* -y
+
+
+Start Services:
+# service httpd start
+
+
+Step 2: Setup User Accounts
+
+
+Now create a new nagios user account and setup a password to this account
+
+
+# useradd nagios
+# passwd nagios
+
+
+Step 3: Install Nagios Core Service
+
+
+After installing required dependencies and adding user accounts. Lets start with Nagios core installation. Download latest nagios core service from official site.
+
+
+# cd /opt/
+# wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.0.8.tar.gz
+# tar xzf nagios-4.0.8.tar.gz
+# cd nagios-4.0.8
+# ./configure --with-command-group=nagios
+# make all
+# make install
+# make install-init
+# make install-config
+# make install-commandmode
+Now use below command to setup apache configuration for Nagios installation.
+
+
+# make install-webconf
+
+
+Step 4: Configure Apache Authentication
+
+
+We need to setup apache authentication for user nagiosadmin. Do not change this username. else you would required more changes in configuration.
+
+
+# htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+Now restart Apache service to make the new settings take effect.
+
+
+# service httpd restart
+
+
+
+
+###############################################################################################################################################################
+
+
+Step 5: Install Nagios Plugins
+
+
+After installing and configuring Nagios core service, Download latest nagios-plugins source and install using following commands.
+
+
+# cd /opt
+# wget http://nagios-plugins.org/download/nagios-plugins-2.0.3.tar.gz
+# tar xzf nagios-plugins-2.0.3.tar.gz
+# cd nagios-plugins-2.0.3
+Now compile and install nagios plugins
+
+
+# ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+# make
+# make install
+Step 6: Verify and Start Nagios
+
+
+Use the following commands to verify nagios install and start nagios core service.
+
+
+# /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+# service nagios start
+Also configure nagios service to start on system start
+
+
+# chkconfig --add nagios
+# chkconfig nagios on
+Step 7: Access Nagios in Web Browser
+
+
+Nagios creates its own apache configuration file /etc/httpd/conf.d/nagios.conf. There are no need to make any changes to it. Simply open below url in browser.
+[change domain name with your domain or ip]
+
+
+http://127.0.0.1/nagios/
+
+
+###############################################################################################################################################################
+
+
+INSTALL NRPE
+
+
+# wget http://downloads.sourceforge.net/project/nagios/nrpe-2.x/nrpe-2.15/nrpe-2.15.tar.gz
+
+
+Extract the NRPE source code tarball.
+
+
+# tar xzf nrpe-2.15.tar.gz
+
+
+
+
+# cd nrpe-2.15
+
+
+Compile the NRPE addon.
+
+
+# ./configure
+
+
+# make all
+
+
+Install the NRPE plugin (for testing), daemon, and sample daemon config file.
+
+
+# make install-plugin
+
+
+# make install-daemon
+
+
+# make install-daemon-config
+
+
+Install the NRPE daemon as a service under xinetd.
+
+
+# make install-xinetd
+
+
+Edit the /etc/xinetd.d/nrpe file and add the IP address of the monitoring server to the only_from directive.
+
+
+” only_from = 127.0.0.1 <nagios_ip_address> “
+
+
+Add the following entry for the NRPE daemon to the /etc/services file.
+
+
+” nrpe                5666/tcp                      # NRPE “
+
+
+Restart the xinetd service.
+
+
+# service xinetd restart
+
+
+Its time to see if things are working properly…
+
+
+Make sure the nrpe daemon is running under xinetd.
+
+
+# netstat -at | grep nrpe
+
+
+The output out this command should show something like this:
+
+
+” tcp 0 0 *:nrpe *:* LISTEN “
+
+
+Next, check to make sure the NRPE daemon is functioning properly. To do this, run the check_nrpe plugin thatwas installed for testing purposes.
+
+
+# /usr/local/nagios/libexec/check_nrpe -H 127.0.0.1

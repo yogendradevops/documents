@@ -1,0 +1,298 @@
+﻿How to Create and Extract Zip Files to Specific Directory in Linux
+
+
+Zip is a simple, cross-platform file packaging and compression utility for Unix-like systems including Linux and Windows OS; plus many other operating systems. The “zip” format is a common archiving file format used on Windows PC’s and most importantly, it enables you to specify the compression level between 1 and 9 as an option.
+
+
+Create Zip Archive File in Linux
+To create a .zip (packaged and compressed) file from the command line, you can run a similar command like the one below, The -r flag enables recursive reading of files directory structure.
+
+
+$ zip -r tecmint_files.zip tecmint_files
+
+
+
+
+To unzip the tecmint_files.zip archive file you have just created above, you can run the unzip command as follows.
+
+
+$ unzip tecmint_files.zip
+
+
+The above command will extract the files into the current working directory. What if you want to send the unzipped files into a specific or different directory – you can learn this in the next section.
+
+
+
+
+Extract Zip File to Specific or Different Directory
+To extract/unzip .zip archive files to specific or different directory from the command line, include the -d unzip command flag as shown below. We will use the same example above to demonstrate this.
+This will extract the .zip file content into the /tmp directory:
+$ mkdir -p /tmp/unziped
+$ unzip tecmint_files.zip -d /tmp/unziped
+$ ls -l /tmp/unziped/
+
+
+
+
+
+
+
+
+
+
+How to Create Password Protected ZIP in Linux
+Once installed, you can use the zip command with -p flag to create a password protected zip archive called ccat-command.zip from the directory of files called ccat-1.1.0 as follows.
+$ zip -p pass123 ccat-command.zip ccat-1.1.0/
+
+
+However, the above method is absolutely insecure, because here the password is provided as clear-text on the command line. Secondly, it will also be stored in the history file (e.g ~.bash_history for bash), meaning another user with access to your account (more especially root user) will easily see the password.
+Therefore, try to always use the -e flag, it shows a prompt allowing you to enter a hidden password as shown.
+$ zip -e ccat-command.zip ccat-1.1.0/
+
+
+How to Unzip Password Protected ZIP in Linux
+To unzip and decrypt the content of the archive file called ccat-command.zip, use the unzip program and provide the password you entered above.
+$ unzip ccat-command.zip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Learn 7zip Command Examples in Linux
+
+
+7-Zip is a free open source, cross-platform, powerful, and fully-featured file archiver with a high compression ratio, for Windows. It has a powerful command line version that has been ported to Linux/POSIX systems.
+It has a high compression ratio in 7z format with LZMA and LZMA2 compression, supports many other archive formats such as XZ, BZIP2, GZIP, TAR, ZIP and WIM for both packing and unpacking; AR, RAR, MBR, EXT, NTFS, FAT, GPT, HFS, ISO, RPM, LZMA, UEFI, Z, and many others for extracting only.
+It provides strong AES-256 encryption in 7z and ZIP formats, offers a compression ratio that of 2-10 % for ZIP and GZIP formats (much better than those offered by PKZip and WinZip). It also comes with self-extracting capability for 7z format and it’s localized in up-to 87 languages.
+How to Install 7zip in Linux
+The port of 7zip on Linux systems is called p7zip, this package comes pre-installed on many mainstream Linux distributions. You need to install the p7zip-full package to get the 7z, 7za, and 7zr CLI utilities on your system, as follows.
+Install 7zip on Debian, Ubuntu or Linux Mint
+Debian-based Linux distributions comes with three software packages related to 7zip and they are p7zip, p7zip-full and p7zip-rar. It is suggested to install p7zip-full package, which supports many archive formats.
+$ sudo apt-get install p7zip-full
+
+
+Install 7zip on Fedora or CentOS/RHEL
+Red Hat-based Linux distributions comes with two packages related to 7zip and they are p7zip and p7zip-plugins. It is suggested to install both packages.
+To install these two packages, you need to enable EPEL repository on CentOS/RHEL distributions. On Fedora, no need to setup additional repository.
+$ sudo yum install p7zip p7zip-plugins
+
+
+Once the 7zip package installed, you can move further to learn some useful 7zip command examples to pack or unpack various types of archives in the following section.
+
+
+
+
+1. To create an .7z archive file, use "a" option. The supported archive formats for creation are 7z, XZ, GZIP, TAR, ZIP and BZIP2. If the given archive file exists already, it will “add” the files to an existing archive, instead of overwriting it.
+
+
+$ 7z a hyper.7z hyper_1.4.2_i386.deb
+
+
+2. To extract an .7z archive file, use "e" option, which will extract the archive in the present working directory.
+
+
+$ 7z e hyper.7z
+
+
+3. To select an archive format, use -t (format name) option, which will allows you to select the archive format such as zip, gzip, bzip2 or tar (the default is 7z).
+
+
+$ 7z a -tzip hyper.zip hyper_1.4.2_i386.deb
+
+
+4. To see a list of files in an archive, use "l" (list) function, which will displays the type of archive format, method used, files in the archive among other information as shown.
+
+
+$ 7z l hyper.7z
+
+
+5. To test the integrity of an archive file, use "t" (test) function as shown.
+
+
+$ 7z t hyper.7z
+
+
+
+
+6. To backup a directory, you should use the 7za utility which preserves owner/group of a file, unlike 7z, the -si option enables reading of files from stdin.
+
+
+$ tar -cf - tecmint_files | 7za a -si tecmint_files.tar.7z
+
+
+7. To restore a backup, use -so option, which will sends output to stdout.
+
+
+$ 7za x -so tecmint_files.tar.7z | tar xf -
+
+
+
+
+8. To set a compression level, use the -mx option as shown.
+$ 7z u <archive-filename> <list-of-files-to-update>
+$ 7z d <archive-filename> <list-of-files-to-delete>
+
+
+10. To set a password to an archive file, use -p {password_here} flag as shown.
+
+
+$ 7za a -p{password_here} tecmint_secrets.tar.7z
+
+
+
+
+
+
+5 Best Command Line Archive Tools for Linux – Part 1
+What is an Archived file?
+An archive file is a compressed file which is composed of one or more than one computer files along with metadata.
+Features of Archiving
+1. Data Compression
+2. Encryption
+3. File Concatenation
+4. Automatic Extraction
+5. Automatic Installation
+6. Source Volume and Media Information
+7. File Spanning
+8. Checksum
+9. Directory Structure Information
+10. Other Metadata (Data About Data)
+11. Error discovery
+Area of Application
+1. Store Computer Files System along with Metadata.
+2. Useful in transferring file locally.
+3. Useful in transferring file over web.
+4. Software Packaging Application.
+The useful archiving application on standard Linux distribution follows:
+1. tar Command
+tar is the standard UNIX/Linux archiving application tool. In its early stage it used to be a Tape Archiving Program which gradually is developed into General Purpose archiving package which is capable of handling archive files of every kind. tar accepts a lot of archiving filter with options.
+tar options
+1. -A : Append tar files to existing archives.
+2. -c : Create a new archive file.
+3. -d : Compare archive with Specified filesystem.
+4. -j : bzip the archive
+5. -r : append files to existing archives.
+6. -t : list contents of existing archives.
+7. -u : Update archive
+8. -x : Extract file from existing archive.
+9. -z : gzip the archive
+10. –delete : Delete files from existing archive.
+tar Examples
+Create a tar archive file.
+# tar -zcvf name_of_tar.tar.gz /path/to/folder
+Decompress an tar archive file.
+# tar -zxvf Name_of_tar_file.tar.gz
+For more detailed examples, read 18 Tar Command Examples in Linux.
+shar Command
+shar which stands for Shell archive is a shell script, the execution of which will create the files. shar is a self-extracting archive file which is a legacy utility and needs Unix Bourne Shell to extract the files. shar has an advantage of being plain text however it is potentially dangerous, since it outputs an executable.
+shar options
+1. -o : Save output to archive files as specified, in the option.
+2. -l : Limit the output size, as specified, in the option but do not split it.
+3. -L : Limit the output size, as specified, in the option and split it.
+4. -n : Name of Archive to be included in the header of the shar files.
+5. -a : Allow automatic generation of headers.
+Note: The ‘-o‘ option is required if the ‘-l‘ or ‘-L‘ option is used and the ‘-n‘ option is required if the ‘-a‘ option is used.
+shar Examples
+Create a shar archive file.
+# shar file_name.extension > filename.shar
+Extract an shar archive file.
+# unshar file_name.shar
+3. ar Command
+ar is the creation and manipulation utility for archives, mainly used for binary object file libraries. ar stands for archiver which can be used to create archive of any kind for any purpose but has largely been replaced by ‘tar’ and now-a-days it is used only to create and update static library files.
+ar options
+1. -d : Delete modules from the archive.
+2. -m : Move Members in the archive.
+3. -p : Print specified members of the archive.
+4. -q : Quick Append.
+5. -r : Insert file member to archive.
+6. -s : Add index to archive.
+7. -a : Add a new file to the existing members of archive.
+ar Examples
+Create an archive using ‘ar‘ tool with a static library say ‘libmath.a‘ with the objective files ‘substraction’ and ‘division’ as.
+# ar cr libmath.a substraction.o division.o
+To extract an ‘ar’ archive file.
+# ar x libmath.a
+4. cpio
+cpio stands for Copy in and out. Cpio is a general purpose file archiver for Linux. It is actively used by RedHat Package Manager (RPM) and in the initramfs of Linux Kernel as well as an important archiving tool in Apple Computer’s Installer (pax).
+cpio options
+1. -0 : Read a list of filenames terminated by a null character instead of a newline.
+2. -a : Reset Access time.
+3. -A : Append.
+4. -b : swap.
+5. -d : Make Directories.
+cpio Examples
+Create an ‘cpio’ archive file.
+# cd tecmint
+# ls
+
+
+file1.o file2.o file3.o
+
+
+# ls | cpio  -ov > /path/to/output_folder/obj.cpio
+To extract a cpio archive file.
+# cpio -idv < /path/to folder/obj.cpio
+5. Gzip
+gzip is standard and widely used file compression and decompression utility. Gzip allows file concatenation. Compressing the file with gzip, outputs the tarball which is in the format of ‘*.tar.gz‘ or ‘*.tgz‘.
+gzip options
+1. –stdout : Produce output on standard output.
+2. –to-stdout : Produce output on standard output.
+3. –decompress : Decompress File.
+4. –uncompress : Decompress File.
+5. -d : Decompress File.
+6. -f : Force Compression/Decompression.
+gzip Examples
+Create an ‘gzip’ archive file.
+# tar -cvzf name_of_archive.tar.gz /path/to/folder
+To extract a ‘gzip’ archive file.
+# gunzip file_name.tar.gz
+The above command must be passed followed with below command.
+# tar -xvf file_name.tar
+
+
+
+
+
+
+Note: The architecture and functionality of ‘gzip’ makes it difficult to recover corrupted ‘gzipped tar archive’ file. It is advised to make several backups of gzipped Important files, at different Locations.

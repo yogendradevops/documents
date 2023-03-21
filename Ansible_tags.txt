@@ -1,0 +1,192 @@
+﻿Ansible Tags:
+
+
+Tags in playbooks are pieces of metadata that are attached to tasks in a playbook file. They are referred to when running playbooks and allow you to selectively target certain tasks at runtime. Basically, they instruct Ansible to execute (or not to execute) specific tasks within the playbook file.
+We can tell Ansible to run only the tags with the -t or --tags flag.
+
+
+$ sudo ansible-playbook /etc/ansible/ansible-01-tags.yml --list-tags
+Skip specific tags in a Playbook
+$ sudo ansible-playbook /etc/ansible/ansible-01-tags.yml --skip-tags enjoy
+Execute a specific task in a playbook
+$ sudo ansible-playbook /etc/ansible/ansible-01-tags.yml --tags hello
+
+
+Ensure that a task always (or never) runs
+- name: Restart Apache Webserver
+  service:
+    name: apache2
+    state: restarted
+  tags:
+    - restart_apache
+    - never
+This can also be tagged as follows using the double square brackets:
+ tags: [ restart_apache, never ]
+
+
+When the playbook is executed without any tags, the task will be omitted.
+
+
+A task that is tagged ‘never‘ will still run when it is explicitly called in the ansible-playbook command. For example, the task that restarts Apache will still be executed since it has explicitly been defined in the command.
+$ sudo ansible-playbook /etc/ansible/ansible-02-tags.yml --tags restart_apache
+
+
+
+
+
+
+We can list the tags in your playbook by using the --list-tags flag:
+$ ansible-playbook basic_example.yml --list-tags
+
+
+playbook: basic_example.yml
+
+
+  play #1 (localhost): localhost        TAGS: []
+      TASK TAGS: [goodbye, hello]
+
+
+
+
+Ansible also provides the never tag, which does the opposite of always tag.
+
+
+
+
+
+
+Logging in register
+
+
+Ansible has built-in support for logging. Add the following lines to your ansible configuration file:
+[defaults] 
+log_path=/path/to/logfile
+
+
+Ansible will look in several places for the config file:
+* ansible.cfg in the current directory where you ran ansible-playbook
+* ~/.ansible.cfg
+* /etc/ansible/ansible.cfg
+
+
+Register in Ansible:
+Ansible register is a way to capture the output from task execution and store it in a variable.
+These are the variables in which the output of your task will be stored on the Ansible Control Server. In simple words, when you want to run a command on a remote computer and then store the output in a variable and use a piece of information from the output, later in your plays. This kind of usage is possible by registered variables.
+
+
+
+
+Defining variables in inventory
+There are two types of variables which you can define in an inventory i.e. host variables and group variables. 
+Host variables
+We will use our default inventory from /etc/ansible/hosts which has below entries
+server1
+server2
+server3
+In inventory I will define 2 variables for server2 in the following format:
+server1
+server2 http_port=8080 pkg=httpd
+server3
+
+
+Here I have defined two custom variables which are applicable only for server2.
+
+
+Playbook:
+---
+ - name: Verifying host variable
+   hosts: server2
+   tasks:
+   - name: Testing first variable (http_port)
+     debug:
+       msg: "The HTTP PORT is {{ http_port }}"
+   - name: Testing second variable (pkg)
+     debug:
+       msg: "The package name is {{ pkg }}"
+
+
+The most important properties of each of the register variables are as follows:cmd – The command that ran to generate the output.
+stdout – The output of the command.
+stderr – The error output of the command.
+start – The date and time when the command began executing.
+end – The date and time when the command finished executing.
+delta – The time taken to run the command. This is the difference between the end and the start properties.
+stdout_lines – An array containing each output line of the command. Same as stdout, but stdout separates the lines using a newline (\n) characters instead of arrays.
+stderr_lines –  An array containing each error output line of the command. Same as stderr, but stderr separates the lines using newlines (\n) characters instead of arrays.
+If you just want to print/access the password string (which is very likely), you may print/access the stdout property of the mypass variable in your playbook, as marked in the screenshot below.
+Playbook:
+
+
+---
+- hosts: localhost
+  vars:
+   database: mariadb
+   restore_table: mariadb
+   restore_table_target: /home/yogendar/Downloads/banned-ips.sql
+   install: geoip-bin
+   shell_script: /tmp/cat_awk.sh
+   table: india_ip
+
+
+  gather_facts: false
+  become: yes
+  tasks:
+   - name: create a new database
+         mysql_db:
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          name: "{{ database }}"
+          state: present
+          login_user: root
+         tags: create_database
+
+
+   - name: restore table
+         mysql_db:
+             name: "{{ restore_table }}"
+             state: import
+             target: "{{restore_table_target }}"
+             login_host: 127.0.0.1
+             login_user: root
+             login_password: 'redhat'
+
+
+   - name: Select query in db and outfile
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock    
+          query: select * from banned_ips into outfile '/tmp/banned_ips_imported.csv'
+
+
+   - name: install geoiplookup
+         apt:
+           name: "{{ install }}"
+           state: present
+         tags:
+          - installgeoip
+
+
+   - name: Run a script
+         ansible.builtin.script:
+          cmd: /tmp/cat_awk.sh
+
+
+
+
+   - name: create a table in mariadb
+         command: mysql -u root -predhat -h 127.0.0.1 mariadb --execute " create table "{{ table }}" (ip VARCHAR (30) ) "   
+
+
+   - name: Load Data in india_ip table
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          query: LOAD DATA INFILE '/tmp/geo_ip_india.csv' INTO TABLE india_ip
+
+
+
+
+   - name: delete from banned_ips
+         community.mysql.mysql_query:
+          login_db: mariadb
+          login_unix_socket: /var/run/mysqld/mysqld.sock
+          query: delete from banned_ips where ip IN(select * from india_ip);

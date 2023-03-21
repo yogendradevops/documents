@@ -1,0 +1,242 @@
+﻿NFS Server
+
+
+NFS (Network File System) is basically developed for sharing of files and folders between Linux/Unix systems by Sun Microsystems in 1980. It allows you to mount your local file systems over a network and remote hosts to interact with them as they are mounted locally on the same system. With the help of NFS, we can set up file sharing between Unix to Linux system and Linux to Unix system.
+
+
+Benefits of NFS
+1. NFS allows local access to remote files.
+2. It uses standard client/server architecture for file sharing between all *nix based machines.
+3. With NFS it is not necessary that both machines run on the same OS.
+4. With the help of NFS we can configure centralized storage solutions.
+5. Users get their data irrespective of physical location.
+6. No manual refresh needed for new files.
+7. Newer version of NFS also supports acl, pseudo root mounts.
+8. Can be secured with Firewalls and Kerberos.
+NFS Services
+It's a System V-launched service. The NFS server package includes three facilities, included in the portmap and nfs-utils packages.
+1. portmap : It maps calls made from other machines to the correct RPC service (not required with NFSv4).
+2. nfs: It translates remote file sharing requests into requests on the local file system.
+3. rpc.mountd: This service is responsible for mounting and unmounting of file systems.
+Important Files for NFS Configuration
+1. /etc/exports : Its a main configuration file of NFS, all exported files and directories are defined in this file at the NFS Server end.
+2. /etc/fstab : To mount a NFS directory on your system across the reboots, we need to make an entry in /etc/fstab.
+3. /etc/sysconfig/nfs : Configuration file of NFS to control on which port rpc and other services are listening.
+
+
+
+
+
+
+Setup and Configure NFS Mounts on Linux Server
+To set up NFS mounts, we’ll be needing at least two Linux/Unix machines. Here in this tutorial, I’ll be using two servers.
+1. NFS Server: nfsserver.example.com with IP-192.168.1.189
+2. NFS Client : nfsclient.example.com with IP-192.168.122.51
+Installing NFS Server and NFS Client
+We need to install NFS packages on our NFS Server as well as on NFS Client machine. We can install it via “yum” (Red Hat Linux) and “apt-get” (Debian and Ubuntu) package installers.
+[root@nfsserver ~]# yum install nfs-utils nfs-utils-lib
+[root@nfsserver ~]# yum install portmap (not required with NFSv4)
+[root@nfsserver ~]# apt-get install nfs-utils nfs-utils-lib
+Now start the services on both machines.
+[root@nfsserver ~]# /etc/init.d/portmap start
+[root@nfsserver ~]# /etc/init.d/nfs start
+[root@nfsserver ~]# chkconfig --level 35 portmap on
+[root@nfsserver ~]# chkconfig --level 35 nfs on
+After installing packages and starting services on both the machines, we need to configure both the machines for file sharing.
+Setting Up the NFS Server
+First we will be configuring the NFS server.
+Configure Export directory
+For sharing a directory with NFS, we need to make an entry in “/etc/exports” configuration file. Here I’ll be creating a new directory named “nfsshare” in “/” partition to share with client server. You can also share an already existing directory with NFS.
+[root@nfsserver ~]# mkdir /nfsshare
+Now we need to make an entry in “/etc/exports” and restart the services to make our directory shareable in the network.
+[root@nfsserver ~]# vi /etc/exports
+
+
+/nfsshare 192.168.122.51(rw,sync,no_root_squash)
+In the above example, there is a directory in / partition named “nfsshare” is being shared with client IP “192.168.122.51” with read and write (rw) privilege, you can also use hostname of the client in the place of IP in above example.
+NFS Options
+Some other options we can use in “/etc/exports” file for file sharing is as follows.
+1. ro: With the help of this option we can provide read only access to the shared files i.e client will only be able to read.
+2. rw: This option allows the client server to both read and write access within the shared directory.
+3. sync: Sync confirms requests to the shared directory only once the changes have been committed.
+4. no_subtree_check: This option prevents the subtree checking. When a shared directory is the subdirectory of a larger file system, nfs performs scans of every directory above it, in order to verify its permissions and details. Disabling the subtree check may increase the reliability of NFS, but reduce security.
+5. no_root_squash: This phrase allows root to connect to the designated directory.
+For more options with “/etc/exports“, you are recommended to read the man pages for export.
+Setting Up the NFS Client
+After configuring the NFS server, we need to mount that shared directory or partition in the client server.
+Mount Shared Directories on NFS Client
+Now at the NFS client end, we need to mount that directory in our server to access it locally. To do so, first we need to find out that shares available on the remote server or NFS Server.
+[root@nfsclient ~]# showmount -e 192.168.1.189
+
+
+Export list for 192.168.1.189:
+/nfsshare 192.168.122.51
+Above command shows that a directory named “nfsshare” is available at “192.168.1.189” to share with your server.
+Mount Shared NFS Directory
+To mount that shared NFS directory we can use following mount command.
+[root@nfsclient ~]# mount -t nfs 192.168.1.189:/nfsshare /mnt/nfsshare
+The above command will mount that shared directory in “/mnt/nfsshare” on the client server. You can verify it following command.
+[root@nfsclient ~]# mount | grep nfs
+
+
+sunrpc on /var/lib/nfs/rpc_pipefs type rpc_pipefs (rw)
+nfsd on /proc/fs/nfsd type nfsd (rw)
+192.168.1.189:/nfsshare on /mnt type nfs (rw,addr=192.168.1.189)
+The above mount command mounted the nfs shared directory on to nfs client temporarily, to mount an NFS directory permanently on your system across the reboots, we need to make an entry in “/etc/fstab“.
+[root@nfsclient ~]# vi /etc/fstab
+Add the following new line as shown below.
+192.168.1.189:/nfsshare /mnt  nfs defaults 0 0
+Test the Working of NFS Setup
+We can test our NFS server setup by creating a test file on the server end and check its availability at nfs client side or vice-versa.
+At the nfsserver end
+I have created a new text file named “nfstest.txt’ in that shared directory.
+[root@nfsserver ~]# cat > /nfsshare/nfstest.txt
+
+
+This is a test file to test the working of NFS server setup.
+At the nfsclient end
+Go to that shared directory in client server and you’ll find that shared file without any manual refresh or service restart.
+[root@nfsclient]# ll /mnt/nfsshare
+total 4
+-rw-r--r-- 1 root root 61 Sep 21 21:44 nfstest.txt
+root@nfsclient ~]# cat /mnt/nfsshare/nfstest.txt
+This is a test file to test the working of NFS server setup.
+Removing the NFS Mount
+If you want to unmount that shared directory from your server after you are done with the file sharing, you can simply unmount that particular directory with “umount” command. See this example below.
+root@nfsclient ~]# umount /mnt/nfsshare
+You can see that the mounts were removed by then looking at the filesystem again.
+[root@nfsclient ~]# df -h -F nfs
+You’ll see that those shared directories are not available any more.
+Important commands for NFS
+Some more important commands for NFS.
+1. showmount -e : Shows the available shares on your local machine
+2. showmount -e <server-ip or hostname>: Lists the available shares at the remote server
+3. showmount -d : Lists all the sub directories
+4. exportfs -v : Displays a list of shares files and options on a server
+5. exportfs -a : Exports all shares listed in /etc/exports, or given name
+6. exportfs -u : Unexports all shares listed in /etc/exports, or given name
+7. exportfs -r : Refresh the server’s list after modifying /etc/exports
+
+
+########################################################################
+
+
+
+
+Setting Up an NFS Server and Client on CentOS 7.2
+
+
+Preliminary Note
+I'm using two CentOS systems here:
+* NFS Server: server.example.com, IP address: 192.168.1.100
+* NFS Client: client.example.com, IP address: 192.168.1.101
+I will use the nano editor in this tutorial to edit configuration files. Nano can be installed like this.
+yum -y install nano
+Configure the Firewall
+I recommend having a firewall installed. If you do not have firewalld installed yet and want to use a firewall, then install it with these commands:
+yum -y install firewalld
+
+
+
+
+
+
+
+
+start the firewall and enable it to be started at boot time.
+systemctl start firewalld.service
+systemctl enable firewalld.service
+
+
+
+
+Next, open the SSH and NFS ports to ensure that you will be able to connect to the server by SSH for admin purposes and by NFS from our NFS client.
+firewall-cmd --permanent --zone=public --add-service=ssh
+firewall-cmd --permanent --zone=public --add-service=nfs
+firewall-cmd --reload
+
+
+Installing NFS
+server:
+On the NFS server we run:
+yum -y install nfs-utils
+Then enable and start the nfs server service.
+systemctl enable nfs-server.service
+systemctl start nfs-server.service
+client:
+On the client, we can install NFS as follows (this is actually the same as on the server):
+yum install nfs-utils
+
+
+Exporting Directories on the Server
+server:
+I'd like to make the directories /home and /var/nfs accessible to the client; therefore we must "export" them on the server.
+When a client accesses an NFS share, this normally happens as the user nfsnobody. Usually the /home directory isn't owned by nfsnobody (and I don't recommend to change its ownership to nfsnobody!), and because we want to read and write on /home, we tell NFS that accesses should be made as root (if our /home share was read-only, this wouldn't be necessary). The /var/nfs directory doesn't exist, so we can create it and change its ownership to the user and group nfsnobody.
+mkdir /var/nfs
+chown nfsnobody:nfsnobody /var/nfs
+chmod 755 /var/nfs
+Now we must modify /etc/exports where we "export" our NFS shares. We specify /home and /var/nfs as NFS shares and tell NFS to make accesses to /home as root (to learn more about /etc/exports, its format and available options, take a look at
+man 5 exports
+)
+nano /etc/exports
+/home           192.168.1.101(rw,sync,no_root_squash,no_subtree_check)
+/var/nfs        192.168.1.101(rw,sync,no_subtree_check)
+(The no_root_squash option makes that /home will be accessed as root.)
+Whenever we modify /etc/exports, we must run:
+exportfs -a
+afterwards, to make the changes effective.
+ 
+5 Mounting the NFS Shares on the Client
+client:
+First we create the directories where we want to mount the NFS shares, e.g.:
+mkdir -p /mnt/nfs/home
+mkdir -p /mnt/nfs/var/nfs
+Afterwards, we can mount them as follows:
+mount 192.168.1.100:/home /mnt/nfs/home
+mount 192.168.1.100:/var/nfs /mnt/nfs/var/nfs
+You should now see the two NFS shares in the outputs of
+df -h
+[root@client ~]# df -h
+and
+mount
+[root@client ~]# mount
+
+
+Testing
+On the client, you can now try to create test files on the NFS shares:
+client:
+touch /mnt/nfs/home/test.txt
+touch /mnt/nfs/var/nfs/test.txt
+Now go to the server and check if you can see both test files:
+server:
+ls -l /home/
+[root@server1 ~]# ls -l /home/
+ls -l /var/nfs
+[root@server1 ~]# ls -l /var/nfs
+
+
+(Please note the different ownerships of the test files: the /home NFS share gets accessed as root, therefore /home/test.txt is owned by root; the /var/nfs share gets accessed as nobody/65534, therefore /var/nfs/test.txt is owned by 65534.) 
+
+
+Mounting NFS Shares at Boot Time
+Instead of mounting the NFS shares manually on the client, you could modify /etc/fstab so that the NFS shares get mounted automatically when the client boots.
+client:
+Open /etc/fstab and append the following lines:
+nano /etc/fstab
+[...]
+192.168.1.100:/home  /mnt/nfs/home   nfs      rw,sync,hard,intr  0     0
+192.168.1.100:/var/nfs  /mnt/nfs/var/nfs   nfs      rw,sync,hard,intr  0     0
+Instead of rw,sync,hard,intr you can use different mount options. To learn more about available options, take a look at
+man nfs
+To test if your modified /etc/fstab is working, reboot the client:
+reboot
+After the reboot, you should find the two NFS shares in the outputs of
+df -h
+[root@client ~]# df -h
+
+
+
+
+and
+mount
+[root@client ~]# mount

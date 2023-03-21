@@ -1,0 +1,43 @@
+﻿Git Server and Client
+                            Server Side
+
+
+# yum install git*  (Install Git RPMS)
+# git --version (check your git version )
+# mkdir /git_repo (Create folder for code)
+# useradd git ; echo redhat@123 | passwd --stdin git (Create user with password )
+# chowm git:git /git_repo  ( set the user permission )
+# su - git ( Login in git User)
+# cd /git_repo ( go to code folder )
+# git init --bare test.git ( Create Empty Project)
+
+
+
+
+
+
+                                  Client Side
+
+
+# yum install git (Install Git RPMS)
+# mkdir test ( Create Project)
+# cd test (go to Project Folder )
+# touch file{1..5}.txt  (Create Project Files)
+# git init ( Create git repo )
+# git add . (add files in Project)
+# git config --global user.name rajeev  ( set global User Name )
+# git config --global user.email rajeev@example.com ( set global Email ID )
+# git commit -m "my 1st code" ( Commit the Project )
+# git remote add origin git@your_git_ServerIP:/git_code/rajutest.git  (Add origin)
+# git remote set-url origin git@your_git_ServerIP:/git_code/rajutest.git (set url )
+# git push origin master (push code into git repo)
+
+
+
+
+                              Client Side Testing
+
+
+# rm -rf  test  (remove your Project )
+# git clone git@your_git_ServerIP:/git_code/rajutest.git ( Download your code )
+# cd test (go to Project Folder and check all the code files )

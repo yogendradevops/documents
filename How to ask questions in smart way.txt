@@ -1,0 +1,71 @@
+﻿How to ask question the smart way:
+Before You Ask
+Before asking a technical question by email, or on a website chat board, do the following:
+1. Try to find an answer by searching the archives of the forum or mailing list you plan to post to.
+2. Try to find an answer by searching the Web.
+3. Try to find an answer by reading the manual.
+4. Try to find an answer by reading a FAQ.
+5. Try to find an answer by asking a skilled friend.
+
+
+* When you ask your question, display the fact that you have done these things first and also display what you have learned from doing these things.
+When You Ask
+Choose your forum carefully
+Be sensitive in choosing where you ask your question. You are likely to be ignored, or written off as a loser, if you:
+* post your question to a forum where it's off topic.
+* post a very elementary question to a forum where advanced technical questions are expected, or vice-versa
+The first step, therefore, is to find the right forum. Again, Google and other Web-searching methods are your friend.
+
+
+When selecting a Web forum, newsgroup or mailing list, don't trust the name by itself too far; look for a FAQ or charter to verify your question is on-topic.
+
+
+Use meaningful, specific subject headers
+On mailing lists or Web forums, the subject header is your golden opportunity to attract qualified experts.
+Don't waste it on babble like “Please help me” 
+
+
+If you ask a question in a reply, be sure to change the subject line to indicate that you're asking a question. A Subject line that looks like “Re: test” or “Re: new bug” is less likely to attract useful amounts of attention.
+
+
+Write in clear, grammatical, correctly-spelled language
+Spend the extra effort to polish your language.Spell, punctuate, and capitalise correctly. Don't TYPE IN ALL CAPS; this is read as shouting and considered rude. 
+
+
+Be precise and informative about your problem
+
+
+
+
+Be precise and informative about your problem
+* Describe the symptoms of your problem or bug carefully and clearly.
+* Describe the environment in which it occurs (machine, OS, application, whatever). Provide your vendor's distribution and release level (e.g.: “CentOS 7”, “Ubuntu”, etc.).
+* Describe the research you did to try and understand the problem before you asked the question.
+* Describe the diagnostic steps you took to try and pin down the problem yourself before you asked the question.
+* Describe any possibly relevant recent changes in your computer or software configuration. 
+
+
+Don't flag your question as “Urgent”, even if it is for you
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* Be precise and give informative information related to your problem so that others can understand your problem and give suggestions or solutions in proper way.
+
+
+* Share all the details related to the problem and the steps taken. 
+
+
+* The best way to improve your chances of getting an answer is by making it easier for us to answer you.

@@ -1,0 +1,101 @@
+﻿Guacamole Screen video-recording
+Step-1 : First do some changes in connection settings:
+  
+
+Step-2 : Now save it and check inside the container after starting the session.
+
+
+Go inside the guacamole container : 
+================================
+podman exec -it guacamole-guacd bash
+================================
+Step-3 : Change Directory where the files are being generated : 
+
+
+guacd@guacamole:/$ cd home/guacd/screen-recording
+guacd@guacamole:~$ ls
+screenrecording  
+
+
+Note : Directory where the recordings are being copied from guacamole-guacd container to base machine $/home/mansi/screen-recording/
+
+
+Step-4 : Make a container of guacenc by using below mentioned command with mounting the same directory of recorded files:
+=============================
+podman run -d -v '/home/mansi/screen-recording/':'/videos' --name guacenc bytepen/guacenc
+=============================
+Repository : docker.io/bytepen/guacenc:latest
+
+
+Sample Output : 
++++++++++++++++++
+mansi@mansi-HP-EliteBook-840-G3:~/screen-recording$ podman run -d -v '/home/mansi/screen-recording':'/videos' --name guacenc bytepen/guacenc
+✔ docker.io/bytepen/guacenc:latest
+Trying to pull docker.io/bytepen/guacenc:latest...
+Getting image source signatures
+Copying blob 69d5f65ddb5e done  
+Copying blob d550c1da08cc done  
+Copying blob 05c89299c7d1 done  
+Copying blob 1f42175256b9 done  
+Copying blob 4675c4be9a5b done  
+Copying config 3eb7dc06f5 done  
+Writing manifest to image destination
+Storing signatures
+ed34553ab56d3d08bc5ea9d9e1dc99445a59a2797575722ec3a11b27eff5089b
++++++++++++++++++++
+
+
+Step-5 : Check the container using the below mentioned command.
+
+
+mansi@mansi-HP-EliteBook-840-G3:~/screen-recording$ podman ps
+ed34553ab56d  docker.io/bytepen/guacenc:latest        /bin/ash /usr/loc...  7 seconds ago  Up 7 seconds ago        guacenc
+
+
+Step-6 : Go inside the guacenc container : 
+
+
+mansi@mansi-HP-EliteBook-840-G3:~/screen-recording$ podman exec -it guacenc /bin/ash
+
+
+Step-7 : Change Directory where the files are being copied :
+/# cd /videos
+/videos # ls
+screenrecording
+
+
+Step-8 : Encode the screenrecoding file to screenrecording.m4v by using below mentioned command:           
+/videos/screen-recording # guacenc screenrecording
+Sample-Output : 
+guacenc: INFO: Guacamole video encoder (guacenc) version 1.3.0
+guacenc: INFO: 1 input file(s) provided.
+guacenc: INFO: Video will be encoded at 640x480 and 2000000 bps.
+guacenc: INFO: Encoding "screenrecording" to "screenrecording.m4v" ...
+
+
+guacenc: INFO: All files encoded successfully.
+/videos # ls
+screenrecording          screenrecording.m4v  
+/videos/screen-recording #
+
+
+Step-9 : Now exit from the container using ctrl+d
+
+
+Step-10 : And copy the files from guacenc container by using below mentioned command : 
+
+
+$podman cp guacenc:/videos/screen-recording .
+
+
+Step-11 : Now try to play this recorded video by VLC Media Player.
+
+
+Here is the Output:
+
+
+  
+
+
+
+Link I followed for solving this : https://www.reddit.com/r/docker/comments/w633an/screen_recording_in_apache_guacamole/

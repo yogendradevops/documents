@@ -1,0 +1,134 @@
+﻿Gitea Setup 
+Gitea :
+Gitea is a painless self-hosted Git service. It is similar to GitHub, Bitbucket, and GitLab. Gitea is a fork of Gogs. It is written in the Go.
+
+
+Setup : 
+→Create a directory name of gitea.
+yogendra@yogendra:~$ mkdir gitea
+
+
+yogendra@yogendra:~$ cd gitea/
+
+
+
+
+→create two directory inside gitea directory with name gitea-DB and gitea-app 
+yogendra@yogendra:~$ mkdir gitea-app gitea-DB
+
+
+→Create a file named gitea.sh 
+yogendra@yogendra:~/gitea$ vim gitea.sh
+yogendra@yogendra:~/gitea$ cat gitea.sh
+#!/bin/bash
+
+
+##create a pod with name gitea and expose port 9080
+podman pod create --name gitea --publish 3003:3000
+##create a postgres container, give it the desired environment variable, attach it to the create pod
+podman run -dt \
+            --pod gitea \
+            --name gitea-postgres \
+            -e POSTGRES_DB=gitea \
+            -e POSTGRES_USER=gitea \
+            -e POSTGRES_PASSWORD=gitea \
+            -e PGDATA=/var/lib/postgresql/data/pgdata \
+            -v /home/yogendra/gitea/gitea-DB:/var/lib/postgresql/data \
+            postgres
+##create a gitea container, give it the desired environment variable, important varibles,importantly DB_VENDOR, attach it to create pod
+podman run -dt \
+            --pod gitea \
+            --name gitea-app \
+            -e USER_UID=1000 \
+            -e USER_GID=1000 \
+            -e GITEA_database_DB_TYPE=postgres \
+            -e GITEA_database_HOST=localhost:5432 \
+            -e GITEA_database_NAME=gitea \
+            -e GITEA_database_USER=gitea \
+            -e GITEA_database_PASSWORD=gitea \
+            -v /home/yogendra/gitea/gitea-app:/data \
+    docker.io/gitea/gitea
+
+
+
+
+
+
+→Give a permission to execute script 
+yogendra@yogendra:~/gitea$ chmod +x gitea.sh
+
+
+
+
+
+
+→Run Script 
+        yogendra@yogendra:~/gitea$ ./gitea.sh
+bb9eadddf7a8c82868bade87eee74a7f9010a7e55aef3bc3c324eb6ed43bccfb
+0d7b21d6a0c7db70305886eb27df0a334ce5a62a8370d5af5a5ca019db0962cf
+b56681254fc4648066ce2bde2c1bab43e504373e36cdc8bdd28a7046b553d177
+
+
+→Check Container Details:- 
+yogendra@yogendra:~/gitea$ podman ps
+CONTAINER ID  IMAGE                                  COMMAND                   CREATED            STATUS                PORTS                       NAMES
+df379779eb00  k8s.gcr.io/pause:3.5                                         2 minutes ago  Up 2 minutes ago  0.0.0.0:3003->3000/tcp  bb9eadddf7a8-infra
+0d7b21d6a0c7  docker.io/library/postgres:latest  postgres                  2 minutes ago  Up 2 minutes ago  0.0.0.0:3003->3000/tcp  gitea-postgres
+b56681254fc4  docker.io/gitea/gitea:latest           /bin/s6-svscan /e...  2 minutes ago  Up 2 minutes ago  0.0.0.0:3003->3000/tcp  gitea-app
+
+
+
+
+
+
+
+
+→Open browser and type 
+http://localhost:3003/
+
+
+  
+
+
+
+
+
+Login page :
+  
+
+
+
+
+
+
+
+Home page of gitea :
+  
+
+
+
+Login gitea and then select an option to create a new repository.
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Give a name of the repository and select the type of repository you want .
+  
+
+  
+
+
+
+=================================================================

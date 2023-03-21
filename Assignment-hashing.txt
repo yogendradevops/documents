@@ -1,0 +1,86 @@
+﻿Assignment - Hashing
+
+
+Q What is Hashing ? 
+Hashing is an algorithm that calculates a fixed-size bit string value from a file. A file basically contains blocks of data. Hashing transforms this data into a far shorter fixed-length value or key which represents the original string. The hash value can be considered the distilled summary of everything within that file.
+A hash is usually a hexadecimal string of several characters. Hashing is also a unidirectional process so you can never work backwards to get back the original data.
+A good hash algorithm should be complex enough such that it does not produce the same hash value from two different inputs. If it does, this is known as a hash collision. A hash algorithm can only be considered good and acceptable if it can offer a very low chance of collision.
+
+
+Q What are Algorithms?
+Algorithms: their meaning in computer science. In Computer Science, an algorithm is a list set of instructions, used to solve problems or perform tasks, based on the understanding of available alternatives.
+Q.Types of Hashing Algorithms:
+There are many different types of hash algorithms such as RipeMD, Tiger, xxhash and more, but the most common type of hashing used for file integrity checks are MD5, SHA-2 and CRC32.
+MD5 - An MD5 hash function encodes a string of information and encodes it into a 128-bit fingerprint. MD5 is often used as a checksum to verify data integrity. However, due to its age, MD5 is also known to suffer from extensive hash collision vulnerabilities, but it’s still one of the most widely used algorithms in the world.
+SHA-2 – SHA-2, developed by the National Security Agency (NSA), is a cryptographic hash function. SHA-2 includes significant changes from its predecessor, SHA-1. The SHA-2 family consists of six hash functions with digests (hash values) that are 224, 256, 384 or 512 bits: SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, SHA-512/256.
+CRC32 – A cyclic redundancy check (CRC) is an error-detecting code often used for detection of accidental changes to data. Encoding the same data string using CRC32 will always result in the same hash output, thus CRC32 is sometimes used as a hash algorithm for file integrity checks. These days, CRC32 is rarely used outside of Zip files and FTP servers.
+Q How Does a Hashing Algorithm Work?
+A hashing algorithm (MD5 hash) grabs the user-input password and converts it into an indecipherable string. This is called a hashed password. Anyone who launches an attack on your database cannot make sense of it because hashing works only one way. This means that once a password is hashed, you can’t go back the other way around to convert it into plain text again. And for this reason, hashing user passwords is a crucial task that should be done when designing the back end.
+
+
+  
+
+Q How is a user password verified at login by linux?
+Today, most systems store hashed values of your password within their databases so that when you authenticate, the system has a way to validate your identity against an encrypted version of your password. 
+For additional security, some systems (Linux-based ones, for instance), add a salt, which is a 32-character string, to the end of the password before it’s hashed. This step prevents two of the same hashes from occurring as a result of two people having the same password, like “Pa$$word123.” By adding a unique salt to each, it’s impossible for the two hash values to be the same. The salting of passwords also makes them much harder to crack, which is valuable in the event of a data breach.
+# mkpasswd -m [algorithm] [password] [salt]
+
+
+
+
+Q What is data integrity?
+(Download file from internet and do some changes and check)
+Data integrity is the overall accuracy, completeness, and consistency of data. Data integrity also refers to the safety of data in regard to regulatory compliance and security. It is maintained by a collection of processes, rules, and standards implemented during the design phase.
+Hash values are useful for verifying the integrity of data sent through insecure channels. The hash value of received data can be compared to the hash value of data as it was sent to determine whether the data was altered.
+The md5sum is designed to verify data integrity using MD5 (Message Digest Algorithm 5).
+MD5 is 128-bit cryptographic hash and if used properly it can be used to verify file authenticity and integrity.
+Syntax :
+md5sum [OPTION]... [FILE]...
+It will print or check MD5(128-bit) checksum.
+Example: Store the MD5 checksum in file and then verify it.
+#md5sum file1.cpp >checkmd5.md5
+It will store the MD5 checksum for file1.cpp in file checkmd5.md5
+# md5sum -c checkmd5.md5
+It will verify the contents of file
+Output :
+file1.cpp: OK
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+After changing the contents of file checkmd5.md5, the output will be :
+file1.cpp: FAILED
+md5sum: WARNING: 1 computed checksum did NOT match
+
+
+After changing the contents of file checkmd5.md5, the output will be :
+file1.cpp: FAILED
+md5sum: WARNING: 1 computed checksum did NOT match
+Q What is salt in hashing?
+A salt is a piece of random data added to a password before it is hashed and stored.
+Salting is the act of adding a series of random characters to a password before going through the hashing function. 
+Adding a salt to stored passwords is a security process used alongside the hashing of passwords before they are stored. A salt is automatically and randomly generated for this purpose, and since a user is not involved in this process the salt can be complex, compounding the complexity of the hashing process. The increased difficulty in such a scenario further protects passwords from being useful should a system be breached. Salting passwords can help a system defend against a pre-computed hash attack, which is also known as a rainbow table or predictive method of unhashing a password store.
+
+
+  
+
+Q What is Man in 5 passwd?
+passwd(5) - Linux man page
+passwd - password file
+Description
+The /etc/passwd/Shadow  file is a text file that describes user login accounts for the system. It should have read permission allowed for all users (many utilities, like ls use it to map user IDs to usernames), but write access only for the superuser. 
+The passwd        files are the local source of password information.  They can
+ be used in conjunction with the Hesiod domains `passwd' and `uid',        and
+ the NIS maps `passwd.byname', `passwd.byuid', `master.passwd.byname', and 'master.passwd.byuid', as controlled by nsswitch.conf(5).

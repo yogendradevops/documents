@@ -1,0 +1,104 @@
+﻿How to resize a logical volume with 5 simple LVM commands
+Attach the new storage to the system. Next, create a new Physical Volume (PV) from that storage. Add the PV to the Volume Group (VG) and then extend the Logical Volume (LV).
+
+
+
+
+# pvcreate /dev/xvdc
+  Physical volume "/dev/xvdc" successfully created.
+
+
+When you attach the new storage /dev/xvdc, you need to use the pvcreate command in order for the disk to be initialized and be seen by the Logical Volume Manager (LVM).
+Identify the Volume Group
+Next, you need to identify the Volume Group (VG) to which you are extending the new disk with the vgs command. Mine is called centos, and that's the only VG available currently on my LVM.
+Extend the Volume Group
+The vgextend command allows you to add one or more initialized Physical Volumes to an existing VG to extend its size.
+As you can see, you want to extend the centos Volume Group.
+After extending it, type the vgs or vgdisplay commands for a more detailed overview of the VG.
+The vgs command shows only the VG in with a few lines.
+The vgdisplay shows all the VGs in the LVM and displays the complete information about them.
+
+
+The lvs or lvdisplay command shows the Logical Volume associated with a Volume Group. Use the lvs command, and the Logical Volume you're trying to extend is the root, which belongs to the centos VG.
+Next, extend the Logical Volume.
+
+
+Extend the Logical Volume
+Extend the LV with the lvextend command. The lvextend command allows you to extend the size of the Logical Volume from the Volume Group.
+# lvextend -l +100%FREE /dev/centos/root.
+
+
+Extend the filesystem
+You need to confirm the file system type you're using, Red Hat uses the XFS file system, but you can check the file system with lsblk -f or df -Th.
+Resize the filesystem on the Logical Volume after it has been extended to show the changes. Resize the XFS filesystem by using the xfs_growfs command.
+
+
+=How to Increase the Size of a Linux LVM by Adding a New Disk?
+
+
+This article helps us to add a new disk to LVM ( Logical Volume Manager), the very best advantage of LVM over normal disk partitions is its support for “dynamic partitions”; you can create and resize (expand or shrink) LVM volumes dynamically as we needed. There is no limit of the physical disk boundary in LVM logical volumes, so you can create a large LVM volume that spans across multiple smaller physical disks. This flexibility partitioning allows you to manage storage space more efficiently as disk usage change from time to time.
+
+
+We needed to login as root user and, run fdisk to check whether the new disks which is attached are detected by Linux on your system.
+
+
+In the example, one volume group (“lv”) exists, and two logical volumes (“root” and “swap”) are created in this volume group.
+
+
+According to the df output, the “root” logical volume is mapped to /dev/mapper/VolGroup-lv-root by the device mapper.
+Using this information, I will show you how to add two disks /dev/sdb and /dev/sdc to the “root” logical volume in the next steps.
+Create Partitions on New Disks
+The first step is to create a partition on each new disk before adding them to LVM. This step is needed only if you want to allocate only part of the disk to LVM. If you want to add the whole disk to LVM, creating a partition is not necessary, and you can skip this step.
+Create Physical Volumes on New Disks
+Next, create a physical volume on each new disk partition (/dev/sdb1 and /dev/sdc1).
+# pvcreate /dev/sdb
+Physical volume "/dev/sdb" successfully created
+Like this add the 3rd disk to the physical volume.
+# pvcreate /dev/sdc
+Physical volume "/dev/sdc" successfully created
+Using lvmdiskscan, verify that physical volumes are created successfully.
+#lvmdiskscan -l
+/dev/ram0             [ 16.00 MiB]
+/dev/root             [ 17.51 GiB]
+/dev/ram1             [ 16.00 MiB]
+/dev/sda1             [ 500.00 MiB]
+/dev/VolGroup/lv_swap [ 2.00 GiB]
+/dev/ram2             [ 16.00 MiB]
+/dev/sda2             [ 19.51 GiB] LVM physical volume
+/dev/sdb              [ 20.00 GiB] LVM physical volume
+/dev/sdc              [ 20.00 GiB] LVM physical volume
+2 disks
+2 LVM physical volume whole disks
+1 LVM physical volume
+Extend an Existing Logical Volume
+Next, find the volume group which contains the logical volume to expand, and extend the group by adding newly created physical volumes to it.
+In our example, the “root” logical volume belongs to the ” VolGroup-lv” volume group. Let’s add a /dev/sdb, the following command instead.
+# vgextend yoda-vg /dev/sdb
+Volume group “VolGroup” successfully extended. To verify that volume is added or not run, please check the below –
+# vgs
+VG       #PV #LV #SN Attr VSize    VFree
+VolGroup 2    2    0 wz--n- 39.50g 20.00g
+
+
+# vgextend VolGroup /dev/sdc
+Volume group "VolGroup" successfully extended
+
+
+# vgs
+VG       #PV    #LV #SN Attr    VSize VFree
+VolGroup   3      2 0    wz--n- 59.50g 39.99g
+Given the resized volume group, now extend the “root” logical volume itself.
+# lvextend -l+100%FREE /dev/VolGroup/lv_root
+Size of logical volume VolGroup/lv_root changed from 17.51 GiB (4482 extents) to 57.50 GiB (14720 extents).
+Logical volume lv_root successfully resized
+The above command tells the “root” logical volume to use all available additional free space in its volume group. Note that /dev/VolGroup/lv_root is the device where “root” volume is mapped to.
+The final step is to enlarge the file system created inside the “root” volume. Otherwise, the file system will not recognize additional free space in the volume.
+# resize2fs -p /dev/VolGroup/lv_root
+resize2fs 1.41.12 (17-May-2010)
+Filesystem at /dev/VolGroup/lv_root is mounted on /; on-line resizing required
+old desc_blocks = 2, new_desc_blocks = 4
+Performing an on-line resize of /dev/VolGroup/lv_root to 15073280 (4k) blocks.
+The filesystem on /dev/VolGroup/lv_root is now 15073280 blocks long.
+The resize2fs command supports resizing ext2/ext3/ext4 file systems. It also supports online resizing in case you expand a file system. No need to unmount the file system.
+At this point, the file system should be expanded to take up 100% of the resized “root” logical volume.
+If we have completed the above steps and add the disks to increase the volumes to extend the existing LVM we can increase the space without losing the data this will help the administrator to manage their disk spaces with our any down time.

@@ -1,0 +1,236 @@
+﻿1. What is Backward Compatibility:
+Backward compatible (also known as downward compatible or backward compatibility) refers to a hardware or software system that can successfully use interfaces and data from earlier versions of the system or with other systems.
+Backward compatibility allows newer technology to advance without superseding a current component.
+
+
+
+
+2. Understand Vim tool :
+Vim is an editor to create or edit a text file. There are two modes in vim. One is the command mode and another is the insert mode. In the command mode, the user can move around the file, delete text, etc. In the insert mode, the user can insert text.
+
+
+Creating a new file with vim
+Step 1 type vim filename (create a file named filename)
+Step 2 type i ( switch to insert mode)
+Step 3 enter text (enter your text)
+Step 4 hit Esc key (switch back to command mode)
+Step 5 type :wq (write file and exit vim)
+
+
+Cursor Movements in command mode
+l – move cursor right
+h – move cursor left
+k – move cursor up
+j – move cursor down
+H – move to top of screen
+M – move to middle of screen
+L – move to bottom of screen
+w – jump forwards to the start of a word
+W – jump forwards to the start of a word (words can contain punctuation)
+e – jump forwards to the end of a word
+E – jump forwards to the end of a word (words can contain punctuation) Cursor Movements in command mode
+b – jump backwards to the start of a word
+b – jump backwards to the start of a word
+B – jump backwards to the start of a word (words can contain punctuation)
+0 – jump to the start of the line
+^ – jump to the first non-blank character of the line
+$ – jump to the end of the line
+g_ – jump to the last non-blank character of the line
+gg – go to the first line of the document
+G – go to the last line of the document
+5G – go to line 5 Cursor Movements in command mode
+fx – jump to next occurrence of character x
+tx – jump to before next occurrence of character x
+fx – jump to next occurrence of character x
+tx – jump to before next occurrence of character x } – jump to next paragraph (or unction/block, when editing code)
+{ – jump to previous paragraph (or function/block, when editing code)
+zz – center cursor on screen
+Ctrl + b – move back one full screen
+Ctrl + f – move forward one full screen
+Ctrl + d – move forward 1/2 a screen
+Ctrl + u – move back 1/2 a screen
+Tip: Prefix a cursor movement command with a number
+to repeat it. For example, 4j moves down 4 lines.
+^F (CTRl F) Forward screenful
+^B Backward screenful
+^f One page forward
+^b One page backward
+^U Up half screenful
+^D Down half screenful
+$ Move cursor to the end of current line
+0 (zero) Move cursor to the beginning of current line
+
+
+Insert Mode
+i – insert before the cursor
+I – insert at the beginning of the line
+a – insert (append) after the cursor
+A – insert (append) at the end of the line
+o – append (open) a new line below the current line
+O – append (open) a new line above the current line
+ea – insert (append) at the end of the word
+Esc – exit insert mode
+
+
+Editing
+r – replace a single character
+J – join line below to the current line
+cc – change (replace) entire line
+cw – change (replace) to the end of the word
+c$ – change (replace) to the end of the line
+s – delete character and substitute text
+S – delete line and substitute text (same as cc)
+xp – transpose two letters (delete and paste)
+u – undo
+Ctrl + r – redo
+. – repeat last command
+
+
+Text Deletion Commands
+x Delete character
+dw Delete word from cursor on
+db Delete word backward
+dd Delete line
+d$ Delete to end of line
+d^ (d caret, not CTRL d) Delete to beginning of line
+VI's copy commmand
+yy yank current line
+y$ yank to end of current line from cursor
+yw yank from cursor to end of current word
+5yy yank, for example, 5 lines
+Paste (used after delete or yank to recover lines.)
+p paste below cursor
+P paste above cursor
+"2p paste from buffer 2 (there are 9)
+u Undo last change
+U Restore line
+J Join next line down to the end of the
+
+
+current lineVisual Commands
+> – shift text right
+< – shift text left
+y – yank (copy) marked text
+d – delete marked text
+~ – switch case 
+
+
+Registers
+:reg – show registers content
+"xy – yank into register x
+"xp – paste contents of register x
+Tip: Registers are being stored in ~/.viminfo,
+and will be loaded again on the next restart of vim.
+
+
+2yy – yank (copy) 2 lines
+yw – yank (copy) the characters of the word
+from the cursor position to the start of the next word
+y$ – yank (copy) to end of line
+p – put (paste) the clipboard after cursor
+P – put (paste) before cursor
+dd – delete (cut) a line
+2dd – delete (cut) 2 lines
+dw – delete (cut) the characters of the word from the cursor position to the start of the next word
+D – delete (cut) to the end of the line
+d$ – delete (cut) to the end of the line
+x – delete (cut) characterExiting
+:w – write (save) the file, but don’t e
+Exiting
+:w – write (save) the file, but don’t exit
+:w !sudo tee % – write out the current file using sudo
+:wq or :x or ZZ – write (save) and quit
+:q – quit (fails if there are unsaved changes)
+:q! or ZQ – quit and throw away unsaved
+changesSearch and Replace
+/pattern – search for pattern
+?pattern – search backward for pattern
+
+
+Search and Replace
+/pattern – search for pattern
+?pattern – search backward for pattern
+n – repeat search in same direction
+N – repeat search in opposite direction
+:%s/old/new/g – replace all old with new
+throughout file
+:%s/old/new/gc – replace all old with new throughout file with confirmations
+:noh – remove highlighting of search matches
+
+
+Most commands can be repeated n times by typing a number, n, before the command. For example 10dd means delete 10 lines.
+. Repeat last command
+cw Change current word to a new word
+r Replace one character at the cursor position
+R Begin overstrike or replace mode use ESC key
+to exit
+:/ pattern Search forward for the pattern
+:? pattern Search backward for the pattern
+n (used after either of the 2 search commands
+above to continue to find next occurrence of the
+Pattern.
+
+
+:g/pat1/s//pat2/g replace every occurrence of
+pattern1 (pat1) with pat2
+Example :g/tIO/s//Ada.Text_IO/g
+This will find and replace tIO by Ada.text_IO
+everywhere in the file.
+:g/a/s// /g replace the letter a, by blank
+:g/a/s///g replace a by nothing
+note: Even this command be undone by u
+
+
+Tabs
+:tabnew or :tabnew file – open a file in a new tab
+Ctrl + wT – move the current split window into its own tab
+gt or :tabnext or :tabn – move to the next tab
+gT or :tabprev or :tabp – move to the previous Tab
+
+
+#gt – move to tab number #
+:tabmove # – move current tab to the #th
+position (indexed from 0)
+:tabclose or :tabc – close the current tab and all
+its windows
+:tabonly or :tabo – close all tabs except for the
+current one
+:tabdo command – run the command on all tabs
+(e.g. :tabdo q – closes all opened tabs)
+
+
+
+
+
+
+3. Understand nsswitch.conf file:
+
+
+Link: https://tecadmin.net/what-is-etc-nsswitch-conf-file/
+
+
+/etc/nsswitch.conf is a Linux configuration file that specifies how the system should switch between different name service providers. The file can be used to configure which services should be used for hostname lookup, password lookups, and so on.
+“/etc/nsswitch.conf” file is read by the Name Service Switch (NSS) library when the system starts up. The NSS library then uses the information in “/etc/nsswitch.conf” to determine which name service providers should be used for each type of lookup.
+“/etc/nsswitch.conf” is a critical part of the Linux operating system, and any changes to the file can potentially cause serious problems. As such, it is important to understand how “/etc/nsswitch.conf” works before making any changes to the file.
+
+
+
+
+
+
+
+
+
+
+4. Understand the /etc/pam.d:
+
+
+Link: https://www.linux.com/news/understanding-pam/
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/managing_smart_cards/pam_configuration_files
+
+
+Four types of PAM module interface are available. Each of these corresponds to a different aspect of the authorization process:                                 
+* auth — This module interface authenticates use. For example, it requests and verifies the validity of a password. Modules with this interface can also set credentials, such as group memberships or Kerberos tickets.                                                 
+* account — This module interface verifies that access is allowed. For example, it checks if a user account has expired or if a user is allowed to log in at a particular time of day.                                                 
+* password — This module interface is used for changing user passwords.                                                 
+* session — This module interface configures and manages user sessions. Modules with this interface can also perform additional tasks that are needed to allow access, like mounting a user's home directory and making the user's mailbox available.

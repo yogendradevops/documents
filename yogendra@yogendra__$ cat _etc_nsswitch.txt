@@ -1,0 +1,502 @@
+﻿Assignment 
+
+
+yogendra@yogendra:~$ cat /etc/nsswitch.conf
+# /etc/nsswitch.conf
+#
+# Example configuration of GNU Name Service Switch functionality.
+# If you have the `glibc-doc-reference' and `info' packages installed, try:
+# `info libc "Name Service Switch"' for information about this file.
+
+
+passwd:             compat mysql
+group:              compat mysql
+shadow:             compat mysql
+gshadow:            files
+
+
+hosts:              files mdns4_minimal [NOTFOUND=return] dns
+networks:           files
+
+
+protocols:          db files
+services:           db files
+ethers:             db files
+rpc:                db files
+
+
+netgroup:           nis
+
+
+yogendra@yogendra:~$ sudo mysql -V
+[sudo] password for vivek:
+mysql  Ver 15.1 Distrib 10.0.38-MariaDB, for debian-linux-gnu (i686) using readline 5.2
+
+
+yogendra@yogendra:~$ sudo apt install mariadb-client
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  snapd-login-service
+Use 'sudo apt autoremove' to remove it.
+The following NEW packages will be installed:
+  mariadb-client
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 13.0 kB of archives.
+After this operation, 62.5 kB of additional disk space will be used.
+Get:1 http://in.archive.ubuntu.com/ubuntu xenial-updates/universe i386 mariadb-client all 10.0.38-0ubuntu0.16.04.1 [13.0 kB]
+Fetched 13.0 kB in 0s (15.7 kB/s)   
+Selecting previously unselected package mariadb-client.
+(Reading database ... 215050 files and directories currently installed.)
+Preparing to unpack .../mariadb-client_10.0.38-0ubuntu0.16.04.1_all.deb ...
+Unpacking mariadb-client (10.0.38-0ubuntu0.16.04.1) ...
+Setting up mariadb-client (10.0.38-0ubuntu0.16.04.1) ...
+
+
+yogendra@yogendra:~$ sudo apt install libpam-mysql
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  snapd-login-service
+Use 'sudo apt autoremove' to remove it.
+The following NEW packages will be installed:
+  libpam-mysql
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 27.3 kB of archives.
+After this operation, 74.8 kB of additional disk space will be used.
+Get:1 http://in.archive.ubuntu.com/ubuntu xenial/universe i386 libpam-mysql i386 0.7~RC1-4ubuntu2 [27.3 kB]
+Fetched 27.3 kB in 0s (58.4 kB/s)
+Preconfiguring packages ...
+Selecting previously unselected package libpam-mysql.
+(Reading database ... 215053 files and directories currently installed.)
+Preparing to unpack .../libpam-mysql_0.7~RC1-4ubuntu2_i386.deb ...
+Unpacking libpam-mysql (0.7~RC1-4ubuntu2) ...
+Setting up libpam-mysql (0.7~RC1-4ubuntu2) ...
+
+
+yogendra@yogendra:~$ sudo apt install libnss-mysql
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+Package libnss-mysql is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+
+E: Package 'libnss-mysql' has no installation candidate
+
+
+yogendra@yogendra:~$ sudo apt update
+Hit:1 http://in.archive.ubuntu.com/ubuntu xenial InRelease
+Get:2 http://in.archive.ubuntu.com/ubuntu xenial-updates InRelease [99.8 kB]
+Hit:3 http://security.ubuntu.com/ubuntu xenial-security InRelease
+Get:4 http://in.archive.ubuntu.com/ubuntu xenial-backports InRelease [97.4 kB]
+Get:5 http://in.archive.ubuntu.com/ubuntu xenial-updates/main i386 Packages [1,525 kB]
+Get:6 http://in.archive.ubuntu.com/ubuntu xenial-updates/main Translation-en [461 kB]
+Get:7 https://esm.ubuntu.com/infra/ubuntu xenial-infra-security InRelease [7,524 B]
+Get:8 http://in.archive.ubuntu.com/ubuntu xenial-updates/main i386 DEP-11 Metadata [326 kB]
+Get:9 http://in.archive.ubuntu.com/ubuntu xenial-updates/universe i386 DEP-11 Metadata [283 kB]
+Get:10 http://in.archive.ubuntu.com/ubuntu xenial-updates/multiverse i386 DEP-11 Metadata [7,156 B]
+Get:11 http://in.archive.ubuntu.com/ubuntu xenial-backports/main i386 DEP-11 Metadata [3,328 B]
+Get:12 http://in.archive.ubuntu.com/ubuntu xenial-backports/universe i386 DEP-11 Metadata [6,608 B]
+Get:13 https://esm.ubuntu.com/infra/ubuntu xenial-infra-updates InRelease [7,475 B]
+Fetched 2,825 kB in 3s (928 kB/s)                              
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+1 package can be upgraded. Run 'apt list --upgradable' to see it.
+
+
+yogendra@yogendra:~$  sudo apt upgrade
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+Calculating upgrade... Done
+The following package was automatically installed and is no longer required:
+  snapd-login-service
+Use 'sudo apt autoremove' to remove it.
+#
+# News about significant security updates, features and services will
+# appear here to raise awareness and perhaps tease /r/Linux ;)
+# Use 'pro config set apt_news=false' to hide this and future APT news.
+#
+The following security updates require Ubuntu Pro with 'esm-infra' enabled:
+  libpam0g libgssapi3-heimdal libxdmcp6 libpcre16-3 perl-base libpolkit-gobject-1-0 libdjvulibre-text bluez libhttp-daemon-perl libcroco3 libwebp5 libdns-export162 libqpdf21 fuse libcomerr2 poppler-utils dbus-x11 gstreamer1.0-alsa libisccfg140 libcups2 intel-microcode libdbus-1-3 libwind0-heimdal uuid-runtime libfdisk1 libsasl2-modules-db xserver-common python3-mako vim-common libnss3-nssdb libcurl3 gnupg-agent libprotobuf-lite9v5 libgrilo-0.2-1 gstreamer1.0-plugins-base-apps libldap-2.4-2 libpam-modules openssl bluez-cups libc6-dbg libc6-dev imagemagick libcairo-gobject2 libgnutls-openssl27 ntfs-3g libwbclient0 libsystemd0 libgd3 libheimntlm0-heimdal libksba8 libavahi-glib1 gstreamer1.0-plugins-good libgs9 dbus libpixman-1-0 python2.7-minimal libmount1 tcpdump snapd libdbi-perl libsqlite3-0 libxrender1 libcdio13 libicu55 binutils libmagickwand-6.q16-2 squashfs-tools bind9-host e2fsprogs zlib1g libavahi-common-data dnsutils libgmp10 perl-modules-5.22 libavahi-common3 libpython2.7 libncurses5 python2.7 dnsmasq-base libcdio-cdda1 python3-pil libheimbase1-heimdal libc6 util-linux libpython3.5 python3.5 python3.5-minimal libsepol1 libpolkit-agent-1-0 libharfbuzz-icu0 libisc160 libvorbisfile3 udev locales gstreamer1.0-plugins-base cups-server-common passwd libsasl2-2 libklibc libpam-runtime e2fslibs isc-dhcp-common cups-common libwavpack1 libncursesw5 libx11-6 libexpat1 libgstreamer-plugins-good1.0-0 libudev1 libvpx3 rsyslog libwebpdemux1 gstreamer1.0-pulseaudio dirmngr libss2 mount libavahi-ui-gtk3-0 libwayland-client0 libperl5.22 libaspell15 samba-libs libcdio-paranoia1 apport gdisk libblkid1 dpkg imagemagick-6.q16 libtiff5 libmagickcore-6.q16-2-extra libisc-export160 busybox-static libc-bin man-db libsasl2-modules cups-ppdc libcupsmime1 libtinfo5 libcaca0 python3-apport libxi6 libjbig2dec0 libpcre3 libxv1 avahi-daemon libvorbisenc2 libfuse2 tar systemd-sysv libspeex1 libuuid1 libavahi-core7 libgcrypt20 liblwres141 libjack-jackd2-0 libhcrypto4-heimdal libglib2.0-bin vim-runtime liblz4-1 gpgv ubuntu-core-launcher vim libpam-systemd libgstreamer-plugins-base1.0-0 libxrandr2 distro-info-data libsndfile1 xz-utils gstreamer1.0-x ghostscript systemd libsmartcols1 login gir1.2-gst-plugins-base-1.0 libxfixes3 libpolkit-backend-1-0 libwebpmux1 mysql-common ncurses-bin libpam-modules-bin libx11-data ghostscript-x aspell libopenexr22 libsmbclient unzip libspeexdsp1 openssh-client libmagickcore-6.q16-2 libmysqlclient20 libgs9-common avahi-autoipd bsdutils libgraphite2-3 libdns162 xserver-xorg-core-hwe-16.04 libjpeg-turbo8 qpdf libglib2.0-data bluez-obexd ncurses-base gnupg2 bash policykit-1 libdjvulibre21 apport-gtk libjbig0 libc-dev-bin libxml2 libcupsppdc1 libflac8 libpython2.7-minimal multiarch-support cpio libgnutls30 libnss3 libroken18-heimdal libfreetype6 ca-certificates perl rsync vim-tiny imagemagick-common libasn1-8-heimdal libzstd1 libisccc140 libkrb5-26-heimdal cups-bsd avahi-utils cron xserver-xorg-legacy-hwe-16.04 libpython3.5-stdlib cups-core-drivers libvorbis0a libbind9-140 cups-daemon gzip python3-jinja2 libharfbuzz0b libtasn1-6 gnupg libbluetooth3 libice6 libcairo2 libcupsimage2 libpython2.7-stdlib libexiv2-14 libpoppler-glib8 liblzma5 python3-lxml libpython3.5-minimal libpoppler58 libavahi-client3 libprotobuf9v5 cups libdpkg-perl libhx509-5-heimdal isc-dhcp-client libcupscgi1 cups-client klibc-utils python3-problem-report libsamplerate0 libpng12-0 libglib2.0-0 libcurl3-gnutls libwayland-server0 libx11-xcb1 libxslt1.1 libssl1.0.0 dpkg-dev tzdata busybox-initramfs libwayland-cursor0
+Learn more about Ubuntu Pro for 16.04 at https://ubuntu.com/16-04
+The following packages will be upgraded:
+  ubuntu-advantage-tools
+1 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Need to get 168 kB of archives.
+After this operation, 56.3 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://in.archive.ubuntu.com/ubuntu xenial-updates/main i386 ubuntu-advantage-tools i386 27.12~16.04.1 [168 kB]
+Fetched 168 kB in 1s (91.9 kB/s)                     
+Preconfiguring packages ...
+(Reading database ... 215064 files and directories currently installed.)
+Preparing to unpack .../ubuntu-advantage-tools_27.12~16.04.1_i386.deb ...
+Unpacking ubuntu-advantage-tools (27.12~16.04.1) over (27.11.3~16.04.1) ...
+Processing triggers for man-db (2.7.5-1) ...
+Setting up ubuntu-advantage-tools (27.12~16.04.1) ...
+Installing new version of config file /etc/ubuntu-advantage/help_data.yaml ...
+Installing new version of config file /etc/update-motd.d/91-contract-ua-esm-status ...
+
+
+yogendra@yogendra:~$ sudo apt install libnss-mysql
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+Package libnss-mysql is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+
+E: Package 'libnss-mysql' has no installation candidate
+yogendra@yogendra:~$ sudo apt install libpam-mysql
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+libpam-mysql is already the newest version (0.7~RC1-4ubuntu2).
+The following package was automatically installed and is no longer required:
+  snapd-login-service
+Use 'sudo apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+
+
+yogendra@yogendra:~$ sudo apt autoremove
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+The following packages will be REMOVED:
+  snapd-login-service
+0 upgraded, 0 newly installed, 1 to remove and 0 not upgraded.
+After this operation, 58.4 kB disk space will be freed.
+Do you want to continue? [Y/n] y
+(Reading database ... 215096 files and directories currently installed.)
+Removing snapd-login-service (1.33-0ubuntu0.16.04.1) ...
+Processing triggers for dbus (1.10.6-1ubuntu3.6) ...
+
+
+yogendra@yogendra:~$ sudo apt search libnss-mysql
+Sorting... Done
+Full Text Search... Done
+libnss-mysql-bg/xenial,now 1.5-4build1 i386 [installed]
+  NSS module for using MySQL as a naming service
+
+
+yogendra@yogendra:~$ cat /usr/share/doc
+doc/          doc-base/
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libnss
+libnss3/             libnss-mdns/         
+libnss3-nssdb/   libnss-mysql-bg/
+
+
+yogendra@yogendra:~$  cat /usr/share/doc/libnss-mysql-bg/
+cat: /usr/share/doc/libnss-mysql-bg/: Is a directory
+
+
+yogendra@yogendra:~$  cat /usr/share/doc/libnss-mysql-bg/
+AUTHORS                  NEWS.gz
+changelog.Debian.gz  README
+copyright                THANKS
+DEBUGGING.gz             TODO
+examples/                UPGRADING.gz
+FAQ.gz                   
+
+
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libnss-mysql-bg/
+AUTHORS                  NEWS.gz
+changelog.Debian.gz  README
+copyright                THANKS
+DEBUGGING.gz             TODO
+examples/                UPGRADING.gz
+FAQ.gz                   
+
+
+yogendra@yogendra:~$ sudo apt update
+Get:1 http://security.ubuntu.com/ubuntu xenial-security InRelease [99.8 kB]
+Hit:2 http://in.archive.ubuntu.com/ubuntu xenial InRelease
+Hit:3 http://in.archive.ubuntu.com/ubuntu xenial-updates InRelease
+Hit:4 http://in.archive.ubuntu.com/ubuntu xenial-backports InRelease
+Get:5 http://security.ubuntu.com/ubuntu xenial-security/main i386 DEP-11 Metadata [93.8 kB]
+Get:6 http://security.ubuntu.com/ubuntu xenial-security/universe i386 DEP-11 Metadata [130 kB]
+Get:7 http://security.ubuntu.com/ubuntu xenial-security/multiverse i386 DEP-11 Metadata [2,464 B]
+Hit:8 https://esm.ubuntu.com/infra/ubuntu xenial-infra-security InRelease
+Hit:9 https://esm.ubuntu.com/infra/ubuntu xenial-infra-updates InRelease
+Fetched 326 kB in 2s (154 kB/s)
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+All packages are up to date.
+
+
+yogendra@yogendra:~$ sudo apt install libnss-mysql-bg
+Reading package lists... Done
+Building dependency tree           
+Reading state information... Done
+libnss-mysql-bg is already the newest version (1.5-4build1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libnss
+libnss3/             libnss3-nssdb/   libnss-mdns/         libnss-mysql-bg/
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libnss-mysql-bg/
+AUTHORS                  examples/                THANKS
+changelog.Debian.gz  FAQ.gz                   TODO
+copyright                NEWS.gz                  UPGRADING.gz
+DEBUGGING.gz             README                   
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libpam
+libpam0g/                 libpam-modules-bin/   libpam-systemd/
+libpam-gnome-keyring/ libpam-mysql/             
+libpam-modules/           libpam-runtime/           
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libpam
+libpam0g/                 libpam-modules-bin/   libpam-systemd/
+libpam-gnome-keyring/ libpam-mysql/             
+libpam-modules/           libpam-runtime/           
+
+
+yogendra@yogendra:~$ cat /usr/share/doc/libpam-mysql/
+changelog.Debian.gz  NEWS.gz                  TODO.Debian
+copyright                README.Debian            
+CREDITS                  README.gz                
+
+
+yogendra@yogendra:~$  sudo mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 34
+Server version: 10.0.38-MariaDB-0ubuntu0.16.04.1 Ubuntu 16.04
+
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+MariaDB [(none)]> create database nss_mysql;
+Query OK, 1 row affected (0.01 sec)
+
+
+MariaDB [(none)]> use nss_mysql;
+Database changed
+
+
+MariaDB [nss_mysql]> drop table if exists  user;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+MariaDB [nss_mysql]>
+[1]+  Stopped                     sudo mysql -u root -p
+
+
+yogendra@yogendra:~$ sudo mysql -u root -p
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 35
+Server version: 10.0.38-MariaDB-0ubuntu0.16.04.1 Ubuntu 16.04
+
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+MariaDB [(none)]> use nss_mysql;
+Database changed
+MariaDB [nss_mysql]> CREATE TABLE groups (
+        ->   group_id int(11) NOT NULL auto_increment primary key,
+        ->   group_name varchar(30) DEFAULT '' NOT NULL,
+        ->   status            char(1) DEFAULT 'A',
+        ->   group_password varchar(64) DEFAULT 'x' NOT NULL,
+        ->   gid int(11) NOT NULL
+        -> );                                        
+Query OK, 0 rows affected (0.05 sec)
+
+
+MariaDB [nss_mysql]> INSERT INTO groups VALUES (1,'users','A','x',100);
+Query OK, 1 row affected (0.01 sec)
+
+
+MariaDB [nss_mysql]> DROP TABLE IF EXISTS user;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+MariaDB [nss_mysql]> CREATE TABLE user (
+        ->   user_id int(11) NOT NULL auto_increment primary key,
+        ->   user_name varchar(50) DEFAULT '' NOT NULL,
+        ->   realname varchar(32) DEFAULT '' NOT NULL,
+        ->   shell varchar(20) DEFAULT '/bin/sh' NOT NULL,
+        ->   password varchar(40) DEFAULT '' NOT NULL,
+        ->   status char(1) DEFAULT 'N' NOT NULL,
+        ->   uid int(11) NOT NULL,
+        ->   gid int(11) DEFAULT '65534' NOT NULL,
+        ->   homedir varchar(32) DEFAULT '/bin/sh' NOT NULL,
+        ->   lastchange varchar(50) NOT NULL default '',
+        ->   min int(11) NOT NULL default '0',
+        ->   max int(11) NOT NULL default '0',
+        ->   warn int(11) NOT NULL default '7',
+        ->   inact int(11) NOT NULL default '-1',
+        ->   expire int(11) NOT NULL default '-1'                               
+        -> );
+Query OK, 0 rows affected (0.03 sec)
+
+
+MariaDB [nss_mysql]> DROP TABLE IF EXISTS user_group;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+MariaDB [nss_mysql]> CREATE TABLE user_group (
+        ->   user_id int(11) DEFAULT '0' NOT NULL,
+        ->   group_id int(11) DEFAULT '0' NOT NULL
+        -> );
+Query OK, 0 rows affected (0.04 sec)
+
+
+MariaDB [nss_mysql]> GRANT select(user_name,user_id,uid,gid,realname,shell,homedir,status) on user to nss@localhost identified by 'ieopurASDF';
+Query OK, 0 rows affected (0.02 sec)
+
+
+MariaDB [nss_mysql]> GRANT select(group_name,group_id,gid,group_password,status) on groups to nss@localhost identified by 'ieopurASDF';
+Query OK, 0 rows affected (0.00 sec)
+
+
+MariaDB [nss_mysql]> GRANT select(user_id,group_id) on user_group to nss@localhost identified by 'ieopurASDF';
+Query OK, 0 rows affected (0.00 sec)
+
+
+MariaDB [nss_mysql]> GRANT select(user_name,password,user_id,uid,gid,realname,shell,homedir,status,lastchange,min,max,warn,inact,expire) on user to 'nss-shadow'@localhost identified by 'ruASDFDER';
+Query OK, 0 rows affected (0.00 sec)
+
+
+MariaDB [nss_mysql]> GRANT update(user_name,password,user_id,uid,gid,realname,shell,homedir,status,lastchange,min,max,warn,inact,expire) on user to 'nss-shadow'@localhost identified by 'ruASDFDER';
+Query OK, 0 rows affected (0.00 sec)
+
+
+MariaDB [nss_mysql]> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.01 sec)
+
+
+MariaDB [nss_mysql]>
+MariaDB [nss_mysql]> exit
+Bye
+
+
+yogendra@yogendra:~$ sudo mysql
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 36
+Server version: 10.0.38-MariaDB-0ubuntu0.16.04.1 Ubuntu 16.04
+
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+MariaDB [(none)]> use nss_mysql;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+
+Database changed
+MariaDB [nss_mysql]> show tables;
++---------------------+
+| Tables_in_nss_mysql |
++---------------------+
+| groups                  |
+| user                    |
+| user_group              |
++---------------------+
+3 rows in set (0.00 sec)
+
+
+MariaDB [nss_mysql]> desc user_group;
++----------+---------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++----------+---------+------+-----+---------+-------+
+| user_id  | int(11) | NO   |         | 0           |           |
+| group_id | int(11) | NO   |         | 0           |           |
++----------+---------+------+-----+---------+-------+
+2 rows in set (0.02 sec)
+
+
+MariaDB [nss_mysql]> desc user;
++------------+-------------+------+-----+---------+----------------+
+| Field          | Type            | Null | Key | Default | Extra              |
++------------+-------------+------+-----+---------+----------------+
+| user_id        | int(11)         | NO   | PRI | NULL        | auto_increment |
+| user_name  | varchar(50) | NO   |         |             |                    |
+| realname   | varchar(32) | NO   |         |             |                    |
+| shell          | varchar(20) | NO   |         | /bin/sh |                    |
+| password   | varchar(40) | NO   |         |             |                    |
+| status         | char(1)         | NO   |         | N           |                    |
+| uid            | int(11)         | NO   |         | NULL        |                    |
+| gid            | int(11)         | NO   |         | 65534   |                    |
+| homedir        | varchar(32) | NO   |         | /bin/sh |                    |
+| lastchange | varchar(50) | NO   |         |             |                    |
+| min            | int(11)         | NO   |         | 0           |                    |
+| max            | int(11)         | NO   |         | 0           |                    |
+| warn           | int(11)         | NO   |         | 7           |                    |
+| inact          | int(11)         | NO   |         | -1          |                    |
+| expire         | int(11)         | NO   |         | -1          |                    |
++------------+-------------+------+-----+---------+----------------+
+15 rows in set (0.01 sec)
+
+
+MariaDB [nss_mysql]> insert into user (
+Display all 787 possibilities? (y or n)
+MariaDB [nss_mysql]> insert into user (user_name ,realname, password, lastname) values ( 'kna' , 'keenable' , 'redhat' , 'no' );
+ERROR 1054 (42S22): Unknown column 'lastname' in 'field list'
+MariaDB [nss_mysql]> insert into user (user_name ,realname, password, lastname) values ( 'kna' , 'keenable' , 'redhat' );
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+MariaDB [nss_mysql]> insert into user (user_name ,realname, password ) values ( 'kna' , 'keenable' , 'redhat' );
+Query OK, 1 row affected, 1 warning (0.01 sec)
+
+
+MariaDB [nss_mysql]> select * from user;
++---------+-----------+----------+---------+----------+--------+-----+-------+---------+------------+-----+-----+------+-------+--------+
+| user_id | user_name | realname | shell   | password | status | uid | gid   | homedir | lastchange | min | max | warn | inact | expire |
++---------+-----------+----------+---------+----------+--------+-----+-------+---------+------------+-----+-----+------+-------+--------+
+|           1 | kna           | keenable | /bin/sh | redhat   | N          |   0 | 65534 | /bin/sh |                |   0 |   0 |        7 |        -1 |         -1 |
++---------+-----------+----------+---------+----------+--------+-----+-------+---------+------------+-----+-----+------+-------+--------+
+1 row in set (0.01 sec)
+
+
+MariaDB [nss_mysql]> select * from user\G
+*************************** 1. row ***************************
+   user_id: 1
+ user_name: kna
+  realname: keenable
+         shell: /bin/sh
+  password: redhat
+        status: N
+           uid: 0
+           gid: 65534
+   homedir: /bin/sh
+lastchange:
+           min: 0
+           max: 0
+          warn: 7
+         inact: -1
+        expire: -1
+1 row in set (0.00 sec)
+
+
+MariaDB [nss_mysql]> exit
+Bye
+
+
+yogendra@yogendra:~$ sudo vim /etc/nsswitch.conf

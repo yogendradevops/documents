@@ -1,0 +1,53 @@
+﻿Assignment 
+
+
+1. Need to use Prometheus Time Series Database and plot your own performance graphs using Grafana Dashboard by creating different movement graphs as per the attendance marking parameter.
+
+
+To Setup Grafana run below given command:
+root@yogendra:/home# docker run -itd --name grafana -p 3000:3000 docker.io/grafana/grafana
+
+
+root@yogendra:/home# docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED              STATUS              PORTS                                           NAMES
+b806cb91ab7a   grafana/grafana   "/run.sh"                24 seconds ago   Up 23 seconds   0.0.0.0:3000->3000/tcp, :::3000->3000/tcp   grafana
+
+
+root@yogendra:/home# docker exec -it grafana bash
+bash-5.1$ ls
+LICENSE              NOTICE.md            README.md            VERSION              bin                  conf                 plugins-bundled  public               scripts
+bash-5.1$ grafana-cli plugins install grafana-googlesheets-datasource
+✔ Downloaded and extracted grafana-googlesheets-datasource v1.1.5 zip successfully to /var/lib/grafana/plugins/grafana-googlesheets-datasource
+
+
+Please restart Grafana after installing plugins. Refer to Grafana documentation for instructions if necessary.
+
+
+bash-5.1$
+
+
+
+
+
+
+OR
+
+
+Run below given command:
+
+
+root@yogendra:/home# docker run -itd --name grafana -p 3000:3000 -e "GF_INSTALL_PLUGINS=grafana-googlesheets-datasource" docker.io/grafana/grafana
+Now Open the browser and write below given to open the grafana.
+localhost:3000/ 
+
+
+  
+
+
+
+
+
+Now Create google API (google sheet API) and enable google sheets API:
+
+
+To create the API key you need to google cloud .google.com. To create the API key , open your browser type “console.cloud.google.com/home ”.

@@ -1,0 +1,375 @@
+﻿OpenLDAP With Sudo
+
+
+                                 OpenLDAP With Sudo User Document.
+                             I have Useing RHEL6.4 or Centos 6.4 64Bit
+
+
+OpenLDAP Server Installation Stap
+
+
+1. install Below Packages in you Local Yum.
+# yum install openldap* migrationtools nss-pam-ldapd pam_ldap.x86_64
+
+
+2. Copy DB_CONFIG file in ldap DB Folder.
+# cp /usr/share/openldap-servers/DB_CONFIG.example  /var/lib/ldap/DB_CONFIG
+
+
+3. Copy slapd.conf configuretion file openldap folder.
+# cp /usr/share/openldap-servers/slapd.conf.obsolete /etc/openldap/slapd.conf
+# cp /usr/share/doc/sudo-1.8.6p3/schema.OpenLDAP  /etc/openldap/schema/sudo.schema
+
+
+4. Create Ldap root User Password in incrypt form.
+# slappasswd
+passowd XXXX
+retry password XXXX
+{SSHA}ys0KIpUDTxDV8kys2q98/iLb/44YZDpd
+
+
+5. configure slapd.conf
+# vim /etc/openldap/slapd.conf
+change below Lines.
+
+
+# See slapd.conf(5) for details on configuration options.
+# This file should NOT be world readable.
+#
+
+
+include             /etc/openldap/schema/corba.schema
+
+
+database config
+access to *
+            by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+            by * none
+
+
+# enable server status monitoring (cn=monitor)
+database monitor
+access to *
+            by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" read
+            by dn.exact="cn=Manager,dc=example,dc=com" read
+            by * none
+
+
+#######################################################################
+# database definitions
+#######################################################################
+
+
+database            bdb
+suffix              "dc=example,dc=com"
+checkpoint          1024 15
+rootdn              "cn=Manager,dc=example,dc=com"
+# Cleartext passwords, especially for the rootdn, should
+# be avoided.  See slappasswd(8) and slapd.conf(5) for details.
+# Use of strong authentication encouraged.
+rootpw                      {SSHA}J/g2NRCo3kWVnBUHyShBm5ITqb6zp9i+
+# rootpw                    secret
+# rootpw                    {crypt}ijFYNcSNctBYg
+
+
+# Indices to maintain for this database
+index        sudoUser                      eq
+
+
+
+
+
+
+# updatedb
+
+
+# vim /etc/sysconfig/ldap
+SLAPD_LDAPS=no
+        to
+SLAPD_LDAPS=yes
+
+
+6. Configure openldap certificate and Key file.
+# openssl req -new -x509 -nodes -out /etc/pki/tls/certs/example.pem -keyout  /etc/pki/tls/certs/examplekey.pem -days 1825
+Generating a 2048 bit RSA private key
+...................................................+++
+............................+++
+writing new private key to '/etc/pki/tls/certs/examplekey.pem'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:IN
+State or Province Name (full name) []:Delhi
+Locality Name (eg, city) [Default City]:New Delhi
+Organization Name (eg, company) [Default Company Ltd]:example
+Organizational Unit Name (eg, section) []:IT
+Common Name (eg, your name or your server's hostname) []:node1.example.com
+Email Address []:root@node1.example.com
+
+
+
+
+
+
+# cp -rv /etc/openldap/slapd.d /etc/openldap/slapd.d-ORG
+# rm -rf /etc/openldap/slapd.d/*
+# chown -R ldap.ldap /etc/openldap/slapd.d/*
+# chown -R ldap.ldap /var/lib/ldap/*
+# slapcat -f slapd.conf -F /etc/openldap/slapd.d/  -n 0
+
+
+6. Configure Database ldif file.
+# vim /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}bdb.ldif
+edit Below Line
+olcRootPW: {SSHA}J/g2NRCo3kWVnBUHyShBm5ITqb6zp9i+
+olcTLSCertificateFile: /etc/pki/tls/certs/example.pem
+olcTLSCertificateKeyFile: /etc/pki/tls/certs/example.pem
+
+
+
+
+# /etc/init.d/slapd restart
+# chkconfig slapd on
+
+
+
+
+# mkdir /home/guests
+# for i in {1..5}; do useradd  -d /home/guests/ldapuser$i ldapuser$i -u 100$i ; echo "redhat" | passwd  --stdin ldapuser$i; done
+Changing password for user ldapuser1.
+passwd: all authentication tokens updated successfully.
+Changing password for user ldapuser2.
+passwd: all authentication tokens updated successfully.
+Changing password for user ldapuser3.
+passwd: all authentication tokens updated successfully.
+Changing password for user ldapuser4.
+passwd: all authentication tokens updated successfully.
+Changing password for user ldapuser5.
+passwd: all authentication tokens updated successfully.
+
+
+# cd /usr/share/migrationtools/
+# vim migrate_common.ph
+edit below line
+$NAMINGCONTEXT{'group'}                 = "ou=Groups";
+$DEFAULT_MAIL_DOMAIN = "example.com";
+$DEFAULT_BASE = "dc=example,dc=com";
+
+
+# getent passwd | tail -n 5
+ldapuser1:x:1001:1001::/home/guests/ldapuser1:/bin/bash
+ldapuser2:x:1002:1002::/home/guests/ldapuser2:/bin/bash
+ldapuser3:x:1003:1003::/home/guests/ldapuser3:/bin/bash
+ldapuser4:x:1004:1004::/home/guests/ldapuser4:/bin/bash
+ldapuser5:x:1005:1005::/home/guests/ldapuser5:/bin/bash
+# getent passwd | tail -n 5  > /root/users
+
+
+# getent group | tail -n 5
+ldapuser1:x:1001:
+ldapuser2:x:1002:
+ldapuser3:x:1003:
+ldapuser4:x:1004:
+ldapuser5:x:1005:
+# getent group | tail -n 5  > /root/group
+
+
+
+
+# getent shadow | tail -n 5
+ldapuser1:$6$gsxcNyM/$MXqdkP58FjmXY28m8n4si17mF8Q1XZkfja1l3yoUMidkUX28uuD2ckZfB302AN4nqvtft5MNp9AlPvLWxSv0g1:16602:0:99999:7:::
+ldapuser2:$6$NasIBKrR$G6Y5MGspks06CBwlKPmUjFGEWCVH3MrFFi2WU3oMZnM5OoqFiiS8ALU3cdl0dEdNUUhI7HpFwmOzkCsISVLPY1:16602:0:99999:7:::
+ldapuser3:$6$y43EYMy.$euBLvDN2Oqa/pyEk3fsbLJjol3ppmyCswnZBtaD2jhwmtxfqA6XgNhIVLNxb/5xx9xMTr1RYDuZgY0yjRdfXY0:16602:0:99999:7:::
+ldapuser4:$6$fwpSln4y$qUfm.tQJs90enc7MM6aWInGUqGFIdrPvKYk/M/M1vNqMkfYB43wEAY2sLX3fkCOfX5Ph7KywZOvq2S6EhS3SK0:16602:0:99999:7:::
+ldapuser5:$6$dUh4HVOh$t3qZTL/vQ47Kby14ejottjyPBDwkx31HycZA4dJS0iKFlxOwIqzuds6BWar1nBf.Ylp/9S45ePox45mycfGRu/:16602:0:99999:7:::
+# getent shadow | tail -n 5  > /root/password
+
+
+# vim migrate_passwd.pl
+/etc/shadow
+to
+/root/password
+
+
+# ./migrate_base.pl  > /root/base.ldif
+# ./migrate_passwd.pl /root/users > /root/users.ldif
+# ./migrate_group.pl /root/group  > /root/group.ldif
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /root/base.ldif
+Enter LDAP Password:
+adding new entry "dc=example,dc=com"
+adding new entry "ou=Hosts,dc=example,dc=com"
+adding new entry "ou=Rpc,dc=example,dc=com"
+adding new entry "ou=Services,dc=example,dc=com"
+adding new entry "nisMapName=netgroup.byuser,dc=example,dc=com"
+adding new entry "ou=Mounts,dc=example,dc=com"
+adding new entry "ou=Networks,dc=example,dc=com"
+adding new entry "ou=People,dc=example,dc=com"
+adding new entry "ou=Groups,dc=example,dc=com"
+adding new entry "ou=Netgroup,dc=example,dc=com"
+adding new entry "ou=Protocols,dc=example,dc=com"
+adding new entry "ou=Aliases,dc=example,dc=com"
+adding new entry "nisMapName=netgroup.byhost,dc=example,dc=com"
+
+
+
+
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /root/users.ldif
+Enter LDAP Password:
+adding new entry "uid=ldapuser1,ou=People,dc=example,dc=com"
+adding new entry "uid=ldapuser2,ou=People,dc=example,dc=com"
+adding new entry "uid=ldapuser3,ou=People,dc=example,dc=com"
+adding new entry "uid=ldapuser4,ou=People,dc=example,dc=com"
+adding new entry "uid=ldapuser5,ou=People,dc=example,dc=com"
+
+
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /root/group.ldif
+Enter LDAP Password:
+adding new entry "cn=ldapuser1,ou=Groups,dc=example,dc=com"
+adding new entry "cn=ldapuser2,ou=Groups,dc=example,dc=com"
+adding new entry "cn=ldapuser3,ou=Groups,dc=example,dc=com"
+adding new entry "cn=ldapuser4,ou=Groups,dc=example,dc=com"
+adding new entry "cn=ldapuser5,ou=Groups,dc=example,dc=com"
+
+
+# ldapsearch -x -b "dc=example,dc=com" | less
+
+
+OpenLDAP is Completed  and now we are going to Sudo Configure
+
+
+vim /root/sudo.ldif (edit below line)
+dn: ou=SUDOers,dc=example,dc=com
+objectclass:top
+objectClass: organizationalUnit
+ou: SIDOERs
+
+
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /root/sudo.ldif
+Enter LDAP Password:
+adding new entry "ou=SUDOers,dc=example,dc=com"
+
+
+# SUDOERS_BASE=ou=SUDOers,dc=example,dc=com
+# export SUDOERS_BASE
+# cd /usr/share/doc/sudo-1.8.6p3
+# chmod +x sudoers2ldif
+
+
+# ./sudoers2ldif /etc/sudoers > /tmp/sudoers.ldif
+# vim /tmp/sudoers.ldif (edit 2 lines)
+dn: cn=defaults,ou=SUDOers,dc=example,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: defaults
+description: Default sudoOption's go here
+sudoOption: requiretty
+sudoOption: !visiblepw
+sudoOption: always_set_home
+sudoOption: env_reset
+sudoOption: env_keep += "LANG LANGUAGE LINGUAS LC_* _XKB_CHARSET"
+sudoOption: env_keep += "QTDIR KDEDIR"
+sudoOption: secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+sudoOrder: 1
+
+
+dn: cn=root,ou=SUDOers,dc=example,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: root
+sudoUser: root
+sudoHost: ALL
+sudoRunAsUser: ALL
+sudoCommand: ALL
+sudoOrder: 2
+
+
+dn: cn=ldapuser1,ou=SUDOers,dc=example,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: ldapuser1
+sudoUser: ldapuser1
+sudoHost: ALL
+sudoRunAsUser: ALL
+sudoCommand: /sbin/fdisk
+sudoOrder: 2
+
+
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /tmp/sudoers.ldif
+Enter LDAP Password:
+adding new entry "cn=defaults,ou=SUDOers,dc=example,dc=com"
+adding new entry "cn=root,ou=SUDOers,dc=example,dc=com"
+adding new entry "cn=ldapuser1,ou=SUDOers,dc=example,dc=com"
+
+
+
+
+# vim /root/user_sudo.ldif
+dn: cn=ldapuser2,ou=SUDOers,dc=example,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: ldapuser2
+sudoUser: ldapuser2
+sudoHost: ALL
+sudoRunAsUser: ALL
+sudoCommand: ALL
+sudoCommand: !/bin/rm
+
+
+sudoOrder: 2
+
+
+# ldapadd -x -W -D "cn=Manager,dc=example,dc=com" -f /root/user_sudo.ldif
+Enter LDAP Password:
+adding new entry "cn=ldapuser2,ou=SUDOers,dc=example,dc=com"
+           
+
+
+Client Side.
+# vim /etc/sudo-ldap.conf
+uri ldap://ldapserver IP
+##
+sudoers_base ou=SUDOers,dc=example,dc=com
+
+
+# vim /etc/nsswitch.conf
+sudoers:        ldap files
+
+
+# authconfig-tui
+Starting nslcd:                                                [  OK  ]
+# getent passwd ldapuser1
+ldapuser1:x:1001:1001:ldapuser1:/home/guests/ldapuser1:/bin/bash
+# su - ldapuser1
+$ sudo fdisk -l
+sudo: unknown defaults entry `env_keep '
+sudo: unknown defaults entry `env_keep '
+sudo: unknown defaults entry `secure_path '
+[sudo] password for ldapuser1:
+
+
+Disk /dev/sda: 21.5 GB, 21474836480 bytes
+255 heads, 63 sectors/track, 2610 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00086c8c
+
+
+   Device Boot          Start             End          Blocks   Id  System
+/dev/sda1   *               1              64          512000   83  Linux
+Partition 1 does not end on cylinder boundary.
+/dev/sda2                  64            2611        20458496   8e  Linux LVM
+            
+$ exit
+# su - ldapuser2
+$ sudo rm -rf /var/log/maillog
+sudo: unknown defaults entry `env_keep '
+sudo: unknown defaults entry `env_keep '
+sudo: unknown defaults entry `secure_path '
+[sudo] password for ldapuser2:
+Sorry, user ldapuser2 is not allowed to execute '/bin/rm -rf /var/log/maillog' as root on node2.example.com.

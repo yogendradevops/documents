@@ -1,0 +1,54 @@
+﻿Create a hash with md5 and sha512 algorithm (with salt and without salt) using openssl 
+
+
+Create a file 
+  Vim file1.txt
+
+
+Generate the hash of this file using the sha512 algorithm.
+
+
+openssl sha512 file1.txt
+SHA512(file1.txt)= 26f3d90bbcf525f12bc02047030f0a146db807278f425357dbe5f00cdb506e1ed4f53c4c562c23fcf2d2f932c635afd2fb9fef5ad39454b915b92ea00b9556c5
+
+
+Generate the hash of the file using the md5 algorithm.
+
+
+root@shiv:/home/vivek# openssl md5 file1.txt
+MD5(file1.txt)= 2f91d13c826fa2a28709e6d09f11fa8c
+root@shiv:/home/vivek#
+
+
+Create hash of the password with salt
+
+
+root@shiv:/home/vivek# openssl passwd -1 -salt "a" 123
+$1$a$eXTNiE82ct6Gf4mIPEGmi/
+
+
+1 - md5 
+“a” = salt
+123 = password
+
+
+Create hash of the password with salt
+
+
+openssl passwd -6 -salt "b" 123
+$6$b$NiJhSjRmX5H8LEuyRS.GyEaR3adtDVVgRQK03xwxYCwC/2bfDr8saHmVrHyw27QOafXo/M/QHNEBy0G4wxBGi.
+
+
+-6 = sha512
+
+
+Create hash of the password without salt
+
+
+
+
+
+
+root@shiv:/home/vivek# openssl passwd -6 123
+$6$ZIpPlrNuuMwak2S0$0IuScvzg/ek0mwssgbNqesRmVL0C5g5iO6m.cicimJ4vvli1XhJRSENdhahIXz0oPUMv/xiIOof9GQvhrZWeA/
+root@shiv:/home/vivek#

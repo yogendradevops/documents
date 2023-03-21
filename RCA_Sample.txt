@@ -1,0 +1,129 @@
+﻿Root Cause Analysis
+RCA# xxx
+RCA Date: dd-mmm-yyyy
+Client Name: ABC Ltd.
+RCA Team:  Name of the engineer(s)
+________________
+
+
+DATE & TIME OF EVENT REPORTED:
+DD-MMM-YYYY at 00:00 hrs
+EVENT DESCRIPTION
+yum repository fails with error message pointing to libssl and libcrypto problem.
+
+
+Background Summary
+
+
+There was a problem importing one of the Python modules
+required to run yum. The error leading to this problem was:
+
+
+/usr/lib64/libssl.so.10: symbol private_ossl_minimum_dh_bits, version libcrypto.so.10 not defined in file libcrypto.so.10 with link time reference
+
+
+Please install a package which provides this module, or
+verify that the module is installed correctly.
+
+
+It's possible that the above module doesn't match the current version of Python, which is:
+2.6.6 (r266:84292, Aug  9 2016, 06:11:56)
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-17)]
+
+
+If you cannot solve this problem yourself, please go to the yum faq at: http://yum.baseurl.org/wiki/Faq
+
+
+
+
+SEVERITY
+ High/Medium/Low (choose)
+
+
+IMPACTED SYSTEMS  
+Server xyz was impacted with downtime of 3 hrs (1200-15:00 hrs)
+DATA COLLECTED DURING ISSUE 
+
+
+* Checked xyz logs
+* System load average 
+
+
+DIAGNOSING THE PROBLEM
+
+
+Check the current version of openssl.
+
+
+[root@SERVER001 ~]# openssl -V
+openssl: relocation error: /usr/lib64/libssl.so.10: symbol private_ossl_minimum_dh_bits, version libcrypto.so.10 not defined in file libcrypto.so.10 with link time reference
+
+
+Check the library folders
+
+
+[root@SERVER001 ~]# ls -lrt /usr/lib/libssl* /usr/lib/libcrypto*
+ls: cannot access /usr/lib/libssl*: No such file or directory
+-rw-r--r-- 1 root root 1953536 Oct 12  2015 /usr/lib/libcrypto.so.1.0.1e
+lrwxrwxrwx 1 root root      19 May 21 22:51 /usr/lib/libcrypto.so.10 -> libcrypto.so.1.0.1e
+
+
+We see the problem in /usr/lib/ libssl.so.10 is pointing to the correct version libssl.so.1.0.1e
+but libcrypto.so.10 is pointing to and older version libcrypto.so.1.0.1e 
+Check always the openssl version to make sure of the changes needed.
+
+
+ROOT CAUSE
+
+
+There is a mismatch between the version of libssl and libcrypto due to bad symbolic links
+
+
+CORRECTIVE ACTION/RESOLVING THE ISSUE
+We need to remove the symlink /usr/lib/libcrypto.so.10 -> /usr/lib/libcrypto.so.1.0.1e
+
+
+and create the correct symbolic link to the proper library
+
+
+mv /usr/lib/libcrypto.so.10 /opt/
+ln -s /usr/lib/libcrypto.so.1.0.1m /usr/lib/libcrypto.so.10 
+
+
+And check the folder again
+
+
+[root@SERVER001 ~]# ls -lrt /usr/lib/libssl* /usr/lib/libcrypto*
+ls: cannot access /usr/lib/libssl*: No such file or directory
+-rw-r--r-- 1 root root 1953536 Oct 12  2015 /usr/lib/libcrypto.so.1.0.1e
+lrwxrwxrwx 1 root root      28 May 24 10:41 /usr/lib/libcrypto.so.10 -> /usr/lib/libcrypto.so.1.0.1m
+
+
+[root@SERVER001 ~]# yum clean all
+Loaded plugins: product-id, rhnplugin, search-disabled-repos, security, subscription-manager
+Cleaning repos: rhel-x86_64-server-6 rhel-x86_64-server-6-rhscl-1 rhel-x86_64-server-extras-6 rhel-x86_64-server-ha-6 rhel-x86_64-server-optional-6
+              : rhel-x86_64-server-supplementary-6 rhn-tools-rhel-x86_64-server-6
+Cleaning up Everything
+
+
+[root@SERVER001 ~]# yum repolist
+Loaded plugins: product-id, rhnplugin, search-disabled-repos, security, subscription-manager
+This system is receiving updates from RHN Classic or RHN Satellite.
+repo id                                                             repo name                                                                                 status
+rhel-x86_64-server-6                                                Red Hat Enterprise Linux Server (v. 6 for 64-bit x86_64)                                  20,345+306
+rhel-x86_64-server-6-rhscl-1                                        Red Hat Software Collections (RHEL 6 Server x86_64)                                          9,358+1
+rhel-x86_64-server-extras-6                                         RHEL Server Extras (v. 6 for 64-bit x86_64)                                                       97
+rhel-x86_64-server-ha-6                                             RHEL Server High Availability (v. 6 for 64-bit x86_64)                                           622
+rhel-x86_64-server-optional-6                                       RHEL Server Optional (v. 6 64-bit x86_64)                                                 11,497+462
+rhel-x86_64-server-supplementary-6                                  RHEL Server Supplementary (v. 6 64-bit x86_64)                                               239+626
+rhn-tools-rhel-x86_64-server-6                                      RHN Tools for RHEL (v. 6 for 64-bit x86_64)                                                      231
+repolist: 42,389
+
+
+
+
+PREVENTIVE ACTION
+Any action that is done or planned to avoid any future issues
+
+
+________________

@@ -1,0 +1,133 @@
+﻿Playbook for tags:
+---
+- name: Ansible Tags example
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Hello World tag example
+      shell:
+        echo  "Hello World!"
+      tags:
+        - hello
+
+
+    - name: Welcome to Ansible Tags tag example
+      shell:
+        echo "How are you?"
+      tags:
+        - welcome
+
+
+    - name: Enjoy tag example
+      shell:
+        echo  "Enjoy!"
+      tags:
+        - enjoy
+
+
+
+
+________________
+
+
+RUN PLAYBOOK 
+
+
+yogendra@yogendra:/tmp$ ansible-playbook adi.yml 
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+
+PLAY [Ansible Tags example] ***********************************************************************************************************************************************************
+
+
+TASK [Hello World tag example] ********************************************************************************************************************************************************
+changed: [localhost]
+
+
+TASK [Welcome to Ansible Tags tag example] ********************************************************************************************************************************************
+changed: [localhost]
+
+
+TASK [Enjoy tag example] **************************************************************************************************************************************************************
+changed: [localhost]
+
+
+PLAY RECAP ****************************************************************************************************************************************************************************
+localhost                  : ok=3    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+________________
+
+
+RUN PLAYBOOK WITH ONLY ONE TAG
+
+
+yogendra@yogendra:/tmp$ ansible-playbook adi.yml --tags hello
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+
+PLAY [Ansible Tags example] ***********************************************************************************************************************************************************
+
+
+TASK [Hello World tag example] ********************************************************************************************************************************************************
+changed: [localhost]
+
+
+PLAY RECAP ****************************************************************************************************************************************************************************
+localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+
+
+________________
+
+
+RUN PLAYBOOK WITH ONLY ONE TAG 
+
+
+
+
+yogendra@yogendra:/tmp$ ansible-playbook adi.yml --tags enjoy
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+
+PLAY [Ansible Tags example] ***********************************************************************************************************************************************************
+
+
+TASK [Enjoy tag example] **************************************************************************************************************************************************************
+changed: [localhost]
+
+
+PLAY RECAP ****************************************************************************************************************************************************************************
+localhost                  : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+
+
+________________
+
+
+RUN PLAYBOOK WITH SKIPPING TAG
+
+
+yogendra@yogendra:/tmp$ ansible-playbook adi.yml --skip-tags enjoy
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+
+PLAY [Ansible Tags example] ***********************************************************************************************************************************************************
+
+
+TASK [Hello World tag example] ********************************************************************************************************************************************************
+changed: [localhost]
+
+
+TASK [Welcome to Ansible Tags tag example] ********************************************************************************************************************************************
+changed: [localhost]
+
+
+PLAY RECAP ****************************************************************************************************************************************************************************
+localhost                  : ok=2    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

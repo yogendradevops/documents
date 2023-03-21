@@ -1,0 +1,282 @@
+﻿Openshift
+* OpenShift is a cloud development Platform as a Service (PaaS) developed by Red Hat. It is an open-source development platform, enabling developers to develop and deploy their applications on cloud infrastructure. It is very helpful in developing cloud-enabled services. It is a user-friendly platform used to create, test, and run applications and deploy them on the cloud.
+* One of the key features of OpenShift is it is extensible, which helps the users support the application written in other languages.
+* OpenShift comes with various concepts of virtualization as its abstraction layer. The underlying idea behind OpenShift is based on virtualization.
+
+
+Why Use OpenShift?
+OpenShift provides a common platform for enterprise units to host their applications on the cloud without worrying about the underlying operating system. This makes it very easy to use, develop, and deploy applications on the cloud. One of the key features is, that it provides managed hardware and network resources for all kinds of development and testing. With OpenShift, PaaS developer has the freedom to design their required environment with specifications.
+* Free − This plan is limited to three years with 1GB space for each.
+* Bronze − This plan includes 3 years and expands up to 16 years with 1GB of space per year.
+* Sliver − This is the 16-year plan of bronze, however, has a storage capacity of 6GB with no additional cost.
+Features
+* Multiple Language Support
+* Multiple Database Support
+* Extensible Cartridge System
+* Source Code Version Management
+* One-Click Deployment
+* Multi Environment Support
+* Standardised Developers’ workflow
+* Dependency and Build Management
+* Automatic Application ScalingResponsive Web Console
+* Rich Command-line Tools
+* Remote SSH Login to Application.
+* Rest API Support
+* Self-service On-Demand Application Stack
+* Built-in Database Services
+* Continuous Integration and Release Management
+* IDE Integration
+* Remote Debugging of Applications
+Virtualization
+In general, virtualization can be defined as the creation of a virtual system rather than a physical or actual version of anything starting from a system, storage, or operating system. The main goal of virtualization is to make the IT infrastructure more scalable and reliable
+Physical vs Virtual Architecture
+  
+
+             Types of Virtualization
+* Application Virtualization − In this method, the application is abstracted from the underlying operating system. This method is very useful in that the application can be run in isolation without being dependent on the operating system underneath.
+* Desktop Virtualization − This method is used to reduce the workstation load in which one can access the desktop remotely, using a thin client at the desk. In this method, the desktops are mostly run in a data center. A classic example can be a Virtual Desktop Image (VDI) which is used in most organizations.
+* Data Virtualization − It is a method of abstracting and getting away from the traditional method of data and data management.
+* Server Virtualization − In this method, server-related resources are virtualized which includes the physical server, process, and operating system. The software which enables this abstraction is often referred to as the hypervisor.
+* Storage Virtualization − It is the process of pooling in multiple storage devices into a single storage device that is managed from a single central console.
+* Network Virtualization − It is the method in which all available network resources are combined by splitting up the available bandwidth and channels, each of which is independent of the other.
+Infrastructure as a Service (IaaS)
+In this format, the service provider provides hardware-level virtual machines with some pre-defined virtual hardware configuration. There are multiple competitors in this space starting from AWS Google Cloud, Rackspace, and many more.
+The main drawback of having IaaS after a long procedure of setup and investment is that one is still responsible for installing and maintaining the operating system and server packages, managing the network of infrastructure, and taking care of the basic system administration.
+Software as a Service (SaaS)
+With SaaS, one has the least worry about the underlying infrastructure. It is as simple as plug and play, wherein the user just has to sign up for the services and start using it. The main drawback with this setup is, one can only perform a minimal amount of customization, which is allowed by the service provider. One of the most common examples of SaaS is Gmail, where the user just needs to log in and start using it. The user can also make some minor modifications to his account. However, it is not very useful from the developer’s point of view.
+Platform as a Service (PaaS)
+It can be considered as a middle layer between SaaS and IaaS. The primary target of PaaS evaluation is for developers in which the development environment can be spin up with a few commands. These environments are designed in such a way that they can satisfy all the development needs, right from having a web application server with a database. To do this, you just require a single command and the service provider does the stuff for you.
+OpenShift Container Platform
+OpenShift container platform is an enterprise platform that helps multiple teams such as development and IT operations teams to build and deploy containerized infrastructure. All the containers built in OpenShift use a very reliable Docker containerization technology, which can be deployed on any data center of publically hosted cloud platforms.
+In other words, OpenShift brings Docker and Kubernetes together to the enterprise level. It is a container platform software for enterprise units to deploy and manage applicants in the infrastructure of their own choice. For example, hosting OpenShift instances on AWS instances.
+OpenShift container platform is available in two package levels.
+* OpenShift Container Local − This is for those developers who wish to deploy and test applications on the local machine. This package is mainly used by development teams for developing and testing applications.
+* OpenShift Container Lab − This is designed for extended evaluation of applications starting from development to deployment to pre-prod environment.
+                     
+Competitors of OpenShift
+* Google App Engine − This is Google’s free platform for developing and hosting web applications. Google’s app engine offers fast development and deployment platform
+* Microsoft Azure − Azure cloud is hosted by Microsoft in their data centers.
+* Amazon Elastic Cloud Compute − They are built-in services provided by Amazon, which help in developing and hosting scalable web applications on the cloud.
+* Cloud Foundry − is an open-source PaaS platform for Java, Ruby, Python, and Node.js applications.
+* CloudStack − Apache’s CloudStack is a project developed by Citrix and is designed to become a direct competitor of OpenShift and OpenStack
+* OpenStack − Another cloud technology provided by Red Hat for cloud computing.
+* Kubernetes − It is a direct orchestration and cluster management technology built to manage Docker containers.
+OpenShift - Architecture
+OpenShift is a layered system wherein each layer is tightly bound with the other layer using Kubernetes and Docker clusters. The architecture of OpenShift is designed in such a way that it can support and manage Docker containers, which are hosted on top of all the layers using Kubernetes. Unlike the earlier version of OpenShift V2, the new version of OpenShift V3 supports containerized infrastructure. In this model, Docker helps in the creation of lightweight Linux-based containers and Kubernetes supports the task of orchestrating and managing containers on multiple hosts.
+                      
+OpenShift - Environment Setup
+1. System Requirement
+In order to set up enterprise OpenShift, one needs to have an active Red Hat account. As OpenShift works on Kubernetes master and node architecture, we need to set up both of them on separate machines, wherein one machine acts as a master and the other works on the node. In order to set up both, there are minimum system requirements.
+   2)Master Machine Configuration
+Following are the minimum system requirements for master machine configuration.
+* A base machine hosted either on physical, virtual, or on any of the cloud environments.
+* At least Linux 7 with the required packages on that instance.
+* 2 CPU core.
+* At least 8 GB RAM.
+* 30 GB of internal hard disk memory.
+    3)Node Machine Configuration
+* Physical or virtual base image as given for the master machine.
+* At least Linux 7 on the machine.
+* Docker installed with not below than 1.6 version.
+* 1 CPU core.
+* 8 GB RAM.
+* 15 GB hard disk for hosting images and 15 GB for storing images.
+
+
+Step by Step Guide to OpenShift Setup
+In the following description, we are going to set up an OpenShift lab environment, which can be later extended to a bigger cluster. As OpenShift requires to master and node setup, we would need at least two machines hosted on either cloud, physical, or virtual machines.
+Step 1 − First install Linux on both machines, where Linux 7 should be the last version. This can be done using the following commands if one has an active Red Hat subscription.
+# subscription-manager repos --disable = "*"
+
+
+# subscription-manager repos --enable = "rhel-7-server-rpms"
+
+
+# subscription-manager repos --enable = "rhel-7-server-extras-rpms"
+
+
+# subscription-manager repos --enable = "rhel-7-server-optional-rpms"
+
+
+# subscription-manager repos --enable = "rhel-7-server-ose-3.0-rpms"
+
+
+# yum install wget git net-tools bind-utils iptables-services bridge-utils
+
+
+# yum install wget git net-tools bind-utils iptables-services bridge-utils
+
+
+# yum install python-virtualenv
+
+
+# yum install gcc
+
+
+# yum install httpd-tools
+
+
+# yum install docker
+
+
+# yum update
+
+
+Once we have all the above base packages installed in both of the machines, the next step would be to set up Docker on the respective machines.
+Step 2 − Configure Docker so that it should allow insecure communication on the local network only. For this, edit the Docker file inside /etc/sysconfig. If the file is not present then you need to create it manually.
+# vi /etc/sysconfig/docker
+OPTIONS = --selinux-enabled --insecure-registry 192.168.122.0/24
+
+
+After configuring the Docker on the master machine, we need to set up a password-less communication between both the machines. For this, we will use public and private key authentication.
+Step 3 − Generate keys on the master machine and then copy the id_rsa.pub key to the authorized key file of the node machine, which can be done using the following command.
+# ssh-keygen
+
+
+# ssh-copy-id -i .ssh/id_rsa.pub root@ose3-node.test.com
+
+
+Once you have all of the above setup in place, next is to set up OpenShift version 3 on the master machine.
+Step 4 − From the master machine, run the following curl command.
+# sh <(curl -s https://install.openshift.com/ose)
+
+
+The above command will put the setup in place for OSV3. The next step would be to configure OpenShift V3 on the machine.
+If you cannot download from the Internet directly, then it could be downloaded from https://install.openshift.com/portable/oo-install-ose.tgz as a tar package from which the installer can run on the local master machine.
+Once we have the setup ready, then we need to start with the actual configuration of OSV3 on the machines. This setup is very specific to test the environment for actual production, we have LDAP and other things in place.
+Step 5 − On the master machine, configure the following code located under /etc/openshift/master/master-config.yaml
+# vi /etc/openshift/master/master-config.yaml
+identityProviders:
+- name: my_htpasswd_provider
+challenge: true
+login: true
+provider:
+apiVersion: v1
+kind: HTPasswdPasswordIdentityProvider
+file: /root/users.htpasswd
+routingConfig:
+subdomain: testing.com
+
+
+Next, create a standard user for default administration.
+# htpasswd -c /root/users.htpasswd admin
+
+
+Step 6 − As OpenShift uses Docker registry for configuring images, we need to configure Docker registry. This is used for creating and storing the Docker images after build.
+Create a directory on the OpenShift node machine using the following command.
+# mkdir /images
+
+
+Next, login to the master machine using the default admin credentials, which gets created while setting up the registry.
+# oc login
+Username: system:admin
+
+
+Switch to the default created project.
+# oc project default
+
+
+Step 7 − Create a Docker Registry.
+#echo '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"registry"}}' | oc create -f -
+
+
+Edit the user privileges.
+#oc edit scc privileged
+users:
+- system:serviceaccount:openshift-infra:build-controller
+- system:serviceaccount:default:registry
+
+
+Create and edit the image registry.
+#oadm registry --service-account = registry --
+config = /etc/openshift/master/admin.kubeconfig --
+credentials = /etc/openshift/master/openshift-registry.kubeconfig --
+images = 'registry.access.redhat.com/openshift3/ose-${component}:${version}' --
+mount-host = /images
+
+
+Step 8 − Create a default routing.
+By default, OpenShift uses OpenVswitch as a software network. Use the following command to create a default routing. This is used for load balancing and proxy routing. The router is similar to the Docker registry and also runs in a registry.
+# echo '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"router"}}' | oc create -f -
+
+
+Next, edit the privileges of the user.
+#oc edit scc privileged
+users:
+   - system:serviceaccount:openshift-infra:build-controller
+   - system:serviceaccount:default:registry
+   - system:serviceaccount:default:router
+
+
+#oadm router router-1 --replicas = 1 --
+credentials = '/etc/openshift/master/openshift-router.kubeconfig' --
+images = 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+
+
+Step 9 − Configure the DNS.
+In order to handle URL request, OpenShift needs a working DNS environment. This DNS configuration is required to create a wild card, which is required to create DNS wild card that points to a router.
+# yum install bind-utils bind
+
+
+# systemctl start named
+
+
+# systemctl enable named
+
+
+vi /etc/named.conf
+options {listen-on port 53 { 10.123.55.111; };
+forwarders {
+   10.38.55.13;
+   ;
+};
+
+
+zone "lab.com" IN {
+   type master;
+   file "/var/named/dynamic/test.com.zone";
+   allow-update { none; };
+};
+
+
+Step 10 − The final step would be to set up github server on OpenShift V3 master machine, which is optional. This can be done easily using the following sequence of commands.
+#yum install curl openssh-server
+
+
+#systemctl enable sshd
+
+
+# systemctl start sshd
+
+
+# firewall-cmd --permanent --add-service = http
+
+
+# systemctl reload firewalld
+
+
+#curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-
+
+
+#yum install gitlab-ce
+
+
+# gitlab-ctl reconfigure
+
+
+Once the above setup is complete, you can verify by testing and deploying applications.
+
+
+
+
+
+
+
+
+
+
+REFERENCE LINKS
+* https://www.tutorialspoint.com/openshift/openshift_cli.htm
+* https://computingforgeeks.com/setup-local-openshift-cluster-with-codeready-containers/
+* https://www.youtube.com/watch?v=KTN_QBuDplo
+* https://computingforgeeks.com/setup-local-openshift-cluster-with-codeready-containers/

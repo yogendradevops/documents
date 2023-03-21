@@ -1,0 +1,195 @@
+﻿10 fdisk Commands to Manage Linux Disk Partitions
+fdisk stands (for “fixed disk or format disk“) is an most commonly used command-line based disk manipulation utility for a Linux/Unix systems. With the help of fdisk command you can view, create, resize, delete, change, copy and move partitions on a hard drive using its own user friendly text based menu driven interface.
+This tool is very useful in terms of creating space for new partitions, organising space for new drives, re-organising an old drives and copying or moving data to new disks. It allows you to create a maximum of four new primary partition and number of logical (extended) partitions, based on size of the hard disk you have in your system.
+You must be root user to run fdisk command, otherwise you will get a “command not found” error.
+
+
+Caution – Don’t Create, Delete or Modify Partitions. Unless you know what you are doing!
+
+
+
+
+1. View all Disk Partitions in Linux
+The following basic command list all existing disk partition on your system. The ‘-l‘ argument stand for (listing all partitions) is used with fdisk command to view all available partitions on Linux. The partitions are displayed by their device’s names. For example: /dev/sda, /dev/sdb or /dev/sdc.
+# fdisk -l
+
+
+Disk /dev/sda: 637.8 GB, 637802643456 bytes
+255 heads, 63 sectors/track, 77541 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+
+
+
+
+
+
+
+
+
+2. View Specific Disk Partition in Linux
+To view all partitions of specific hard disk use the option ‘-l‘ with device name. For example, the following command will display all disk partitions of device /dev/sda. If you’ve different device names, simple write device name as /dev/sdb or /dev/sdc.
+
+
+# fdisk -l /dev/sda
+
+
+
+
+
+
+3. Check all Available fdisk Commands
+If you would like to view all commands which are available for fdisk. Simply use the following command by mentioning the hard disk name such as /dev/sda as shown below. The following command will give you output similar to below.
+
+
+# fdisk /dev/sda
+Type ‘m‘ to see the list of all available commands of fdisk which can be operated on /dev/sda hard disk. After, I enter ‘m‘ on the screen, you will see the all available options for fdisk that you can be used on the /dev/sda device.
+
+
+# fdisk /dev/sda
+4. Print all Partition Table in Linux
+To print all partition table of hard disk, you must be on command mode of specific hard disk say /dev/sda.
+# fdisk /dev/sda
+From the command mode, enter ‘p‘ instead of ‘m‘ as we did earlier. As I enter ‘p‘, it will print the specific /dev/sda partition table.
+Command (m for help): p
+
+
+5. How to Delete a Partition in Linux
+If you would like to delete a specific partition (i.e /dev/sda9) from the specific hard disk such as /dev/sda. You must be in fdisk command mode to do this.
+# fdisk /dev/sda
+Next, enter ‘d‘ to delete any given partition name from the system. As I enter ‘d‘, it will prompt me to enter partition number that I want to delete from /dev/sda hard disk. Suppose I enter number ‘4‘ here, then it will delete partition number ‘4‘ (i.e. /dev/sda4) disk and shows free space in partition table. Enter ‘w‘ to write table to disk and exit after making new alterations to partition table. The new changes would only take place after next reboot of system. This can be easily understood from the below output.
+
+
+# fdisk /dev/sda
+
+
+Warning : Be careful, while performing this step, because using option ‘d‘ will completely delete partition from system and may lost all data in partition.
+
+
+6. How to Create a New Partition in Linux
+If you’ve free space left on one of your device say /dev/sda and would like to create a new partition under it. Then you must be in fdisk command mode of /dev/sda. Type the following command to enter into command mode of specific hard disk.
+# fdisk /dev/sda
+After entering in command mode, now press “n” command to create a new partition under /dev/sda with specific size. This can be demonstrated with the help of following given output.
+
+
+# fdisk  /dev/sda
+While creating a new partition, it will ask you two options ‘extended‘ or ‘primary‘ partition creation. Press ‘e‘ for extended partition and ‘p‘ for primary partition. Then it will ask you to enter following two inputs.
+1. First cylinder number of the partition to be create.
+2. Last cylinder number of the partition to be created (Last cylinder, +cylinders or +size).
+You can enter the size of cylinder by adding “+5000M” in last cylinder. Here, ‘+‘ means addition and 5000M means size of new partition (i.e 5000MB). Please keep in mind that after creating a new partition, you should run ‘w‘ command to alter and save new changes to partition table and finally reboot your system to verify newly created partition.
+
+
+Command (m for help): w
+The partition table has been altered!
+
+
+7. How to Format a Partition in Linux
+After the new partition is created, don’t skip to format the newly created partition using ‘mkfs‘ command. Type the following command in the terminal to format a partition. Here /dev/sda4 is my newly created partition.
+
+
+# mkfs.ext4 /dev/sda4
+
+
+8. How to Check Size of a Partition in Linux
+After formatting new partition, check the size of that partition using flag ‘s‘ (displays size in blocks) with fdisk command. This way you can check size of any specific device.
+
+
+# fdisk -s /dev/sda2
+5194304
+9. How to Fix Partition Table Order
+If you’ve deleted a logical partition and again recreated it, you might notice ‘partition out of order‘ problem or error message like ‘Partition table entries are not in disk order‘.
+For example, when three logical partitions such as (sda4, sda5 and sda6) are deleted, and new partition created, you might expect the new partition name would be sda4. But, the system would create it as sda5. This happens because of, after the partition are deleted, sda7 partition had been moved as sda4 and free space shift to the end.
+To fix such partition order problems, and assign sda4 to the newly created partition, issue the ‘x‘ to enter an extra functionality section and then enter ‘f‘ expert command to fix the order of partition table as shown below.
+# fdisk  /dev/sda
+
+
+After, running ‘f‘ command, don’t forget to run ‘w‘ command to save and exit from fdisk command mode. Once it fixed partition table order, you will no longer get error messages.
+
+
+10. How to Disable Boot Flag (*) of a Partition
+By default, fdisk command shows the boot flag (i.e. ‘*‘) symbol on each partition. If you want to enable or disable boot flag on a specific partition, do the following steps.
+
+
+# fdisk  /dev/sda
+Press ‘p‘ command to view the current partition table, you see there is a boot flag (asterisk (*) symbol in orange color) on /dev/sda1 disk as shown below.
+
+
+# fdisk /dev/sda
+Next enter command ‘a‘ to disable boot flag, then enter partition number ‘1‘ as (i.e. /dev/sda1) in my case. This will disable boot flag on the partition /dev/sda1. This will remove the asterisk (*) flag.
+
+
+Command (m for help): a
+Partition number (1-9): 1
+
+
+Command (m for help): p
+
+
+
+
+
+
+
+
+
+
+
+
+10 ‘free’ Commands to Check Memory Usage in Linux
+Linux is one of the most popular open source operating system and comes with huge set of commands. The most important and single way of determining the total available space of the physical memory and swap memory is by using “free” command.
+The Linux “free” command gives information about total used and available space of physical memory and swap memory with buffers used by kernel in Linux/Unix like operating systems.
+
+
+1. Display System Memory
+Free command used to check the used and available space of physical memory and swap memory in KB. See the command in action below.
+# free
+
+
+2. Display Memory in Bytes
+Free command with option -b, display the size of memory in Bytes.
+# free -b
+
+
+3. Display Memory in Kilo Bytes
+Free command with option -k, display the size of memory in (KB) Kilobytes.
+# free -k
+
+
+
+
+4. Display Memory in Megabytes
+To see the size of the memory in (MB) Megabytes use option as -m.
+# free -m
+
+
+5. Display Memory in Gigabytes
+Using -g option with free command, would display the size of the memory in GB(Gigabytes).
+# free -g
+
+
+6. Display Total Line
+Free command with -t option, will list the total line at the end.
+# free -t
+
+
+7. Disable Display of Buffer Adjusted Line
+By default the free command display “buffer adjusted” line, to disable this line use option as -o.
+# free -o
+
+
+
+
+8. Display Memory Status for Regular Intervals
+The -s option with number, used to update free command at regular intervals. For example, the below command will update free command every 5 seconds.
+# free -s 5
+
+
+9. Show Low and High Memory Statistics
+The -l switch displays detailed high and low memory size statistics.
+# free -l
+10. Check Free Version
+The -V option, display free command version information.
+# free -V
+
+
+procps version 3.2.8

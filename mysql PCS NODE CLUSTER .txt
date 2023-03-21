@@ -1,0 +1,266 @@
+﻿Mysql PCS NODE CLUSTER 
+
+
+Followed link :- 
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/high_availability_add-on_administration/ch-startup-haaa#s1-clusterinstall-HAAA
+https://www.alexlinux.com/mysql-active-active-cluster-with-pacemaker/
+
+
+
+
+1. set hostname on both VM
+[nidhi@node1 ~]$ hostnamectl set-hostname node1.example.com
+[nidhi@node1 ~]$ hostnamectl set-hostname node2.example.com
+===============================================================================
+2. install package on both mahine
+[root@node1 nidhi]# yum install pcs pacemaker fence-agents-all
+Loaded plugins: langpacks, product-id, search-disabled-repos, subscription-manager
+Resolving Dependencies
+There are unfinished transactions remaining. You might consider running yum-complete-transaction, or "yum-complete-transaction --cleanup-only" and "yum history redo last", first to finish them. If those don't work you'll have to try removing/installing packages by hand (maybe package-cleanup can help).
+--> Running transaction check
+---> Package fence-agents-all.x86_64 0:4.2.1-41.el7_9.6 will be installed
+---> Package pacemaker.x86_64 0:1.1.23-1.el7_9.1 will be installed
+---> Package pcs.x86_64 0:0.9.169-3.el7_9.3 will be installed
+--> Finished Dependency Resolution
+
+
+Dependencies Resolved
+
+
+================================================================================
+ Package                                        Arch                                 Version                                           Repository                                                    Size
+================================================================================
+Installing:
+ fence-agents-all                               x86_64                               4.2.1-41.el7_9.6                                  rhel-7-server-rpms                                            26 k
+ pacemaker                                      x86_64                               1.1.23-1.el7_9.1                                  rhel-ha-for-rhel-7-server-rpms                               481 k
+ pcs                                            x86_64                               0.9.169-3.el7_9.3                                 rhel-ha-for-rhel-7-server-rpms                               4.2 M
+
+
+Transaction Summary
+================================================================================
+Install  3 Packages
+
+
+Total download size: 4.7 M
+Installed size: 12 M
+Is this ok [y/d/N]: y
+Downloading packages:
+(1/3): fence-agents-all-4.2.1-41.el7_9.6.x86_64.rpm                                                                                                                                |  26 kB  00:00:01    
+(2/3): pacemaker-1.1.23-1.el7_9.1.x86_64.rpm                                                                                                                                       | 481 kB  00:00:01    
+(3/3): pcs-0.9.169-3.el7_9.3.x86_64.rpm                                                                                                                                            | 4.2 MB  00:00:02    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                                                                     2.1 MB/s | 4.7 MB  00:00:02    
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : pacemaker-1.1.23-1.el7_9.1.x86_64                                                                                                                                                      1/3
+  Installing : pcs-0.9.169-3.el7_9.3.x86_64                                                                                                                                                           2/3
+  Installing : fence-agents-all-4.2.1-41.el7_9.6.x86_64                                                                                                                                               3/3
+  Verifying  : pacemaker-1.1.23-1.el7_9.1.x86_64                                                                                                                                                      1/3
+  Verifying  : fence-agents-all-4.2.1-41.el7_9.6.x86_64                                                                                                                                               2/3
+  Verifying  : pcs-0.9.169-3.el7_9.3.x86_64                                                                                                                                                           3/3
+
+
+Installed:
+  fence-agents-all.x86_64 0:4.2.1-41.el7_9.6                               pacemaker.x86_64 0:1.1.23-1.el7_9.1                               pcs.x86_64 0:0.9.169-3.el7_9.3                              
+
+
+Complete!
+===============================================================================
+
+
+3. enable the ports
+[nidhi@node1 ~]$ firewall-cmd --add-service=high-availability
+success
+[nidhi@node1 ~]$ firewall-cmd --permanent --add-service=high-availability
+success
+================================================================================
+4. set a password for a hacluster user
+[root@node1 nidhi]# passwd hacluster
+Changing password for user hacluster.
+New password:
+BAD PASSWORD: The password is a palindrome
+Retype new password:
+passwd: all authentication tokens updated successfully.
+
+
+===============================================================================
+
+
+5. start PCS service
+[root@node1 nidhi]# systemctl start pcsd.service
+[root@node1 nidhi]# systemctl enable pcsd.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/pcsd.service to /usr/lib/systemd/system/pcsd.service.
+[root@node1 nidhi]# systemctl status pcsd.service
+● pcsd.service - PCS GUI and remote configuration interface
+   Loaded: loaded (/usr/lib/systemd/system/pcsd.service; disabled; vendor preset: disabled)
+   Active: active (running) since Mon 2023-01-23 07:52:47 EST; 31s ago
+     Docs: man:pcsd(8)
+           man:pcs(8)
+ Main PID: 21055 (pcsd)
+    Tasks: 4
+   CGroup: /system.slice/pcsd.service
+           └─21055 /usr/bin/ruby /usr/lib/pcsd/pcsd
+
+
+Jan 23 07:52:45 node1.example.com systemd[1]: Starting PCS GUI and remote configuration interface...
+Jan 23 07:52:47 node1.example.com systemd[1]: Started PCS GUI and remote configuration interface.
+================================================================================
+6. Host entry in /etc/hosts file
+[root@nidhi1 nidhi]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1             localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.122.218 nidhi2.example.com
+192.168.122.89 nidhi1.example.com
+
+
+===============================================================================
+7. Authenticate PCS user 
+[root@node1 nidhi]#  pcs cluster auth nidhi1.example.com nidhi2.example.com
+Username: hacluster
+Password:
+nidhi2.example.com: Authorized
+nidhi1.example.com: Authorized
+
+
+================================================================================
+
+
+8. create the two-node cluster 
+[root@node1 nidhi]#  pcs cluster setup --name cluster_mysql nidhi1.example.com nidhi2.example.com
+Destroying cluster on nodes: nidhi1.example.com, nidhi2.example.com...
+nidhi2.example.com: Stopping Cluster (pacemaker)...
+nidhi1.example.com: Stopping Cluster (pacemaker)...
+nidhi1.example.com: Successfully destroyed cluster
+nidhi2.example.com: Successfully destroyed cluster
+
+
+Sending 'pacemaker_remote authkey' to 'nidhi1.example.com', 'nidhi2.example.com'
+nidhi1.example.com: successful distribution of the file 'pacemaker_remote authkey'
+nidhi2.example.com: successful distribution of the file 'pacemaker_remote authkey'
+Sending cluster config files to the nodes...
+nidhi1.example.com: Succeeded
+nidhi2.example.com: Succeeded
+
+
+Synchronizing pcsd certificates on nodes nidhi1.example.com, nidhi2.example.com...
+nidhi2.example.com: Success
+nidhi1.example.com: Success
+Restarting pcsd on the nodes in order to reload the certificates...
+nidhi2.example.com: Success
+nidhi1.example.com: Success
+===============================================================================
+9. Enable and start the cluster services
+
+
+[root@node1 nidhi]# systemctl start pacemaker; systemctl start corosync
+[root@node1 nidhi]# systemctl start pacemaker; systemctl start corosync
+[root@node1 nidhi]# pcs cluster start --all
+nidhi1.example.com: Starting Cluster (corosync)...
+nidhi2.example.com: Starting Cluster (corosync)...
+nidhi1.example.com: Starting Cluster (pacemaker)...
+nidhi2.example.com: Starting Cluster (pacemaker)...
+
+
+=======================================================================
+
+
+10. Disable STONITH
+[root@node1 nidhi]# pcs property set stonith-enabled=false
+[root@node1 nidhi]# pcs property set no-quorum-policy=ignore
+
+
+=======================================================================
+
+
+11. Create pcs VIP 
+[root@node1 nidhi]# pcs resource create virtual_ip ocf:heartbeat:IPaddr2 ip=192.168.122.100 cidr_netmask=24 op monitor interval=30s on-fail=restart
+
+
+Add resources 
+[root@node1 nidhi]# pcs resource create mysql ocf:heartbeat:mysql  \
+> binary="/usr/bin/mysqld_safe"   config="/etc/my.cnf" \
+>   datadir="/var/lib/mysql"   pid="/var/lib/mysql/mysql.pid" \
+>   socket="/var/lib/mysql/mysql.sock"  \
+>  additional_parameters="--bind-address=0.0.0.0"   op start timeout=60s \
+>   op stop timeout=60s   op monitor interval=20s timeout=30s \
+> on-fail=standby
+
+
+======================================================================
+
+
+12. Check pcs status 
+[root@node1 nidhi]# pcs status
+Cluster name: cluster_mysql
+Stack: corosync
+Current DC: nidhi1.example.com (version 1.1.23-1.el7_9.1-9acf116022) - partition with quorum
+Last updated: Tue Jan 24 04:43:03 2023
+Last change: Tue Jan 24 04:38:31 2023 by root via cibadmin on nidhi1.example.com
+
+
+2 nodes configured
+2 resource instances configured
+
+
+Online: [ nidhi1.example.com nidhi2.example.com ]
+
+
+Full list of resources:
+
+
+ mysql    (ocf::heartbeat:mysql):    Started nidhi1.example.com
+ virtual_ip    (ocf::heartbeat:IPaddr2):    Started nidhi2.example.com
+
+
+Failed Resource Actions:
+* mysql_start_0 on nidhi2.example.com 'unknown error' (1): call=24, status=Timed Out, exitreason='',
+        last-rc-change='Tue Jan 24 04:28:10 2023', queued=0ms, exec=60008ms
+
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+
+
+=======================================================================
+
+
+13. Change cluster vip from one node to another node 
+[root@node1 nidhi]# pcs resource move virtual_ip nidhi1.example.com
+[root@node1 nidhi]# pcs status
+Cluster name: cluster_mysql
+Stack: corosync
+Current DC: nidhi1.example.com (version 1.1.23-1.el7_9.1-9acf116022) - partition with quorum
+Last updated: Tue Jan 24 07:12:26 2023
+Last change: Tue Jan 24 07:12:18 2023 by root via crm_resource on nidhi1.example.com
+
+
+2 nodes configured
+2 resource instances configured
+
+
+Online: [ nidhi1.example.com nidhi2.example.com ]
+
+
+Full list of resources:
+
+
+ mysql    (ocf::heartbeat:mysql):    Started nidhi1.example.com
+ virtual_ip    (ocf::heartbeat:IPaddr2):    Started nidhi1.example.com
+
+
+Failed Resource Actions:
+* mysql_start_0 on nidhi2.example.com 'unknown error' (1): call=24, status=Timed Out, exitreason='',
+        last-rc-change='Tue Jan 24 04:28:10 2023', queued=0ms, exec=60008ms
+
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+
+
+=======================================================================

@@ -1,0 +1,27 @@
+﻿Minutes of Meeting
+
+
+Virtual Meeting : Skype
+Date: 02-09-2022
+Time: 05:10 PM to 05:40 PM
+People Involved:          Ashish Sir 
+ Waqqas Sir
+ Sandeep Sir
+ Somesh Sir
+ Sumit Kushwaha
+ Yogendra Yadav
+
+
+Purpose: To Discuss Status of the task assigned.
+
+
+Discussion:  In this meeting we have discussed the status of the task assigned. The errors or issues we face during the task. We also discuss the Retro tool. We have to sign up in the Retro tool with the office email id.
+
+
+Issues raised: Issues regarding the ssl certificate.
+
+
+Decisions Taken: We have to submit the document of the task with the configuration file.
+
+
+Next Meeting: On Saturday

@@ -1,0 +1,344 @@
+﻿Mysql Basic Commands
+How to install MySQL in RHEL and Centos
+# yum install mysql* -y
+-----------------------------------------------------
+How to start MySQL
+# service mysqld start
+# /etc/init.d/mysqld start
+----------------------------------------------------
+How to set root password in MySQL
+# mysqladmin password "redhat"
+----------------------------------------------------
+How to Login in Mysql
+# mysql -u root -predhat
+mysql>
+----------------------------------------------------
+How to change root and Users password
+mysql> UPDATE mysql.user SET Password=PASSWORD('redhat123') WHERE User='root';
+-----------------------------------------------------------------------------------------
+How to Create database
+mysql> create database DB-NAME;
+
+
+How to Check database
+mysql> show databases;
+
+
+How to Create User
+mysql> CREATE USER 'USER_NAME'@'localhost' IDENTIFIED BY 'PASSWORD';
+
+
+How to given PRIVILEGES
+mysql> GRANT ALL PRIVILEGES ON `DB-NAME` . * TO 'USER_NAME'@'localhost';
+
+
+How to given one Privileges
+mysql> GRANT SELECT, INSERT, DELETE ON database TO username@'localhost' IDENTIFIED BY 'password';
+
+
+How to delete User
+mysql> drop user 'USER_NAME'@'localhost';
+------------------------------------------------------------------------------------------
+How to create MySQL data file in Another Location
+# mysql_install_db --user=mysql --datadir="your data Location path " (example --datadir=/var/tmp/abc)
+
+
+How to Select DB
+mysql> use DB-NAME;
+
+
+How To Create Table in DB defaults Engine
+mysql> CREATE TABLE TABLE_NAME  (name varchar(50), mobile varchar(50) , id varchar(50) , remark varchar(50));
+
+
+How to add column in mysql ( To add a column called email to the contacts table created in
+Create a basic MySQL table with a datatype of VARCHAR(80), use the following SQL statement: )
+
+
+mysql> ALTER TABLE TABLE_NAME  ADD email VARCHAR(60);
+
+
+This Command use to  Add a new Column FIRST  ( This first statement will add the email column
+to the end of the table. To insert the new column after a specific column, such as name, use this statement:)
+
+
+mysql> ALTER TABLE data ADD email1 VARCHAR(60) FIRST;
+
+
+This Command use to Add a new Column After FIRST Column
+mysql> ALTER TABLE data  ADD email2 VARCHAR(60) AFTER mobile;
+
+
+How to Create Table in DB with another Engine
+mysql> CREATE TABLE TABLE_NAME  (name varchar(50), mobile varchar(50) , id varchar(50) , remark varchar(50)) ENGINE=InnoDB;
+
+
+How to INSERT Vailue in TABLE
+mysql> INSERT INTO TABLE_NAME  VALUES ('RAM','111111111112','11110001','OKOKOK');
+-----------------------------------------------------------------------------------------------------------------
+How to check table Schema
+mysql> desc TABLE_NAME;
+
+
+How to Check Table ENGINE
+mysql> show create table TABLE_NAME;
+
+
+How To check MySQL ENGINES
+mysql> show engines;
+
+
+How to check data in TABLE
+mysql> select * from TABLE_NAME;
+
+
+How to search specific data from table with coloumn
+mysql> select * from data where id=1001;
+mysql> select * from data where id like 1001;
+
+
+In a table, a column may contain many duplicate values; and sometimes you only want to list the different (distinct) values.
+The DISTINCT keyword can be used to return only distinct (different) values.
+
+
+mysql> SELECT DISTINCT email1 FROM data;
+------------------------------------------------------------------------------------------------------------------
+The DELETE command is used to remove rows from a table. A WHERE clause can be used to only remove some rows.
+If no WHERE condition is specified, all rows will be removed. After performing a DELETE operation you need to COMMIT or ROLLBACK the
+transaction to make the change permanent or to undo it. Note that this operation will cause all DELETE triggers on the table to fire.
+
+
+mysql> DELETE FROM TABLE_NAME  WHERE name = 'RAM';
+
+
+TRUNCATE removes all rows from a table. The operation cannot be rolled back and no triggers will be fired. As such,
+TRUCATE is faster and doesn't use as much undo space as a DELETE.
+
+
+mysql> TRUNCATE TABLE TABLE_NAME;
+
+
+The DROP command removes a table from the database. All the tables' rows, indexes and privileges will also be
+removed. No DML triggers will be fired. The operation cannot be rolled back.
+
+
+mysql> DROP TABLE TABLE_NAME;
+mysql> DROP database DB_NAME;
+---------------------------------------------------------------------------------------------------------------------------------------------
+How to Import CSV File in MySQL
+mysql> LOAD DATA INFILE'/path/abc.csv' INTO TABLE TABLE_NAME FIELDS TERMINATED BY ',' ;
+
+
+
+
+How to Check  AND & OR Operators
+The AND operator displays a record if both the first condition AND the second condition are true.
+mysql> SELECT * FROM data  WHERE name='ram2' AND id='11110001';
+
+
+The OR operator displays a record if either the first condition OR the second condition is true.
+mysql> SELECT * FROM data  WHERE name='abc' OR  id='1001';
+
+
+
+
+The ORDER BY keyword sorts the records in ascending order by default. To sort the
+records in a descending order, you can use the DESC keyword.
+mysql> SELECT name  FROM data ORDER BY name ASC;
+mysql> SELECT name  FROM data ORDER BY name DESC;
+
+
+The UPDATE statement is used to update existing records in a table.
+mysql> UPDATE data  SET name='NEW-NAME'  WHERE name='OLD-NAME';
+
+
+How to Create Index in Coloumn
+mysql> ALTER TABLE table_Name  ADD INDEX (coloumn_name);
+Query OK, 0 rows affected (1 min 35.39 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+
+How to Check Cretaed INDEX
+mysql> show index from table_Name;
+
+
+How to Count data in table
+mysql> select  count(*) from table_Name;
+
+
+how to check user privileges
+mysql > SHOW GRANTS FOR 'root'@'localhost';
+
+
+How to set REPLICATION privileges (Master)
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'username'@'%' IDENTIFIED BY 'redhat';
+
+
+How to set Master Podition (Slave)
+mysql> CHANGE MASTER TO MASTER_HOST='12.34.56.789',MASTER_USER='username',MASTER_PASSWORD='redhat', MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=107;
+mysql> CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=107;
+
+
+How to Skip Slave Error in one time
+mysql> stop slave; SET GLOBAL sql_slave_skip_counter = 1; start slave;
+
+
+How to read mysqlbin log File
+# mysqlbinlog  --base64-output=DECODE-ROWS --verbose replication.383626 > /tmp/replication1111.383626.txt
+
+
+How to add Coloumn in table
+mysql> ALTER TABLE tbl_billing_failure  ADD zoneid VARCHAR(15) default 0;
+
+
+mysql> ALTER TABLE tbl_new_sms ADD message_type VARCHAR(15) default 'TXT';
+
+
+How to check mysql running binlog_format 
+mysql> SHOW VARIABLES like '%binlog_format%';
+
+
+How to Change Binlog format (ROW | MIXED | STETMENT )
+mysql> SET GLOBAL binlog_format = 'STATEMENT';
+mysql> SET GLOBAL binlog_format = 'ROW';
+mysql> SET GLOBAL binlog_format = 'MIXED';
+===============================================================
+mysql> SET SESSION binlog_format = 'STATEMENT';
+mysql> SET SESSION binlog_format = 'ROW';
+mysql> SET SESSION binlog_format = 'MIXED';
+
+
+# my.cnf: binlog_format=ROW
+
+
+How to check PROCEDURE and FUNCTION
+mysql> SHOW PROCEDURE STATUS;
+mysql> SHOW FUNCTION STATUS;
+
+
+mysql> SHOW CREATE PROCEDURE PROCEDURE_NAME;
+mysql> SHOW CREATE FUNCTION  FUNCTION_NAME;
+
+
+
+
+MySQL Error Code: 1548 Cannot load from mysql.proc. The table is probably corrupted
+# mysql_upgrade -uroot -p --force
+
+
+------------------------------
+How to take mysql dump
+---------------------------
+
+
+How to take dump with Procedures and Functions
+E:\bin>mysqldump.exe -u root -p --routines --verbose --single-transaction  --no-data misdata > E:\DUMP.SQL\routines1.sql
+
+
+How to take complete dump
+# mysqldump -u root -p  --all-database > /tmp/dump.sql
+
+
+How to take dump only specific databases
+# mysqldump -uroot -p db1 db2 db3 > dump.sql
+
+
+How to take dump only specific table in database
+# mysqldump -u root -p database_Name table_Name > dump.sql
+
+
+How to restore Dump
+# mysql -u root -p < /tmp/dump.sql
+
+
+Dump Only Table structure
+# mysqldump -u root -p --single-transaction  --databases ivr_cms --no-data > /tmp/dump.sql
+
+
+how to take dump only table structure
+# mysqldump -u root -p  --all-databases  --no-data  > /tmp/dump.sql
+
+
+The following SQL statement selects all customers with Country NOT containing the pattern "22":
+mysql> SELECT * FROM tbl_contentusage_mod_aircel  WHERE Duration  NOT LIKE '%22%';
+
+
+SET GLOBAL log_bin_trust_function_creators = 1;
+SET GLOBAL group_concat_max_len=15000;
+
+
+How to Create new table with old table with data without index. (and Rename)
+mysql> create table New_Table_Name  select * from OLD_Table_Name;
+
+
+How to Create blank table with indexing. without data. (and Rename)
+mysql> create table New_Table_Name like  OLD_Table_Name;
+
+
+Rename the Table (Only rename)
+mysql> alter table OLD_TABLE_NAME rename NEW_TABLE_NAME;
+
+
+How to cheange coloumn_name
+mysql> ALTER TABLE TABLE_NAME  CHANGE  OLD_TABLE_NAME  NEW_TABLE_NAME  varchar(20);
+
+
+How to change Varchar Velue ( 10 to 1000 )
+mysql> alter table Table_Name  modify coloumn_name  varchar(10000);
+
+
+
+
+
+
+How to take table data in CSV file
+mysql> select * into outfile '/tmp/abc1.csv' fields terminated by ',' from RAJU_rename_table ;
+
+
+how to repair myisam tables (for all databases)
+# mysqlcheck  --repair -u root -p --all-databases
+
+
+how to repair myisam Single  tables (for Single Table)
+# mysqlcheck  --repair -u root -p database Table_Name
+
+
+
+
+How to check Login database
+mysql> select database();
+
+
+How to check Login User
+mysql> select user();
+
+
+How to check Size in Databases
+mysql> SELECT table_schema "database", sum(data_length + index_length)/1024/1024 "size in MB" FROM information_schema.TABLES GROUP BY table_schema;
+
+
+
+
+How do I change the privileges for MySQL user that is already created
+select user,host from mysql.user;
+
+
+To show privileges:
+show grants for 'user'@'host';
+
+
+To change privileges, first revoke. Such as:
+revoke all privileges on *.* from 'user'@'host';
+
+
+Then grant the appropriate privileges as desired:
+grant SELECT,INSERT,UPDATE,DELETE ON `db`.* TO 'user'@'host';
+
+
+Finally, flush:
+flush privileges;
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+Shows all queries running for 5 seconds or more:
+mysql> SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND != 'Sleep' AND TIME >= 5;

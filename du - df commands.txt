@@ -1,0 +1,201 @@
+﻿10 Useful du (Disk Usage) Commands to Find Disk Usage of Files and Directories
+
+
+
+
+The Linux “du” (Disk Usage) is a standard Unix/Linux command, used to check the information of disk usage of files and directories on a machine.
+The du command has many parameter options that can be used to get the results in many formats. The du command also displays the files and directory sizes in a recursive manner.
+
+
+How to Find the Size of a Directory in Linux
+1. To find out the disk usage summary of a /home/tecmint directory tree and each of its subdirectories. Enter the command as:
+
+
+# du  /home/tecmint
+
+
+The output of the above command displays the number of disk blocks in the /home/tecmint directory along with its sub-directories.
+
+
+How to Find the Directory Size in Human Readable Format
+2. Using the “-h” option with the “du” command provides results in “Human Readable Format“. This means you can see sizes in Bytes, Kilobytes, Megabytes, Gigabytes, etc.
+
+
+# du -h /home/tecmint
+
+
+
+
+How to Find Total Size of a Directory in Linux
+3. To get the summary of a grand total disk usage size of a directory uses the option “-s” as follows.
+
+
+# du -sh /home/tecmint
+
+
+
+
+4. Using the “-a” flag with the “du” command displays the disk usage of all the files and directories.
+
+
+# du -a /home/tecmint
+
+
+5. Using the “-a” flag along with “-h” displays disk usage of all files and folders in a human-readable format. The below output is easier to understand as it shows the files in Kilobytes, Megabytes, etc.
+
+
+# du -ah /home/tecmint
+
+
+6. Find out the disk usage of a directory tree with its subtree in Kilobyte blocks. Use the “-k” (displays size in 1024 bytes units).
+
+
+# du -k /home/tecmint
+
+
+7. To get the summary of disk usage of directory tree along with its subtrees in Megabytes (MB) only. Use the option “-mh” as follows. The “-m” flag counts the blocks in MB units and “-h” stands for human-readable format.
+
+
+# du -mh /home/tecmint
+
+
+8. The “-c” flag provides a grand total usage disk space at the last line. If your directory is taken 674MB space, then the last last two lines of the output would be.
+
+
+# du -ch /home/tecmint
+
+
+
+
+How to Exclude Files with du Command
+
+
+9. The below command calculates and displays the disk usage of all files and directories, but excludes the files that match the given pattern. The below command excludes the “.txt” files while calculating the total size of a directory. So, this way you can exclude any file formats by using the flag “-–exclude“. See the output there is no txt files entry.
+
+
+# du -ah --exclude="*.txt" /home/tecmint
+
+
+
+
+How to Find Directory Usage By Modification Time
+10. Display the disk usage based on a modification of time, use the flag “–time” as shown below.
+
+
+# du -ha --time /home/tecmint
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+12 Useful “df” Commands to Check Disk Space in Linux
+The ‘df‘ command stands for “disk filesystem“, it is used to get a full summary of available and used disk space usage of the file system on the Linux system.
+Using ‘-h‘ parameter with (df -h) will show the file system disk space statistics in “human-readable” format, means it gives the details in bytes, megabytes, and gigabyte.
+1. Check File System Disk Space Usage
+
+
+The “df” command displays the information of device name, total blocks, total disk space, used disk space, available disk space, and mount points on a file system.
+# df
+
+
+2. Display Information of all File System Disk Space Usage
+The same as above, but it also displays information of dummy file systems along with all the file system disk usage and their memory utilization.
+
+
+# df -a
+
+
+3. Show Disk Space Usage in Human Readable Format
+Have you noticed that the above commands display information in bytes, which is not readable at all because we are in a habit of reading the sizes in megabytes, gigabytes, etc. as it makes it very easy to understand and remember.
+The df command provides an option to display sizes in Human Readable formats by using '-h' (prints the results in human-readable format (e.g., 1K 2M 3G)).
+# df -h
+
+
+4. Display Information of /home File System
+To see the information of only device /home file systems in human-readable format use the following command.
+
+
+# df -hT /home
+
+
+
+
+
+
+
+
+
+
+5. Display Information of File System in Bytes
+To display all file system information and usage in 1024-byte blocks, use the option ‘-k‘ (e.g. --block-size=1K) as follows.
+
+
+# df -k
+
+
+6. Display Information of File System in MB
+To display information of all file system usage in MB (MegaByte) use the option ‘-m‘.
+
+
+# df -m
+
+
+7. Display Information of File System in GB
+To display information of all file system statistics in GB (Gigabyte) use the option as ‘df -h‘.
+
+
+# df -h
+
+
+
+
+8. Display File System Inodes
+Using ‘-i‘ switch will display the information of a number of used inodes and their percentage for the file system.
+
+
+# df -i
+
+
+9. Display File System Type
+If you notice all the above commands output, you will see there is no Linux file system type mentioned in the results. To check the file system type of your system use the option ‘T‘. It will display file system type along with other information.
+
+
+# df -T
+
+
+10. Include Certain File System Type
+If you want to display a certain file system type use the ‘-t‘ option. For example, the following command will only display the ext3 file system.
+
+
+# df -t ext3
+
+
+
+
+
+
+
+
+11. Exclude Certain File System Type
+
+
+If you want to display a file system type that doesn’t belongs to the ext3 type use the option ‘-x‘. For example, the following command will only display other file systems types other than ext3.
+
+
+# df -x ext3
+
+
+12. Display Information of df Command.
+Using '--help‘ switch will display a list of available option that is used with df command.
+
+
+# df --help

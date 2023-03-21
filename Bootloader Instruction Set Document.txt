@@ -1,0 +1,64 @@
+﻿BOOTLOADER
+
+
+Create a bootloader for your Virtual Machines:
+
+
+Create file boot.s:
+yogendra@yogendra:~$ vim boot.s
+
+
+Write below given code:
+
+
+.code16
+.global demo
+demo:
+mov $msg, %si
+mov $0xe, %ah
+print_msg:
+lodsb
+cmp $0, %al
+je finish
+int $0x10
+jmp print_msg
+finish:
+hlt
+msg:.asciz "Hello Sir! This is Yogendra Yadav’s bootloader :)"
+.fill 510-(.-demo),1, 0
+.word 0xaa55
+
+
+
+
+
+
+Install binutils:
+yogendra@yogendra:~$  sudo apt install binutils
+
+
+After the installation run below given commands:
+yogendra@yogendra:~$ as -o boot.o boot.s
+
+
+yogendra@yogendra:~$  ld -o boot.bin --oformat binary -e demo -Ttext 0x7c00 boot.o
+
+
+yogendra@yogendra:~$ ll
+total 112
+drwxr-xr-x 20 yogendra yogendra 4096 Oct  3 11:36 ./
+drwxr-xr-x  4 root         root         4096 Oct  1 14:14 ../
+-rw-------  1 yogendra yogendra  404 Oct  3 10:49 .bash_history
+-rw-r--r--  1 yogendra yogendra  220 Oct  1 14:14 .bash_logout
+-rw-r--r--  1 yogendra yogendra 3771 Oct  1 14:14 .bashrc
+drwxrwxr-x  2 yogendra yogendra 4096 Oct  3 11:19 BOOT/
+-rwxrwxr-x  1 yogendra yogendra  512 Oct  3 11:36 boot.bin*
+-rw-rw-r--  1 yogendra yogendra 1384 Oct  3 11:35 boot.o
+-rw-rw-r--  1 yogendra yogendra  230 Oct  3 11:35 boot.s
+
+
+Now install qemu-system-x86:
+yogendra@yogendra:~$ sudo apt install qemu-system-x86
+
+
+yogendra@yogendra:~$ qemu-system-x86_64 -drive file=boot.bin,index=0,media=disk,format=raw

@@ -1,0 +1,131 @@
+﻿Touch Command
+
+
+Touch command is used to create, change and modify timestamps of a file. Basically it is used to create an empty file.
+Touch Command Options:
+1. -a, change the access time only
+2. -c, if the file does not exist, do not create it
+3. -d, update the access and modification times
+4. -m, change the modification time only
+5. -r, use the access and modification times of file
+6. -t, creates a file using a specified time
+
+
+1. How to Create an Empty File
+The following touch command creates an empty (zero byte) new file called world
+# touch world
+2. How to Create Multiple Files
+By using touch command, you can also create more than one single file. For example the following command will create 3 files named, country, state and district .
+# touch country state district
+3. How to Change File Access and Modification Time
+To change or update the last access and modification times of a file called world use the -a option as follows. The following command sets the current time and date on a file. If the world file does not exist, it will create the new empty file with the name.
+# touch -a world
+The most popular Linux commands such as find command and ls command uses timestamps for listing and finding files.
+4. How to Avoid Creating New File
+Using -c option with touch command avoids creating new files. For example the following command will not create a file called world if it does not exists.
+# touch -c world
+5. How to Change File Modification Time
+If you like to change the only modification time of a file called world, then use the -m option with touch command. Please note it will only update the last modification times (not the access times) of the file.
+# touch -m world
+6. Explicitly Set the Access and Modification times
+You can explicitly set the time using -c and -t option with the touch command. The format would be as follows.
+# touch -c -t YYDDHHMM world
+For example the following command sets the access and modification date and time to a file world as 17:30 (17:30 p.m.) June10 of the current year (2022).
+# touch -c -t 06101730 world
+Next verify the access and modification time of file world, with ls -l command.
+# ls -l
+
+
+total 2
+-rw-r--r--.  1 root    root   0 Dec 10 17:30 world
+7. How to Use the time stamp of another File
+The following touch command with -r option, will update the time-stamp of file country with the time-stamp of world file. So, both the file holds the same time stamp.
+# touch -r world country
+8. Create a File using a specified time
+If you would like to create a file with specified time other than the current time, then the format should be.
+# touch -t YYMMDDHHMM.SS India
+India file a time stamp of 18:30:55 p.m. on June 10, 2022.
+# touch -t 202206101830.55 India.
+Cat Command
+The cat (short for “concatenate“) command is one of the most frequently used commands in Linux/Unix-like operating systems. cat command allows us to create single or multiple files, view content of a file, concatenate files and redirect output in terminal or files.
+General Syntax of Cat Command
+$ cat [OPTION] [FILE]...
+1. Display Contents of File
+The below example will show the contents of /etc/passwd file.
+# cat /etc/passwd
+
+
+2. View Contents of Multiple Files in terminal
+In the below example, it will display the contents of the test and test1 file in the terminal.
+# cat test test1
+
+
+3. Create a File with Cat Command
+We will create a file called test2 file with the below command.
+# cat >test2
+
+
+Awaits input from the user, type desired text, and press CTRL+D (hold down Ctrl key and type ‘d‘) to exit. The text will be written in the test2 file. You can see the content of the file with the following cat command.
+# cat test2
+
+
+hello everyone, how do you do?
+4. Use Cat Command with More & Less Options
+If a file having a large number of content that won’t fit in the output terminal and the screen scrolls up very fast, we can use parameters more and less with the cat command as shown below.
+# cat song.txt | more
+# cat song.txt | less
+5. Display Line Numbers in File
+With the -n option you could see the line numbers of a file song.txt in the output terminal.
+# cat -n song.txt
+
+
+6. Display $ at the End of File
+In the below, you can see with the -e option that ‘$‘ is shows at the end of the line and also in space showing ‘$‘ if there is any gap between paragraphs. This option is useful to squeeze multiple lines into a single line.
+# cat -e test
+
+
+7. Display Tab Separated Lines in File
+In the below output, we could see TAB space is filled up with the ‘^I‘ characters.
+# cat -T test
+
+
+8. Display Multiple Files at Once
+In the below example we have three files test, test1, and test2, and able to view the contents of those files as shown above. We need to separate each file with ; (semicolon).
+# cat test; cat test1; cat test2
+
+
+This is a test file
+This is the test1 file.
+This is test2 file.
+
+
+9. Use Standard Output with Redirection Operator
+We can redirect the standard output of a file into a new file else existing file with a ‘>‘ (greater than) symbol. Careful, existing contents of the test1 will be overwritten by the contents of the test file.
+# cat test > test1
+
+
+
+
+
+
+10. Appending Standard Output with Redirection Operator
+Appends in the existing file with ‘>>‘ (double greater than) symbol. Here, the contents of the test file will be appended at the end of the test1 file.
+# cat test >> test1
+
+
+11. Redirecting Standard Input with Redirection Operator
+When you use the redirect with standard input ‘<‘ (less than symbol), it uses file name test2 as input for command and output will be shown in a terminal.
+# cat < test2
+
+
+This is test2 file.
+
+
+12. Redirecting Multiple Files Contain in a Single File
+This will create a file called test3 and all output will be redirected in a newly created file.
+# cat test test1 test2 > test3
+
+
+13. Sorting Contents of Multiple Files in a Single File
+This will create a file test4 and the output of the cat command is piped to sort and the result will be redirected to a newly created file.
+# cat test test1 test2 test3 | sort > test4
